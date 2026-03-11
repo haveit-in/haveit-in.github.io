@@ -15,6 +15,192 @@ const categories = [
   // { id: 'household', icon: '🏠', label: 'Household' },
 ]
 
+const popularItems = [
+  {
+    name: 'Spicy Chicken Biryani',
+    price: '₹249',
+    rating: '4.8',
+    image: 'https://placehold.co/100x100?text=Biryani',
+  },
+  {
+    name: 'Veggie Overload Pizza',
+    price: '₹299',
+    rating: '4.6',
+    image: 'https://placehold.co/300x300?text=Pizza',
+  },
+  {
+    name: 'Masala Dosa Platter',
+    price: '₹189',
+    rating: '4.7',
+    image: 'https://placehold.co/300x300?text=Dosa',
+  },
+  {
+    name: 'Paneer Butter Masala',
+    price: '₹229',
+    rating: '4.5',
+    image: 'https://placehold.co/300x300?text=Paneer',
+  },
+  {
+    name: 'Classic Cheeseburger',
+    price: '₹179',
+    rating: '4.4',
+    image: 'https://placehold.co/300x300?text=Burger',
+  },
+  {
+    name: 'Peri Peri Fries',
+    price: '₹119',
+    rating: '4.3',
+    image: 'https://placehold.co/300x300?text=Fries',
+  },
+  {
+    name: 'Hakka Noodles Bowl',
+    price: '₹199',
+    rating: '4.5',
+    image: 'https://placehold.co/300x300?text=Noodles',
+  },
+  {
+    name: 'Tandoori Chicken',
+    price: '₹329',
+    rating: '4.7',
+    image: 'https://placehold.co/300x300?text=Tandoori',
+  },
+  {
+    name: 'Momos Platter',
+    price: '₹159',
+    rating: '4.4',
+    image: 'https://placehold.co/300x300?text=Momos',
+  },
+  {
+    name: 'Chocolate Brownie',
+    price: '₹129',
+    rating: '4.6',
+    image: 'https://placehold.co/300x300?text=Brownie',
+  },
+  {
+    name: 'Idli Sambar Box',
+    price: '₹149',
+    rating: '4.5',
+    image: 'https://placehold.co/300x300?text=Idli',
+  },
+  {
+    name: 'Grilled Sandwich',
+    price: '₹139',
+    rating: '4.3',
+    image: 'https://placehold.co/300x300?text=Sandwich',
+  },
+  {
+    name: 'Chole Bhature',
+    price: '₹199',
+    rating: '4.6',
+    image: 'https://placehold.co/300x300?text=Chole',
+  },
+  {
+    name: 'Falooda Sundae',
+    price: '₹159',
+    rating: '4.4',
+    image: 'https://placehold.co/300x300?text=Falooda',
+  },
+  {
+    name: 'Cold Coffee',
+    price: '₹119',
+    rating: '4.2',
+    image: 'https://placehold.co/300x300?text=Coffee',
+  },
+]
+
+const groceryItems = [
+  {
+    name: 'Fresh Milk (1L)',
+    price: '₹69',
+    tag: 'Dairy • Daily use',
+    image: 'https://placehold.co/300x300?text=Milk',
+  },
+  {
+    name: 'Brown Bread Loaf',
+    price: '₹55',
+    tag: 'Bakery • Breakfast',
+    image: 'https://placehold.co/300x300?text=Bread',
+  },
+  {
+    name: 'Eggs Pack (12)',
+    price: '₹85',
+    tag: 'Protein • Essentials',
+    image: 'https://placehold.co/300x300?text=Eggs',
+  },
+  {
+    name: 'Mixed Veggies Pack',
+    price: '₹129',
+    tag: 'Frozen • Veg mix',
+    image: 'https://placehold.co/300x300?text=Veggies',
+  },
+  {
+    name: 'Premium Basmati Rice',
+    price: '₹649',
+    tag: '5kg • Long grain',
+    image: 'https://placehold.co/300x300?text=Rice',
+  },
+  {
+    name: 'Sunflower Oil (1L)',
+    price: '₹149',
+    tag: 'Healthy choice',
+    image: 'https://placehold.co/300x300?text=Oil',
+  },
+  {
+    name: 'Atta Wheat Flour',
+    price: '₹349',
+    tag: '5kg • Chakki fresh',
+    image: 'https://placehold.co/300x300?text=Atta',
+  },
+  {
+    name: 'Assorted Fruits Box',
+    price: '₹259',
+    tag: 'Seasonal picks',
+    image: 'https://placehold.co/300x300?text=Fruits',
+  },
+  {
+    name: 'Tomato & Onion Pack',
+    price: '₹79',
+    tag: 'Daily cooking',
+    image: 'https://placehold.co/300x300?text=Veg+Pack',
+  },
+  {
+    name: 'Green Leafy Mix',
+    price: '₹69',
+    tag: 'Salad ready',
+    image: 'https://placehold.co/300x300?text=Greens',
+  },
+  {
+    name: 'Detergent Powder',
+    price: '₹199',
+    tag: '3kg • Fresh scent',
+    image: 'https://placehold.co/300x300?text=Detergent',
+  },
+  {
+    name: 'Toothpaste Twin Pack',
+    price: '₹149',
+    tag: 'Oral care',
+    image: 'https://placehold.co/300x300?text=Toothpaste',
+  },
+  {
+    name: 'Shampoo Family Pack',
+    price: '₹249',
+    tag: '650ml • Care',
+    image: 'https://placehold.co/300x300?text=Shampoo',
+  },
+  {
+    name: 'Kitchen Towels (6)',
+    price: '₹129',
+    tag: 'Cleaning • Home',
+    image: 'https://placehold.co/300x300?text=Towels',
+  },
+  {
+    name: 'Instant Noodles Pack',
+    price: '₹99',
+    tag: 'Quick bites',
+    image: 'https://placehold.co/300x300?text=Noodles',
+  },
+]
+
 export default function Landing({ onOpenLogin, onOpenSignup }) {
   const [placeholder, setPlaceholder] = useState(searchPhrases[0])
   const [phraseIndex, setPhraseIndex] = useState(0)
@@ -128,104 +314,154 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
       </header>
 
       <main className="hero">
-        <div className="container heroGrid">
-          <section className="heroCard">
-            <div className="heroCardInner">
-              <span className="pill">Food • Groceries • Everything you need</span>
-              <h1 className="heroTitle">Find what you crave — delivered in a click.</h1>
-              <p className="heroSubtitle">
-                HaveIt brings your favorites together: restaurants, groceries, and daily essentials. Fast
-                search, clean checkout, and order tracking that works on mobile and laptop.
-              </p>
+        {/* Section 1 — Category banners */}
+        <section className="categorySection" aria-label="Browse by category">
+          <div className="container">
+            <div className="categoryCards">
+              <article className="categoryBanner categoryBannerFood">
+                <div className="categoryBannerContent">
+                  <div className="categoryBannerLabel">FOOD DELIVERY</div>
+                  <h2 className="categoryBannerTitle">Crave it? Order it.</h2>
+                  <p className="categoryBannerSubtitle">From restaurants near you.</p>
+                  <div className="categoryBannerOffer">UPTO 60% OFF</div>
+                  <button type="button" className="categoryBannerCta btn btnPrimary" onClick={onOpenSignup}>
+                    Explore
+                  </button>
+                </div>
+                <div className="categoryBannerVisual" aria-hidden="true">
+                  <img
+                    src="https://placehold.co/260x180?text=Food+Platter"
+                    alt=""
+                    className="categoryBannerImage"
+                    loading="lazy"
+                  />
+                </div>
+              </article>
 
-              <div className="ctaRow">
-                <button type="button" className="btn btnPrimary" onClick={onOpenSignup}>
-                  Get started
-                </button>
-                <button type="button" className="btn" onClick={onOpenLogin}>
-                  I already have an account
-                </button>
-              </div>
+              <article className="categoryBanner categoryBannerGroceries">
+                <div className="categoryBannerContent">
+                  <div className="categoryBannerLabel">GROCERIES</div>
+                  <h2 className="categoryBannerTitle">Fresh picks, fast delivery.</h2>
+                  <p className="categoryBannerSubtitle">Instant grocery, daily essentials.</p>
+                  <div className="categoryBannerOffer">⚡ 20 MINS</div>
+                  <button type="button" className="categoryBannerCta btn" onClick={onOpenSignup}>
+                    Explore
+                  </button>
+                </div>
+                <div className="categoryBannerVisual" aria-hidden="true">
+                  <img
+                    src="https://placehold.co/260x180?text=Grocery+Basket"
+                    alt=""
+                    className="categoryBannerImage"
+                    loading="lazy"
+                  />
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
 
-              <div className="featureGrid" role="list">
-                <div className="feature" role="listitem">
-                  <div className="featureTitle">One account</div>
-                  <p className="featureText">Log in with mobile or use Google/Facebook.</p>
-                </div>
-                <div className="feature" role="listitem">
-                  <div className="featureTitle">Clean checkout</div>
-                  <p className="featureText">Designed for thumbs on mobile and speed on desktop.</p>
-                </div>
-                <div className="feature" role="listitem">
-                  <div className="featureTitle">Track orders</div>
-                  <p className="featureText">A simple, readable flow from cart to delivery.</p>
-                </div>
+        {/* Section 2 — Food items shelf */}
+        <section className="itemsSection" aria-labelledby="popular-heading">
+          <div className="container">
+            <div className="itemsHeader">
+              <div>
+                <h2 id="popular-heading" className="itemsTitle">
+                  What&apos;s popular near you
+                </h2>
+                <p className="itemsSubtitle">Trending bites HaveIt users are loving right now.</p>
               </div>
             </div>
-          </section>
-
-          <aside className="heroCard" aria-label="Preview">
-            <div className="heroCardInner">
-              <div className="pill">Preview</div>
-              <h2
-                style={{
-                  margin: '14px 0 10px',
-                  fontSize: 18,
-                  letterSpacing: -0.2,
-                  color: '#1C1917',
-                }}
-              >
-                Your next order, simplified.
-              </h2>
-              <div
-                style={{
-                  border: '1px solid #F0F0F0',
-                  background: '#F9FAFB',
-                  borderRadius: 14,
-                  padding: 14,
-                  display: 'grid',
-                  gap: 12,
-                }}
-              >
-                {[
-                  { title: 'Chicken Biryani', meta: '25–35 min • 4.6★' },
-                  { title: 'Fresh Fruits Box', meta: 'Today • 1.8 km' },
-                  { title: 'Milk + Bread', meta: '10–15 min • Nearby' },
-                ].map((item) => (
-                  <div
-                    key={item.title}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '44px 1fr',
-                      gap: 12,
-                      alignItems: 'center',
-                      padding: 10,
-                      borderRadius: 12,
-                      border: '1px solid #F0F0F0',
-                      background: '#FFFFFF',
-                      boxShadow: '0 6px 18px rgba(15,23,42,0.06)',
-                    }}
-                  >
-                    <SquareLogo size={44} />
-                    <div style={{ display: 'grid', gap: 2 }}>
-                      <div style={{ fontWeight: 650, color: '#1C1917' }}>{item.title}</div>
-                      <div style={{ color: '#6B7280', fontSize: 13 }}>
-                        {item.meta}
-                      </div>
+            <div className="itemsShelf" role="list">
+              {popularItems.map((item) => (
+                <article key={item.name} className="itemCard itemCardMicro" role="listitem">
+                  <div className="itemImageWrap itemImageWrapMicro">
+                    <img src={item.image} alt={item.name} className="itemImage" loading="lazy" />
+                    <button type="button" className="itemAddBtn" aria-label={`Add ${item.name}`}>
+                      +
+                    </button>
+                  </div>
+                  <div className="itemBody itemBodyMicro">
+                    <h3 className="itemName itemNameMicro">{item.name}</h3>
+                    <div className="itemMeta itemMetaMicro">
+                      <span className="itemPrice itemPriceMicro">{item.price}</span>
+                      <span className="itemRating itemRatingMicro" aria-label={`${item.rating} star rating`}>
+                        ★ {item.rating}
+                      </span>
                     </div>
                   </div>
-                ))}
-                <button type="button" className="btn btnPrimary" onClick={onOpenSignup}>
-                  Create your account
-                </button>
-              </div>
-              <p className="finePrint">
-                This is a frontend-only design. Hook your auth later without changing the UI.
-              </p>
+                </article>
+              ))}
             </div>
-          </aside>
-        </div>
+          </div>
+        </section>
+
+        {/* Section 3 — Grocery items shelf */}
+        <section className="itemsSection itemsSectionAlt" aria-labelledby="groceries-heading">
+          <div className="container">
+            <div className="itemsHeader">
+              <div>
+                <h2 id="groceries-heading" className="itemsTitle">
+                  Fresh groceries, always on hand
+                </h2>
+                <p className="itemsSubtitle">Build your basket with staples, snacks, and fresh picks.</p>
+              </div>
+            </div>
+            <div className="itemsShelf" role="list">
+              {groceryItems.map((item) => (
+                <article key={item.name} className="itemCard itemCardMicro" role="listitem">
+                  <div className="itemImageWrap itemImageWrapMicro">
+                    <img src={item.image} alt={item.name} className="itemImage" loading="lazy" />
+                    <button type="button" className="itemAddBtn" aria-label={`Add ${item.name}`}>
+                      +
+                    </button>
+                  </div>
+                  <div className="itemBody itemBodyMicro">
+                    <h3 className="itemName itemNameMicro">{item.name}</h3>
+                    <div className="itemMeta itemMetaMicro">
+                      <span className="itemPrice itemPriceMicro">{item.price}</span>
+                      <span className="itemTag itemTagMicro">{item.tag}</span>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
+
+      {/* Section 4 — Footer */}
+      <footer className="siteFooter">
+        <div className="footerDivider" />
+        <div className="container footerInner">
+          <div className="footerBrand">
+            <Brand />
+            <p className="footerTagline">Food. Groceries. Found it? HaveIt.</p>
+          </div>
+
+          <nav className="footerNav" aria-label="Footer navigation">
+            <a href="#" className="footerLink">
+              Home
+            </a>
+            <a href="#" className="footerLink">
+              About
+            </a>
+            <a href="#" className="footerLink">
+              Blog
+            </a>
+            <a href="#" className="footerLink">
+              Privacy
+            </a>
+            <a href="#" className="footerLink">
+              Terms
+            </a>
+          </nav>
+
+          <div className="footerCopy">
+            <small>© 2025 Haveit. All rights reserved.</small>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
