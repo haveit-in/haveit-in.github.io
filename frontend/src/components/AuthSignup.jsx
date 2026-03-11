@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import Brand from './Brand.jsx'
-import SocialButton from './SocialButton.jsx'
 import TextField from './TextField.jsx'
 import { FacebookIcon, GoogleIcon } from './Icons.jsx'
 
@@ -61,25 +60,12 @@ export default function AuthSignup({ onSuccess, onOpenLogin }) {
     <div>
       <Brand />
 
-      <h2 className="authTitle" style={{ marginTop: 14 }}>
+      {/* <h2 className="authTitle" style={{ marginTop: 14 }}>
         Sign up
       </h2>
-      <p className="authHint">Use your mobile number, or create an account with Google/Facebook.</p>
-
-      <div className="socialRow">
-        <SocialButton
-          provider="Google"
-          icon={<GoogleIcon />}
-          onClick={() => alert('Connect Google sign-up here.')}
-        />
-        <SocialButton
-          provider="Facebook"
-          icon={<FacebookIcon />}
-          onClick={() => alert('Connect Facebook sign-up here.')}
-        />
-      </div>
-
-      <div className="divider">or</div>
+      <p className="authHint">
+        Sign up with your mobile number. You can also create an account using a social login.
+      </p> */}
 
       <form className="form" onSubmit={onSubmit}>
         <TextField
@@ -130,6 +116,27 @@ export default function AuthSignup({ onSuccess, onOpenLogin }) {
           .
         </div>
       </form>
+
+      <div className="divider">or</div>
+
+      <div className="socialIconRow">
+        <button
+          type="button"
+          className="socialIconButton"
+          aria-label="Sign up with Google"
+          onClick={() => alert('Connect Google sign-up here.')}
+        >
+          <GoogleIcon size={20} />
+        </button>
+        <button
+          type="button"
+          className="socialIconButton"
+          aria-label="Sign up with Facebook"
+          onClick={() => alert('Connect Facebook sign-up here.')}
+        >
+          <FacebookIcon size={20} />
+        </button>
+      </div>
     </div>
   )
 }

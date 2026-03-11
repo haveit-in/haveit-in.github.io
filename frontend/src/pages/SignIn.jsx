@@ -51,10 +51,10 @@ export default function SignIn() {
         <section className="authCard" aria-label="Log in">
           <Brand />
 
-          <h2 className="authTitle" style={{ marginTop: 14 }}>
+          {/* <h2 className="authTitle" style={{ marginTop: 14 }}>
             Log in
           </h2>
-          <p className="authHint">Use your mobile number, or continue with Google/Facebook.</p>
+          <p className="authHint">Use your mobile number, or continue with Google/Facebook.</p> */}
 
           <div className="socialRow">
             <SocialButton

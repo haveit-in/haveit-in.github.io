@@ -65,10 +65,10 @@ export default function SignUp() {
         <section className="authCard" aria-label="Sign up">
           <Brand />
 
-          <h2 className="authTitle" style={{ marginTop: 14 }}>
+          {/* <h2 className="authTitle" style={{ marginTop: 14 }}>
             Sign up
           </h2>
-          <p className="authHint">Use email & password, or create an account with Google/Facebook.</p>
+          <p className="authHint">Use email & password, or create an account with Google/Facebook.</p> */}
 
           <div className="socialRow">
             <SocialButton
