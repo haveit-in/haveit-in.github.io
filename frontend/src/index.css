@@ -1,5 +1,5 @@
 :root {
-  --bg: #0b1220;
+  --bg: #1C1917;
   --panel: rgba(255, 255, 255, 0.06);
   --panel-2: rgba(255, 255, 255, 0.08);
   --text: rgba(255, 255, 255, 0.92);
@@ -7,8 +7,8 @@
   --faint: rgba(255, 255, 255, 0.55);
   --border: rgba(255, 255, 255, 0.12);
   --shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
-  --brand: #7c5cff;
-  --brand-2: #26d6a0;
+  --brand: #F97316;
+  --brand-2: #FDBA74;
   --danger: #ff4d6d;
 
   --radius: 16px;
@@ -16,14 +16,14 @@
 
   --container: 1120px;
 
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
-    Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: Poppins, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: 1.4;
   font-weight: 400;
   color: var(--text);
-  background: radial-gradient(1200px 800px at 10% 10%, rgba(124, 92, 255, 0.35), transparent 60%),
-    radial-gradient(1200px 800px at 90% 10%, rgba(38, 214, 160, 0.25), transparent 55%),
-    radial-gradient(800px 600px at 50% 100%, rgba(255, 77, 109, 0.16), transparent 60%),
+  background: radial-gradient(900px 600px at 10% 10%, rgba(249, 115, 22, 0.20), transparent 62%),
+    radial-gradient(900px 600px at 90% 12%, rgba(253, 186, 116, 0.10), transparent 60%),
+    radial-gradient(700px 520px at 50% 100%, rgba(249, 115, 22, 0.08), transparent 62%),
     var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -96,12 +96,12 @@ input {
 }
 
 .btnPrimary {
-  background: linear-gradient(135deg, var(--brand), #4aa3ff);
+  background: linear-gradient(135deg, var(--brand), #fb923c);
   border-color: rgba(255, 255, 255, 0.18);
 }
 
 .btnPrimary:hover {
-  background: linear-gradient(135deg, #6b4cff, #3d9aff);
+  background: linear-gradient(135deg, #ea580c, #f97316);
 }
 
 .btnGhost {

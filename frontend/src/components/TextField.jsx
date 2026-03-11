@@ -8,6 +8,7 @@ export default function TextField({
   onChange,
   right,
   error,
+  inputMode,
 }) {
   return (
     <div className="field">
@@ -22,6 +23,7 @@ export default function TextField({
         className="input"
         type={type}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         placeholder={placeholder}
         value={value}
         onChange={onChange}

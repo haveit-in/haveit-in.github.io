@@ -57,24 +57,11 @@ export default function SignUp() {
   }
 
   return (
-    <div className="authShell">
-      <aside className="authSide">
-        <div className="authSideInner">
-          <Brand />
-          <h1 className="authSideTitle">Create your account.</h1>
-          <p className="authSideText">
-            Start ordering in minutes. This signup UI is fully responsive and ready to be
-            connected to your auth provider.
-          </p>
-
-          <div className="feature">
-            <div className="featureTitle">What you get</div>
-            <p className="featureText">Saved addresses, faster checkout, and order tracking.</p>
-          </div>
-        </div>
-      </aside>
-
-      <main className="authMain">
+    <div className="authSingle">
+      <div className="authWrap">
+        <Link className="backArrow" to="/" aria-label="Back">
+          <span aria-hidden="true">←</span>
+        </Link>
         <section className="authCard" aria-label="Sign up">
           <Brand />
 
@@ -138,14 +125,25 @@ export default function SignUp() {
             </button>
 
             <div className="finePrint">
-              By continuing, you agree to our <Link to="/signup">Terms</Link> and{' '}
-              <Link to="/signup">Privacy Policy</Link>.
+              By continuing, you agree to our{' '}
+              <Link className="linkBlue" to="/signup">
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link className="linkBlue" to="/signup">
+                Privacy Policy
+              </Link>
+              .
               <br />
-              Already have an account? <Link to="/signin">Sign in</Link>.
+              Already have an account?{' '}
+              <Link className="linkPrimary" to="/signin">
+                Log in
+              </Link>
+              .
             </div>
           </form>
         </section>
-      </main>
+      </div>
     </div>
   )
 }

@@ -1,19 +1,16 @@
-import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
+import SquareLogo from '../components/SquareLogo.jsx'
 
-export default function Landing() {
+export default function Landing({ onOpenLogin, onOpenSignup }) {
   return (
     <div className="appShell">
       <header className="topNav">
         <div className="container topNavInner">
           <Brand />
           <div className="navActions">
-            <Link className="btn btnGhost" to="/signin">
-              Sign in
-            </Link>
-            <Link className="btn btnPrimary" to="/signup">
-              Create account
-            </Link>
+            <button type="button" className="btn btnPrimary" onClick={onOpenLogin}>
+              Log in
+            </button>
           </div>
         </div>
       </header>
@@ -31,18 +28,18 @@ export default function Landing() {
               </p>
 
               <div className="ctaRow">
-                <Link className="btn btnPrimary" to="/signup">
+                <button type="button" className="btn btnPrimary" onClick={onOpenSignup}>
                   Get started
-                </Link>
-                <Link className="btn" to="/signin">
+                </button>
+                <button type="button" className="btn" onClick={onOpenLogin}>
                   I already have an account
-                </Link>
+                </button>
               </div>
 
               <div className="featureGrid" role="list">
                 <div className="feature" role="listitem">
                   <div className="featureTitle">One account</div>
-                  <p className="featureText">Sign in with email or use Google/Facebook.</p>
+                  <p className="featureText">Log in with mobile or use Google/Facebook.</p>
                 </div>
                 <div className="feature" role="listitem">
                   <div className="featureTitle">Clean checkout</div>
@@ -90,16 +87,7 @@ export default function Landing() {
                       background: 'rgba(255,255,255,0.04)',
                     }}
                   >
-                    <div
-                      aria-hidden="true"
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 14,
-                        background:
-                          'linear-gradient(135deg, rgba(124,92,255,0.85), rgba(38,214,160,0.65))',
-                      }}
-                    />
+                    <SquareLogo size={44} />
                     <div style={{ display: 'grid', gap: 2 }}>
                       <div style={{ fontWeight: 650 }}>{item.title}</div>
                       <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>
@@ -108,9 +96,9 @@ export default function Landing() {
                     </div>
                   </div>
                 ))}
-                <Link className="btn btnPrimary" to="/signup">
+                <button type="button" className="btn btnPrimary" onClick={onOpenSignup}>
                   Create your account
-                </Link>
+                </button>
               </div>
               <p className="finePrint">
                 This is a frontend-only design. Hook your auth later without changing the UI.
