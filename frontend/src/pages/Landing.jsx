@@ -10,9 +10,9 @@ const categories = [
   { id: 'groceries', icon: '🛒', label: 'Groceries' },
   { id: 'beverages', icon: '🥤', label: 'Beverages' },
   { id: 'fresh', icon: '🥬', label: 'Fresh' },
-  { id: 'bakery', icon: '🍰', label: 'Bakery' },
-  { id: 'personal-care', icon: '🧴', label: 'Personal Care' },
-  { id: 'household', icon: '🏠', label: 'Household' },
+  // { id: 'bakery', icon: '🍰', label: 'Bakery' },
+  // { id: 'personal-care', icon: '🧴', label: 'Personal Care' },
+  // { id: 'household', icon: '🏠', label: 'Household' },
 ]
 
 export default function Landing({ onOpenLogin, onOpenSignup }) {
@@ -86,7 +86,11 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
 
           <div className="navRight">
             <button type="button" className="navIconButton" onClick={onOpenLogin}>
+              <span className="navIcon" aria-hidden="true">
+                👤
+              </span>
               <span className="navIconLabel">Login</span>
+              
             </button>
             <button type="button" className="navIconButton" aria-label="View cart">
               <span className="navIcon" aria-hidden="true">
