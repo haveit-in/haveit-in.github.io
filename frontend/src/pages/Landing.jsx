@@ -325,16 +325,18 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                   <p className="categoryBannerSubtitle">From restaurants near you.</p>
                   <div className="categoryBannerOffer">UPTO 60% OFF</div>
                   <button type="button" className="categoryBannerCta btn btnPrimary" onClick={onOpenSignup}>
-                    Explore
+                    Explore <span className="categoryBannerCtaArrow" aria-hidden="true">→</span>
                   </button>
                 </div>
                 <div className="categoryBannerVisual" aria-hidden="true">
-                  <img
-                    src="https://placehold.co/260x180?text=Food+Platter"
-                    alt=""
-                    className="categoryBannerImage"
-                    loading="lazy"
-                  />
+                  <div className="categoryBannerArt categoryBannerArtFood">
+                    <img
+                      src="https://placehold.co/340x260?text=Food+Image"
+                      alt=""
+                      className="categoryBannerImage"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               </article>
 
@@ -343,18 +345,20 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                   <div className="categoryBannerLabel">GROCERIES</div>
                   <h2 className="categoryBannerTitle">Fresh picks, fast delivery.</h2>
                   <p className="categoryBannerSubtitle">Instant grocery, daily essentials.</p>
-                  <div className="categoryBannerOffer">⚡ 20 MINS</div>
+                  <div className="categoryBannerOffer">⚡ 10 MINS</div>
                   <button type="button" className="categoryBannerCta btn" onClick={onOpenSignup}>
-                    Explore
+                    Explore <span className="categoryBannerCtaArrow" aria-hidden="true">→</span>
                   </button>
                 </div>
                 <div className="categoryBannerVisual" aria-hidden="true">
-                  <img
-                    src="https://placehold.co/260x180?text=Grocery+Basket"
-                    alt=""
-                    className="categoryBannerImage"
-                    loading="lazy"
-                  />
+                  <div className="categoryBannerArt categoryBannerArtGroceries">
+                    <img
+                      src="https://placehold.co/340x260?text=Grocery+Image"
+                      alt=""
+                      className="categoryBannerImage"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               </article>
             </div>
