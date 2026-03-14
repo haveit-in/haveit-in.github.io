@@ -322,17 +322,12 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                     Explore
                   </button>
                 </div>
-                <div className="absolute bottom-4 right-4 w-24 h-24 md:w-32 md:h-32 bg-gray-200 rounded-xl flex items-center justify-center">
-                  {/* Arrow button in top right of image area */}
-                  <button
-                    type="button"
-                    className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-orange-500 hover:bg-orange-50 transition-colors"
-                    aria-label="Explore Food Delivery"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
-                  </button>
+                <div className="absolute bottom-4 right-4 w-24 h-24 md:w-32 md:h-32 rounded-xl flex items-center justify-center overflow-hidden">
+                  <img
+                    src="/image/food-delivery.png"
+                    alt="Food Delivery"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </article>
 
@@ -361,17 +356,12 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                     Explore
                   </button>
                 </div>
-                <div className="absolute bottom-4 right-4 w-24 h-24 md:w-32 md:h-32 bg-gray-200 rounded-xl flex items-center justify-center">
-                  {/* Arrow button in top right of image area */}
-                  <button
-                    type="button"
-                    className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-orange-500 hover:bg-orange-50 transition-colors"
-                    aria-label="Explore Groceries"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
-                  </button>
+                <div className="absolute bottom-4 right-4 w-24 h-24 md:w-32 md:h-32 rounded-xl flex items-center justify-center overflow-hidden">
+                  <img
+                    src="/image/groceries.png"
+                    alt="Groceries"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </article>
             </div>
@@ -383,6 +373,100 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
 
         {/* Groceries Section */}
         <GroceriesCategories />
+
+        {/* Divider */}
+        <div className="border-t border-gray-200" />
+
+        {/* App Download Banner */}
+        <section className="bg-gray-900 py-8 md:py-12 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              {/* Left Content */}
+              <div className="text-center md:text-left">
+                <div className="flex items-center gap-2 mb-4 justify-center md:justify-start">
+                  <img
+                    src="image/2.png"
+                    alt="Haveit"
+                    className="h-16 w-auto object-contain bg-white rounded-lg px-3 py-2 shadow-lg"
+                  />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                  Get the Haveit App now!
+                </h2>
+                <p className="text-gray-400 text-sm md:text-base">
+                  For best offers and discounts curated specially for you.
+                </p>
+              </div>
+
+              {/* Right Content - Phone with QR */}
+              <div className="relative">
+                {/* Phone Frame */}
+                <div className="relative w-48 md:w-56">
+                  {/* Phone mockup */}
+                  <div className="bg-white rounded-3xl p-3 shadow-2xl">
+                    <div className="bg-gray-100 rounded-2xl p-4 aspect-[3/4] flex flex-col items-center justify-center">
+                      {/* QR Code placeholder */}
+                      <div className="w-32 h-32 bg-white p-2 rounded-lg shadow-sm mb-3">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <rect x="10" y="10" width="25" height="25" fill="#1f2937"/>
+                          <rect x="65" y="10" width="25" height="25" fill="#1f2937"/>
+                          <rect x="10" y="65" width="25" height="25" fill="#1f2937"/>
+                          <rect x="15" y="15" width="15" height="15" fill="white"/>
+                          <rect x="70" y="15" width="15" height="15" fill="white"/>
+                          <rect x="15" y="70" width="15" height="15" fill="white"/>
+                          <rect x="18" y="18" width="9" height="9" fill="#1f2937"/>
+                          <rect x="73" y="18" width="9" height="9" fill="#1f2937"/>
+                          <rect x="18" y="73" width="9" height="9" fill="#1f2937"/>
+                          <rect x="40" y="10" width="5" height="5" fill="#1f2937"/>
+                          <rect x="50" y="10" width="5" height="5" fill="#1f2937"/>
+                          <rect x="40" y="20" width="5" height="5" fill="#1f2937"/>
+                          <rect x="45" y="25" width="5" height="5" fill="#1f2937"/>
+                          <rect x="55" y="20" width="5" height="5" fill="#1f2937"/>
+                          <rect x="10" y="40" width="5" height="5" fill="#1f2937"/>
+                          <rect x="20" y="45" width="5" height="5" fill="#1f2937"/>
+                          <rect x="30" y="40" width="5" height="5" fill="#1f2937"/>
+                          <rect x="45" y="40" width="10" height="10" fill="#1f2937"/>
+                          <rect x="60" y="45" width="5" height="5" fill="#1f2937"/>
+                          <rect x="70" y="40" width="5" height="5" fill="#1f2937"/>
+                          <rect x="80" y="50" width="5" height="5" fill="#1f2937"/>
+                          <rect x="40" y="55" width="5" height="5" fill="#1f2937"/>
+                          <rect x="50" y="60" width="5" height="5" fill="#1f2937"/>
+                          <rect x="60" y="55" width="5" height="5" fill="#1f2937"/>
+                          <rect x="70" y="60" width="5" height="5" fill="#1f2937"/>
+                          <rect x="45" y="70" width="5" height="5" fill="#1f2937"/>
+                          <rect x="55" y="75" width="5" height="5" fill="#1f2937"/>
+                          <rect x="65" y="70" width="10" height="5" fill="#1f2937"/>
+                          <rect x="75" y="75" width="5" height="10" fill="#1f2937"/>
+                          <rect x="85" y="70" width="5" height="5" fill="#1f2937"/>
+                          <rect x="40" y="80" width="5" height="5" fill="#1f2937"/>
+                          <rect x="50" y="85" width="15" height="5" fill="#1f2937"/>
+                          <rect x="70" y="80" width="5" height="10" fill="#1f2937"/>
+                          <rect x="80" y="85" width="5" height="5" fill="#1f2937"/>
+                          <rect x="85" y="80" width="5" height="5" fill="#1f2937"/>
+                        </svg>
+                      </div>
+                      <p className="text-orange-500 text-xs font-semibold">Scan to download</p>
+                    </div>
+                  </div>
+                  
+                  {/* Floating food decorations */}
+                  <div className="absolute -left-8 top-1/4 w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '3s' }}>
+                    <span className="text-xl">🍔</span>
+                  </div>
+                  <div className="absolute -right-6 top-1/3 w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }}>
+                    <span className="text-lg">🥗</span>
+                  </div>
+                  <div className="absolute -left-6 bottom-1/4 w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '2s', animationDelay: '1s' }}>
+                    <span className="text-lg">🍕</span>
+                  </div>
+                  <div className="absolute -right-8 bottom-1/3 w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '0.3s' }}>
+                    <span className="text-xl">🍱</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Footer */}
         <footer className="bg-gray-50 text-gray-700 py-12 md:py-16">

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 
 // ChevronLeft Icon component
 const ChevronLeftIcon = ({ size = 20 }) => (
@@ -35,7 +35,7 @@ const foodCategories = [
 ]
 
 // Section Header Component with arrows
-function SectionHeader({ title, onScrollLeft, onScrollRight }) {
+function SectionHeader({ title, onScrollLeft, onScrollRight, hasMoreLeft, hasMoreRight }) {
   return (
     <div className="flex items-center justify-between mb-4 md:mb-6">
       <h2 className="text-xl md:text-2xl font-bold text-gray-900">{title}</h2>
@@ -43,7 +43,12 @@ function SectionHeader({ title, onScrollLeft, onScrollRight }) {
         <button
           type="button"
           onClick={onScrollLeft}
-          className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-all"
+          disabled={!hasMoreLeft}
+          className={`w-8 h-8 md:w-9 md:h-9 rounded-full border flex items-center justify-center transition-all ${
+            hasMoreLeft
+              ? 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+              : 'border-gray-200 text-gray-300 cursor-not-allowed'
+          }`}
           aria-label="Previous"
         >
           <ChevronLeftIcon size={16} />
@@ -51,7 +56,12 @@ function SectionHeader({ title, onScrollLeft, onScrollRight }) {
         <button
           type="button"
           onClick={onScrollRight}
-          className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-all"
+          disabled={!hasMoreRight}
+          className={`w-8 h-8 md:w-9 md:h-9 rounded-full border flex items-center justify-center transition-all ${
+            hasMoreRight
+              ? 'border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800'
+              : 'border-gray-200 text-gray-300 cursor-not-allowed'
+          }`}
           aria-label="Next"
         >
           <ChevronRightIcon size={16} />
@@ -81,6 +91,37 @@ function FoodCategoryCard({ name, image }) {
 // Main FoodCategories Component
 export default function FoodCategories() {
   const foodSliderRef = useRef(null)
+  const [hasMoreLeft, setHasMoreLeft] = useState(false)
+  const [hasMoreRight, setHasMoreRight] = useState(true)
+
+  const checkScrollBoundaries = useCallback(() => {
+    if (foodSliderRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = foodSliderRef.current
+      const maxScroll = scrollWidth - clientWidth
+      // Add small buffer (5px) for floating point precision
+      setHasMoreLeft(scrollLeft > 5)
+      setHasMoreRight(scrollLeft < maxScroll - 5 && maxScroll > 0)
+    }
+  }, [])
+
+  useEffect(() => {
+    const slider = foodSliderRef.current
+    if (!slider) return
+
+    // Initial check
+    checkScrollBoundaries()
+
+    // Listen for scroll events
+    slider.addEventListener('scroll', checkScrollBoundaries, { passive: true })
+    
+    // Also check on window resize
+    window.addEventListener('resize', checkScrollBoundaries)
+
+    return () => {
+      slider.removeEventListener('scroll', checkScrollBoundaries)
+      window.removeEventListener('resize', checkScrollBoundaries)
+    }
+  }, [checkScrollBoundaries])
 
   const scrollSlider = (direction) => {
     if (foodSliderRef.current) {
@@ -98,6 +139,8 @@ export default function FoodCategories() {
           title="Order our best food options"
           onScrollLeft={() => scrollSlider('left')}
           onScrollRight={() => scrollSlider('right')}
+          hasMoreLeft={hasMoreLeft}
+          hasMoreRight={hasMoreRight}
         />
 
         {/* Mobile: Horizontal scrollable grid (3 columns visible) */}
