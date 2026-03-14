@@ -15,6 +15,8 @@ import {
   PlusIcon,
   LightningIcon,
 } from '../components/Icons.jsx'
+import FoodCategories from '../components/FoodCategories.jsx'
+import GroceriesCategories from '../components/GroceriesCategories.jsx'
 
 const searchPhrases = [
   'Search for dishes, groceries, or more...',
@@ -428,114 +430,143 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
           </div>
         </section>
 
-        {/* Popular Items Section */}
-        <section className="py-6 md:py-10 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-5 md:mb-6 flex items-end justify-between">
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
-                  What&apos;s popular near you
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Trending bites HaveIt users are loving right now.
-                </p>
-              </div>
-              {/* Arrow buttons in same line as subtitle */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => scrollSlider('left')}
-                  className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all"
-                  aria-label="Previous items"
-                >
-                  <ChevronLeftIcon size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollSlider('right')}
-                  className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all"
-                  aria-label="Next items"
-                >
-                  <ChevronRightIcon size={16} />
-                </button>
-              </div>
-            </div>
+        {/* Food Categories Section */}
+        <FoodCategories />
 
-            {/* Slider Container */}
-            <div className="relative">
-              {/* Slider Track */}
-              <div
-                ref={sliderRef}
-                onScroll={handleScroll}
-                className="overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory"
-              >
-                <div className="flex gap-4 pb-4">
-                  {popularItems.map((item) => (
-                    <article
-                      key={item.name}
-                      className="flex-shrink-0 w-[calc(50%-8px)] md:w-[calc(25%-12px)] snap-start"
-                    >
-                      <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <div className="relative aspect-[4/3]">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                          <button
-                            type="button"
-                            className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors"
-                            aria-label={`Add ${item.name}`}
-                          >
-                            <PlusIcon size={16} />
-                          </button>
-                        </div>
-                        <div className="p-3">
-                          <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">{item.name}</h3>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold text-gray-900">{item.price}</span>
-                            <span className="inline-flex items-center gap-0.5 text-sm font-semibold text-orange-500">
-                              <StarIcon size={14} />
-                              {item.rating}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-
-              {/* Slider Progress Bar */}
-              <div className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-orange-500 rounded-full transition-all duration-300"
-                  style={{ width: `${scrollProgress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Groceries Section */}
+        <GroceriesCategories />
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-8 md:py-12">
+        <footer className="bg-gray-50 text-gray-700 py-12 md:py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-              <div>
-                <span className="text-2xl font-bold text-orange-500">Haveit</span>
-                <p className="text-gray-400 text-sm mt-1">Food. Groceries. Found it? HaveIt.</p>
+            {/* Main Footer Content */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+              {/* Company Logo & Copyright */}
+              <div className="col-span-2 md:col-span-1">
+                <div className="flex items-center">
+                  <img
+                    src="/image/2.png"
+                    alt="Haveit"
+                    className="h-16 w-auto object-contain"
+                    style={{ mixBlendMode: 'multiply' }}
+                  />
+                </div>
+                {/* <p className="text-gray-500 text-xs mt-0">Food. Groceries. Delivery</p> */}
+                <p className="text-gray-500 text-sm mt-3">© 2026 Haveit Limited</p>
               </div>
-              <nav className="flex flex-wrap gap-6 text-sm">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">Home</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">About</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms</a>
-              </nav>
+
+              {/* Company Column */}
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4">Company</h3>
+                <ul className="space-y-3 text-sm">
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">About Us</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit Corporate</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Careers</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Team</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit One</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit Instamart</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit Dineout</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Minis</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Pyng</a></li>
+                </ul>
+              </div>
+
+              {/* Contact Us Column */}
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4">Contact us</h3>
+                <ul className="space-y-3 text-sm">
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Help & Support</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Partner With Us</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Ride With Us</a></li>
+                </ul>
+
+                <h3 className="font-semibold text-gray-900 mt-6 mb-4">Legal</h3>
+                <ul className="space-y-3 text-sm">
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Terms & Conditions</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Cookie Policy</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Privacy Policy</a></li>
+                </ul>
+              </div>
+
+              {/* Available In Column */}
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4">Available in:</h3>
+                <ul className="space-y-3 text-sm">
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Hyderabad</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Warangal</a></li>
+                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Hyderabad</a></li> */}
+                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Delhi</a></li> */}
+                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Mumbai</a></li> */}
+                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Pune</a></li> */}
+                </ul>
+                <button className="mt-3 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 transition-colors flex items-center gap-2">
+                  5 cities
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Life at Haveit + Social */}
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4">Life at Haveit</h3>
+                <ul className="space-y-3 text-sm mb-6">
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Explore With Haveit</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit News</a></li>
+                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Snackables</a></li>
+                </ul>
+
+                <h3 className="font-semibold text-gray-900 mb-4">Social Links</h3>
+                <div className="flex items-center gap-3">
+                  <a href="https://www.linkedin.com/company/haveit/posts/?feedView=all" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="LinkedIn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                      <rect x="2" y="9" width="4" height="12"/>
+                      <circle cx="4" cy="4" r="2"/>
+                    </svg>
+                  </a>
+                  <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Instagram">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                    </svg>
+                  </a>
+                  <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Facebook">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                    </svg>
+                  </a>
+                  <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Twitter">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
             </div>
-            <div className="border-t border-gray-800 pt-6">
-              <p className="text-gray-500 text-sm">© 2025 Haveit. All rights reserved.</p>
+
+            {/* Bottom Section - App Download */}
+            <div className="border-t border-gray-200 pt-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <p className="text-gray-600 text-lg font-medium">For better experience, download the Haveit app now</p>
+                <div className="flex items-center gap-4">
+                  <a href="#" className="block">
+                    <img
+                      src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                      alt="Download on the App Store"
+                      className="h-10"
+                    />
+                  </a>
+                  <a href="#" className="block">
+                    <img
+                      src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                      alt="Get it on Google Play"
+                      className="h-12"
+                    />
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </footer>
