@@ -17,6 +17,10 @@ import {
 } from '../components/Icons.jsx'
 import FoodCategories from '../components/FoodCategories.jsx'
 import GroceriesCategories from '../components/GroceriesCategories.jsx'
+import LocationSelector from '../components/LocationSelector.jsx'
+import SearchBar from '../components/SearchBar.jsx'
+import CartButton from '../components/CartButton.jsx'
+import { useApp } from '../context/AppContext.jsx'
 
 const searchPhrases = [
   'Search for dishes, groceries, or more...',
@@ -98,6 +102,7 @@ const ChevronRightIcon = ({ size = 20 }) => (
 )
 
 export default function Landing({ onOpenLogin, onOpenSignup }) {
+  const { addToCart } = useApp()
   const [placeholder, setPlaceholder] = useState(searchPhrases[0])
   const [phraseIndex, setPhraseIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(searchPhrases[0].length)
@@ -167,32 +172,11 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
             </div>
 
             {/* Location Selector */}
-            <button
-              type="button"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-              aria-label="Select delivery location"
-            >
-              <div className="text-left">
-                <p className="text-sm font-semibold text-gray-900">Select Location</p>
-                <p className="text-xs text-gray-500 flex items-center gap-1">
-                  Tap to choose <ChevronDownIcon size={10} />
-                </p>
-              </div>
-            </button>
+            <LocationSelector />
 
             {/* Search Bar */}
             <div className="flex-1 max-w-2xl">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <SearchIcon size={18} className="text-gray-400" />
-                </div>
-                <input
-                  type="search"
-                  className="block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder={placeholder}
-                  aria-label="Search for dishes, groceries, or more"
-                />
-              </div>
+              <SearchBar placeholder={placeholder} />
             </div>
 
             {/* Right Actions */}
@@ -205,16 +189,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                 <UserIcon size={18} />
                 <span>Login</span>
               </button>
-              <button
-                type="button"
-                className="relative flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                aria-label="View cart"
-              >
-                <CartIcon size={20} />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                  0
-                </span>
-              </button>
+              <CartButton />
             </div>
           </div>
         </div>
@@ -264,16 +239,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
             <MenuIcon size={24} />
           </button>
           <span className="text-xl font-bold text-orange-500">Haveit</span>
-          <button
-            type="button"
-            className="relative p-2 -mr-2 text-gray-700"
-            aria-label="View cart"
-          >
-            <CartIcon size={22} />
-            <span className="absolute top-0 right-0 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-              0
-            </span>
-          </button>
+          <CartButton isMobile />
         </div>
 
         {/* Mobile Menu Dropdown */}
@@ -296,32 +262,10 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
         {/* Mobile Location & Search */}
         <div className="px-4 pb-3 space-y-3">
           {/* Location */}
-          <button
-            type="button"
-            className="flex items-center gap-2 text-left"
-            aria-label="Select delivery location"
-          >
-            <LocationIcon size={18} className="text-orange-500" />
-            <div>
-              <p className="text-xs text-gray-500">Location</p>
-              <p className="text-sm font-medium text-gray-900 flex items-center gap-1">
-                Tap to choose <ChevronDownIcon size={10} />
-              </p>
-            </div>
-          </button>
+          <LocationSelector isMobile />
 
           {/* Search */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <SearchIcon size={18} className="text-gray-400" />
-            </div>
-            <input
-              type="search"
-              className="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="Search dishes, groceries..."
-              aria-label="Search dishes, groceries"
-            />
-          </div>
+          <SearchBar isMobile placeholder="Search dishes, groceries..." />
 
           {/* Category Bar Mobile */}
           <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide py-1">
