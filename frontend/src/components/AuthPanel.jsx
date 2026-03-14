@@ -17,6 +17,7 @@ export default function AuthPanel({ open, mode, onClose, onModeChange }) {
         role="dialog"
         aria-modal="true"
         aria-label={isLogin ? 'Log in' : 'Sign up'}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="authPanelHandle" aria-hidden="true" />
 
