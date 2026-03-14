@@ -298,24 +298,26 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-4 md:gap-6">
               {/* Food Delivery Card */}
-              <article className="bg-white rounded-2xl p-5 md:p-6 relative overflow-hidden min-h-[200px] md:min-h-[260px]">
-                <div className="relative z-10 max-w-[65%]">
-                  <h2 className="text-lg md:text-xl font-bold text-gray-900 tracking-wide mb-1">
-                    FOOD DELIVERY
-                  </h2>
-                  <p className="text-base md:text-lg font-semibold text-gray-800 mb-2">
-                    Crave it? Order it.
-                  </p>
-                  <p className="text-xs md:text-sm text-gray-500 mb-4">
-                    Get your favorite meals delivered hot and fresh to your doorstep.
-                  </p>
-                  <span className="inline-block px-3 py-1.5 bg-orange-100 text-orange-600 text-xs font-bold rounded-lg">
-                    UPTO 60% OFF
-                  </span>
+              <article className="bg-white rounded-2xl p-5 md:p-6 relative overflow-hidden h-[260px] md:h-[300px]">
+                <div className="relative z-10 max-w-[65%] h-full flex flex-col">
+                  <div className="flex-1">
+                    <h2 className="text-lg md:text-xl font-bold text-orange-600 tracking-wide mb-1">
+                      FOOD DELIVERY
+                    </h2>
+                    <p className="text-base md:text-lg font-semibold text-gray-800 mb-2">
+                      Crave it? Order it.
+                    </p>
+                    <p className="text-xs md:text-sm text-gray-500 mb-4">
+                      Get your favorite meals delivered hot and fresh to your doorstep.
+                    </p>
+                    <span className="inline-block px-3 py-1.5 bg-orange-100 text-orange-600 text-xs font-bold rounded-lg">
+                      UPTO 60% OFF
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={onOpenSignup}
-                    className="absolute bottom-0 left-0 px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+                    className="px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-colors self-start"
                   >
                     Explore
                   </button>
@@ -335,24 +337,26 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
               </article>
 
               {/* Groceries Card */}
-              <article className="bg-white rounded-2xl p-5 md:p-6 relative overflow-hidden min-h-[200px] md:min-h-[260px]">
-                <div className="relative z-10 max-w-[65%]">
-                  <h2 className="text-lg md:text-xl font-bold text-gray-900 tracking-wide mb-1">
-                    GROCERIES
-                  </h2>
-                  <p className="text-base md:text-lg font-semibold text-gray-800 mb-2">
-                    Fresh picks, fast delivery.
-                  </p>
-                  <p className="text-xs md:text-sm text-gray-500 mb-4">
-                    Stock up on essentials with our wide range of groceries.
-                  </p>
-                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-600 text-xs font-bold rounded-lg">
-                    <LightningIcon size={12} /> 10 MINS
-                  </span>
+              <article className="bg-white rounded-2xl p-5 md:p-6 relative overflow-hidden h-[260px] md:h-[300px]">
+                <div className="relative z-10 max-w-[65%] h-full flex flex-col">
+                  <div className="flex-1">
+                    <h2 className="text-lg md:text-xl font-bold text-orange-600 tracking-wide mb-1">
+                      GROCERIES
+                    </h2>
+                    <p className="text-base md:text-lg font-semibold text-gray-800 mb-2">
+                      Fresh picks, fast delivery.
+                    </p>
+                    <p className="text-xs md:text-sm text-gray-500 mb-4">
+                      Stock up on essentials with our wide range of groceries.
+                    </p>
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-600 text-xs font-bold rounded-lg">
+                      <LightningIcon size={12} /> 10 MINS
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={onOpenSignup}
-                    className="absolute bottom-0 left-0 px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+                    className="px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-colors self-start"
                   >
                     Explore
                   </button>
