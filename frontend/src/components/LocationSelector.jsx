@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useApp } from '../context/AppContext.jsx';
+import { useApp } from '../context/useApp.js';
 import { LocationIcon, ChevronDownIcon } from './Icons.jsx';
 
 // CrossIcon component
@@ -22,7 +22,7 @@ const TargetIcon = ({ size = 18 }) => (
   </svg>
 );
 
-export default function LocationSelector({ isMobile = false }) {
+export default function LocationSelector({ isMobile = false, isHeader = false }) {
   const { location, setLocation } = useApp();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -60,7 +60,7 @@ export default function LocationSelector({ isMobile = false }) {
 
       const data = await response.json();
       setSuggestions(data);
-    } catch (err) {
+    } catch {
       setError('Unable to fetch locations. Please try again.');
       setSuggestions([]);
     } finally {
@@ -117,13 +117,13 @@ export default function LocationSelector({ isMobile = false }) {
           setIsOpen(false);
           setQuery('');
           setSuggestions([]);
-        } catch (err) {
+        } catch {
           setError('Unable to get your location. Please try again.');
         } finally {
           setGettingLocation(false);
         }
       },
-      (err) => {
+      () => {
         setGettingLocation(false);
         setError('Unable to access your location. Please check your browser permissions.');
       },
@@ -182,7 +182,12 @@ export default function LocationSelector({ isMobile = false }) {
   }, []);
 
   const displayText = location.areaName || 'Select Location';
+  const truncatedDisplayText = displayText.length > 15 ? `${displayText.slice(0, 15)}...` : displayText;
   const subText = location.areaName ? '' : 'Tap to choose';
+
+  const desktopButtonClass = isHeader
+    ? 'inline-flex items-center gap-3 h-10 min-w-[160px] rounded-full border border-gray-200 bg-white px-4 shadow-sm text-sm font-medium text-gray-900 transition hover:shadow-md focus:outline-none focus:ring-0 focus:border-[#E8711A] max-w-[220px]'
+    : 'flex items-center gap-2 h-10 min-w-[160px] rounded-full border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 transition hover:shadow-md focus:outline-none focus:ring-0 focus:border-[#E8711A] max-w-[220px]';
 
   if (isMobile) {
     return (
@@ -190,19 +195,25 @@ export default function LocationSelector({ isMobile = false }) {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-left w-full"
-          aria-label="Select delivery location"
-        >
-          <LocationIcon size={18} className="text-[#E8711A] flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-500">Location</p>
-            <p className="text-sm font-medium text-gray-900 flex items-center gap-1 truncate">
-              {displayText}
-              <ChevronDownIcon size={10} className="flex-shrink-0" />
-            </p>
-          </div>
-        </button>
-
+        className="group flex items-center gap-2 text-left w-full rounded-full border border-gray-200 bg-white px-3 py-2 focus:outline-none focus:ring-0 focus:border-[#E8711A]"
+        aria-label="Select delivery location"
+      >
+        <LocationIcon size={18} className="text-[#E8711A] flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-gray-500">Location</p>
+          <p className="text-sm font-medium text-gray-900 flex items-center gap-1">
+            <span className="relative block truncate max-w-full">
+              <span className="truncate block">{truncatedDisplayText}</span>
+              {displayText.length > 15 && (
+                <span className="pointer-events-none absolute left-0 bottom-full mb-2 hidden w-max max-w-[220px] whitespace-normal rounded-md bg-slate-900 px-2 py-1 text-[11px] text-white shadow-lg group-hover:block">
+                  {displayText}
+                </span>
+              )}
+            </span>
+            <ChevronDownIcon size={10} className="flex-shrink-0" />
+          </p>
+        </div>
+      </button>
         {isOpen && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
             <div className="p-3">
@@ -212,8 +223,8 @@ export default function LocationSelector({ isMobile = false }) {
                   type="text"
                   value={query}
                   onChange={handleInputChange}
-                  placeholder="Search for area, street..."
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E8711A] focus:border-transparent"
+                  placeholder="Search"
+                  className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#E8711A] focus:border-transparent"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <LocationIcon size={16} className="text-gray-400" />
@@ -235,7 +246,7 @@ export default function LocationSelector({ isMobile = false }) {
               <button
                 onClick={handleGetCurrentLocation}
                 disabled={gettingLocation}
-                className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm font-medium text-gray-700 transition-colors disabled:opacity-50"
+                className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-xs font-medium text-gray-700 transition-colors disabled:opacity-50"
               >
                 <TargetIcon size={16} className={gettingLocation ? 'animate-spin' : ''} />
                 <span>{gettingLocation ? 'Getting location...' : 'Use my current location'}</span>
@@ -292,15 +303,23 @@ export default function LocationSelector({ isMobile = false }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+        className={`${desktopButtonClass} group`}
         aria-label="Select delivery location"
       >
-        <div className="text-left">
-          <p className="text-sm font-semibold text-gray-900 truncate max-w-[150px]">
-            {displayText}
+        <LocationIcon size={18} className="text-[#E8711A] flex-shrink-0" />
+        <div className="text-left min-w-0">
+          <p className="text-sm font-medium text-gray-900 truncate max-w-[170px]">
+            <span className="relative block truncate max-w-full">
+              <span className="truncate block">{truncatedDisplayText}</span>
+              {displayText.length > 15 && (
+                <span className="pointer-events-none absolute left-0 bottom-full mb-2 hidden w-max max-w-[220px] whitespace-normal rounded-md bg-slate-900 px-2 py-1 text-[11px] text-white shadow-lg group-hover:block">
+                  {displayText}
+                </span>
+              )}
+            </span>
           </p>
           {subText && (
-            <p className="text-xs text-gray-500 flex items-center gap-1">
+            <p className="text-[10px] text-gray-500 flex items-center gap-1">
               {subText} <ChevronDownIcon size={10} />
             </p>
           )}
@@ -309,7 +328,7 @@ export default function LocationSelector({ isMobile = false }) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
+        <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
           <div className="p-3">
             <div className="relative">
               <input

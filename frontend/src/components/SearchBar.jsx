@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import Fuse from 'fuse.js';
-import { useApp } from '../context/AppContext.jsx';
+import { useApp } from '../context/useApp.js';
 import { SearchIcon } from './Icons.jsx';
 
 // Search data combining dishes, restaurants, and categories
@@ -120,7 +120,7 @@ function HighlightedText({ text, query }) {
 }
 
 export default function SearchBar({ 
-  placeholder = "Search for dishes, groceries, or more...",
+  placeholder = "Search",
   isMobile = false,
   onSearch 
 }) {
@@ -276,12 +276,12 @@ export default function SearchBar({
   };
 
   const inputClasses = isMobile
-    ? "block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A] focus:border-transparent"
-    : "block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A] focus:border-transparent";
+    ? "block w-full h-10 pl-10 pr-4 border border-gray-200 rounded-full bg-white text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A]/30 focus:border-[#E8711A]"
+    : "block w-full h-10 pl-11 pr-4 border border-gray-200 rounded-full bg-white text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A]/30 focus:border-[#E8711A]";
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <div className="relative">
+    <div className={`relative h-10 ${isMobile ? 'w-full' : 'max-w-[220px]'}`} ref={dropdownRef}>
+      <div className="relative rounded-full overflow-hidden h-10">
         <div className={`absolute inset-y-0 left-0 ${isMobile ? 'pl-3' : 'pl-4'} flex items-center pointer-events-none`}>
           <SearchIcon size={isMobile ? 18 : 18} className="text-gray-400" />
         </div>
@@ -309,7 +309,7 @@ export default function SearchBar({
                     {category}
                   </div>
                   <ul>
-                    {categoryResults.map((result, index) => {
+                    {categoryResults.map((result) => {
                       const globalIndex = results.indexOf(result);
                       const isSelected = globalIndex === selectedIndex;
                       

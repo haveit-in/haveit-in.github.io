@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import {
   CubeIcon,
   FoodIcon,
@@ -7,7 +7,6 @@ import {
   LeafIcon,
   SearchIcon,
   UserIcon,
-  CartIcon,
   LocationIcon,
   ChevronDownIcon,
   MenuIcon,
@@ -19,13 +18,13 @@ import FoodCategories from '../components/FoodCategories.jsx'
 import GroceriesCategories from '../components/GroceriesCategories.jsx'
 import LocationSelector from '../components/LocationSelector.jsx'
 import SearchBar from '../components/SearchBar.jsx'
-import CartButton from '../components/CartButton.jsx'
-import { useApp } from '../context/AppContext.jsx'
+import MagnetWrapper from '../components/MagnetWrapper.jsx'
 
 const searchPhrases = [
-  'Search for dishes, groceries, or more...',
-  'Search for biryani...',
-  'Search for groceries...',
+  'Biryani',
+  'Pizza',
+  'Veg curries',
+  'Chicken curries',
 ]
 
 const categories = [
@@ -34,57 +33,6 @@ const categories = [
   { id: 'groceries', Icon: AppleIcon, label: 'Groceries' },
   { id: 'beverages', Icon: DropletIcon, label: 'Beverages' },
   { id: 'fresh', Icon: LeafIcon, label: 'Fresh' },
-]
-
-const popularItems = [
-  {
-    name: 'Biryani',
-    price: '₹240',
-    rating: '4.5',
-    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=300&fit=crop',
-  },
-  {
-    name: 'Pizza',
-    price: '₹299',
-    rating: '4.7',
-    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
-  },
-  // {
-  //   name: 'Dosa',
-  //   price: '₹120',
-  //   rating: '4.6',
-  //   image: 'https://images.unsplash.com/photo-1665660716988-1f472b8e7d50?w=400&h=300&fit=crop',
-  // },
-  {
-    name: 'Paneer',
-    price: '₹180',
-    rating: '4.4',
-    image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&h=300&fit=crop',
-  },
-  {
-    name: 'Burger',
-    price: '₹199',
-    rating: '4.5',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
-  },
-  {
-    name: 'Fries',
-    price: '₹99',
-    rating: '4.3',
-    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=300&fit=crop',
-  },
-  {
-    name: 'Noodles',
-    price: '₹149',
-    rating: '4.4',
-    image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop',
-  },
-  {
-    name: 'Tandoori',
-    price: '₹349',
-    rating: '4.7',
-    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop',
-  },
 ]
 
 // ChevronLeft Icon component
@@ -102,32 +50,12 @@ const ChevronRightIcon = ({ size = 20 }) => (
 )
 
 export default function Landing({ onOpenLogin, onOpenSignup }) {
-  const { addToCart } = useApp()
   const [placeholder, setPlaceholder] = useState(searchPhrases[0])
   const [phraseIndex, setPhraseIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(searchPhrases[0].length)
   const [isDeleting, setIsDeleting] = useState(true)
   const [activeCategory, setActiveCategory] = useState('all')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const sliderRef = useRef(null)
-  const [scrollProgress, setScrollProgress] = useState(0)
-
-  const handleScroll = () => {
-    if (sliderRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current
-      const maxScroll = scrollWidth - clientWidth
-      const progress = maxScroll > 0 ? (scrollLeft / maxScroll) * 100 : 0
-      setScrollProgress(progress)
-    }
-  }
-
-  const scrollSlider = (direction) => {
-    if (sliderRef.current) {
-      const scrollAmount = 300
-      const targetScroll = sliderRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount)
-      sliderRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' })
-    }
-  }
 
   useEffect(() => {
     const current = searchPhrases[phraseIndex]
@@ -164,32 +92,35 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
     <div className="min-h-screen bg-white">
       {/* Desktop Header */}
       <header className="hidden md:block sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-6">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <span className="text-2xl font-bold text-orange-500">Haveit</span>
-            </div>
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="relative">
+            <div className="relative z-10 flex items-center justify-between h-20 gap-4">
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <LocationSelector isHeader />
+                <div className="w-[220px] max-w-[220px] h-10">
+                  <SearchBar placeholder={placeholder} />
+                </div>
+              </div>
 
-            {/* Location Selector */}
-            <LocationSelector />
+              <div className="absolute left-1/2 -translate-x-1/2 top-0 flex items-center h-20">
+                <MagnetWrapper>
+                  <span className="text-2xl font-bold text-orange-500">
+                    Haveit
+                  </span>
+                </MagnetWrapper>
+              </div>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-2xl">
-              <SearchBar placeholder={placeholder} />
-            </div>
-
-            {/* Right Actions */}
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onOpenLogin}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                <UserIcon size={18} />
-                <span>Login</span>
-              </button>
-              <CartButton />
+              <div className="flex items-center gap-3 whitespace-nowrap">
+                <MagnetWrapper>
+                  <button
+                    type="button"
+                    onClick={onOpenLogin}
+                    className="h-10 px-4 rounded-full text-sm font-medium text-gray-700 border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    Login
+                  </button>
+                </MagnetWrapper>
+              </div>
             </div>
           </div>
         </div>
@@ -202,24 +133,25 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                 const Icon = cat.Icon
                 const isActive = activeCategory === cat.id
                 return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={`flex flex-col items-center gap-1 min-w-[60px] transition-colors relative ${
-                      isActive ? 'text-orange-500' : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                    role="tab"
-                    aria-selected={isActive}
-                  >
-                    <Icon size={22} className={isActive ? 'text-orange-500' : 'text-gray-400'} />
-                    <span className={`text-xs font-medium ${isActive ? 'font-semibold' : ''}`}>
-                      {cat.label}
-                    </span>
-                    {isActive && (
-                      <div className="absolute -bottom-1 w-6 h-0.5 bg-orange-500 rounded-full" />
-                    )}
-                  </button>
+                  <MagnetWrapper key={cat.id} className="inline-block">
+                    <button
+                      type="button"
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`flex flex-col items-center gap-1 min-w-[60px] transition-colors relative rounded-full px-2 py-2 ${
+                        isActive ? 'text-orange-500 bg-orange-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      }`}
+                      role="tab"
+                      aria-selected={isActive}
+                    >
+                      <Icon size={22} className={isActive ? 'text-orange-500' : 'text-gray-400'} />
+                      <span className={`text-xs font-medium ${isActive ? 'font-semibold' : ''}`}>
+                        {cat.label}
+                      </span>
+                      {isActive && (
+                        <div className="absolute -bottom-1 w-6 h-0.5 bg-orange-500 rounded-full" />
+                      )}
+                    </button>
+                  </MagnetWrapper>
                 )
               })}
             </div>
@@ -229,33 +161,38 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
 
       {/* Mobile Header */}
       <header className="md:hidden sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="flex items-center justify-between px-4 h-14">
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 -ml-2 text-gray-700"
-            aria-label="Toggle menu"
-          >
-            <MenuIcon size={24} />
-          </button>
+        <div className="flex items-center justify-between px-4 h-14 gap-2">
+          <MagnetWrapper>
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 -ml-2 text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Toggle menu"
+            >
+              <MenuIcon size={24} />
+            </button>
+          </MagnetWrapper>
           <span className="text-xl font-bold text-orange-500">Haveit</span>
-          <CartButton isMobile />
+          <div className="flex items-center gap-2">
+          </div>
         </div>
 
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
           <div className="px-4 py-3 border-b border-gray-100 bg-white">
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileMenuOpen(false)
-                onOpenLogin()
-              }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white text-base font-semibold rounded-xl hover:bg-orange-600 transition-colors shadow-sm"
-            >
-              <UserIcon size={20} />
-              <span>Login</span>
-            </button>
+            <MagnetWrapper>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  onOpenLogin()
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white text-base font-semibold rounded-xl hover:bg-orange-600 transition-colors shadow-sm"
+              >
+                <UserIcon size={20} />
+                <span>Login</span>
+              </button>
+            </MagnetWrapper>
           </div>
         )}
 
@@ -265,7 +202,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
           <LocationSelector isMobile />
 
           {/* Search */}
-          <SearchBar isMobile placeholder="Search dishes, groceries..." />
+          <SearchBar isMobile placeholder={placeholder} />
 
           {/* Category Bar Mobile */}
           <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide py-1">
@@ -273,19 +210,20 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
               const Icon = cat.Icon
               const isActive = activeCategory === cat.id
               return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`flex flex-col items-center gap-1 min-w-[56px] transition-colors ${
-                    isActive ? 'text-orange-500' : 'text-gray-500'
-                  }`}
-                  role="tab"
-                  aria-selected={isActive}
-                >
-                  <Icon size={20} className={isActive ? 'text-orange-500' : 'text-gray-400'} />
-                  <span className={`text-xs ${isActive ? 'font-semibold' : ''}`}>{cat.label}</span>
-                </button>
+                <MagnetWrapper key={cat.id} className="inline-block">
+                  <button
+                    type="button"
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`flex flex-col items-center gap-1 min-w-[56px] transition-colors rounded-full px-2 py-2 ${
+                      isActive ? 'text-orange-500 bg-orange-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                    role="tab"
+                    aria-selected={isActive}
+                  >
+                    <Icon size={20} className={isActive ? 'text-orange-500' : 'text-gray-400'} />
+                    <span className={`text-xs ${isActive ? 'font-semibold' : ''}`}>{cat.label}</span>
+                  </button>
+                </MagnetWrapper>
               )
             })}
           </div>
@@ -294,11 +232,11 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
 
       <main>
         {/* Hero Section - Orange Background with Cards */}
-        <section className="bg-orange-500 py-6 md:py-8">
+        <section className="bg-orange-500 py-4 md:py-5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid md:grid-cols-2 gap-4 md:gap-5">
               {/* Food Delivery Card */}
-              <article className="bg-white rounded-2xl p-5 md:p-6 relative overflow-hidden h-[260px] md:h-[300px]">
+              <article className="bg-white rounded-2xl p-4 md:p-5 relative overflow-hidden h-[220px] md:h-[260px]">
                 <div className="relative z-10 max-w-[65%] h-full flex flex-col">
                   <div className="flex-1">
                     <h2 className="text-lg md:text-xl font-bold text-orange-600 tracking-wide mb-1">
@@ -322,7 +260,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                     Explore
                   </button>
                 </div>
-                <div className="absolute bottom-4 right-4 w-24 h-24 md:w-32 md:h-32 rounded-xl flex items-center justify-center overflow-hidden">
+                <div className="absolute bottom-3 right-3 w-20 h-20 md:w-24 md:h-24 rounded-xl flex items-center justify-center overflow-hidden">
                   <img
                     src="/image/food-delivery.png"
                     alt="Food Delivery"
@@ -332,7 +270,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
               </article>
 
               {/* Groceries Card */}
-              <article className="bg-white rounded-2xl p-5 md:p-6 relative overflow-hidden h-[260px] md:h-[300px]">
+              <article className="bg-white rounded-2xl p-4 md:p-5 relative overflow-hidden h-[220px] md:h-[260px]">
                 <div className="relative z-10 max-w-[65%] h-full flex flex-col">
                   <div className="flex-1">
                     <h2 className="text-lg md:text-xl font-bold text-orange-600 tracking-wide mb-1">
@@ -356,7 +294,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                     Explore
                   </button>
                 </div>
-                <div className="absolute bottom-4 right-4 w-24 h-24 md:w-32 md:h-32 rounded-xl flex items-center justify-center overflow-hidden">
+                <div className="absolute bottom-3 right-3 w-20 h-20 md:w-24 md:h-24 rounded-xl flex items-center justify-center overflow-hidden">
                   <img
                     src="/image/groceries.png"
                     alt="Groceries"

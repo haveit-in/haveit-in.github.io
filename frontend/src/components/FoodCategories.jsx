@@ -74,7 +74,7 @@ function SectionHeader({ title, onScrollLeft, onScrollRight, hasMoreLeft, hasMor
 // Food Category Card Component
 function FoodCategoryCard({ name, image }) {
   return (
-    <div className="flex flex-col items-center cursor-pointer group">
+    <div className="flex flex-col items-center cursor-pointer group relative">
       <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden mb-2 transition-transform duration-200 group-hover:scale-105">
         <img
           src={image}
