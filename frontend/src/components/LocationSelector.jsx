@@ -186,8 +186,8 @@ export default function LocationSelector({ isMobile = false, isHeader = false })
   const subText = location.areaName ? '' : 'Tap to choose';
 
   const desktopButtonClass = isHeader
-    ? 'inline-flex items-center gap-3 h-10 min-w-[160px] rounded-full border border-gray-200 bg-white px-4 shadow-sm text-sm font-medium text-gray-900 transition hover:shadow-md focus:outline-none focus:ring-0 focus:border-[#E8711A] max-w-[220px]'
-    : 'flex items-center gap-2 h-10 min-w-[160px] rounded-full border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 transition hover:shadow-md focus:outline-none focus:ring-0 focus:border-[#E8711A] max-w-[220px]';
+    ? 'inline-flex items-center gap-3 h-10 min-w-[160px] rounded-full border border-gray-200 bg-orange-50 px-4 shadow-sm text-sm font-medium text-gray-900 transition hover:shadow-md focus:outline-none focus:ring-0 focus:border-[#E8711A] max-w-[220px]'
+    : 'flex items-center gap-2 h-10 min-w-[160px] rounded-full border border-gray-200 bg-orange-50 px-3 text-sm font-medium text-gray-900 transition hover:shadow-md focus:outline-none focus:ring-0 focus:border-[#E8711A] max-w-[220px]';
 
   if (isMobile) {
     return (
@@ -195,7 +195,7 @@ export default function LocationSelector({ isMobile = false, isHeader = false })
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-        className="group flex items-center gap-2 text-left w-full rounded-full border border-gray-200 bg-white px-3 py-2 focus:outline-none focus:ring-0 focus:border-[#E8711A]"
+        className="group flex items-center gap-2 text-left w-full rounded-full border border-gray-200 bg-orange-50 px-3 py-2 focus:outline-none focus:ring-0 focus:border-[#E8711A]"
         aria-label="Select delivery location"
       >
         <LocationIcon size={18} className="text-[#E8711A] flex-shrink-0" />

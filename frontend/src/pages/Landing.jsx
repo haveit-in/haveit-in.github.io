@@ -21,6 +21,7 @@ import GroceriesCategories from '../components/GroceriesCategories.jsx'
 import LocationSelector from '../components/LocationSelector.jsx'
 import SearchBar from '../components/SearchBar.jsx'
 import MagnetWrapper from '../components/MagnetWrapper.jsx'
+import ContentBar from '../components/ContentBar.jsx'
 
 const searchPhrases = [
   'Biryani',
@@ -95,7 +96,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
   return (
     <div className="min-h-screen bg-white">
       {/* Desktop Header */}
-      <header className="hidden md:block sticky top-0 z-50 bg-white border-b border-gray-100">
+      <header className="hidden md:block sticky top-0 z-50 bg-orange-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-8">
           <div className="relative">
             <div className="relative z-10 flex items-center justify-between h-20 gap-4">
@@ -119,7 +120,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                   <button
                     type="button"
                     onClick={() => setIsFavoritesModalOpen(true)}
-                    className="h-10 w-10 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-gray-700"
+                    className="h-10 w-10 rounded-full border border-gray-200 bg-orange-50 hover:bg-orange-100 transition-colors flex items-center justify-center text-gray-700"
                     aria-label="Favorites"
                   >
                     <HeartIcon size={20} />
@@ -129,7 +130,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                   <button
                     type="button"
                     onClick={() => setIsCartModalOpen(true)}
-                    className="h-10 w-10 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-gray-700"
+                    className="h-10 w-10 rounded-full border border-gray-200 bg-orange-50 hover:bg-orange-100 transition-colors flex items-center justify-center text-gray-700"
                     aria-label="Cart"
                   >
                     <CartIcon size={20} />
@@ -139,7 +140,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
                   <button
                     type="button"
                     onClick={onOpenLogin}
-                    className="h-10 px-4 rounded-full text-sm font-medium text-gray-700 border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+                    className="h-10 px-4 rounded-full text-sm font-medium text-gray-700 border border-gray-200 bg-orange-50 hover:bg-orange-100 transition-colors"
                   >
                     Login
                   </button>
@@ -148,43 +149,10 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
             </div>
           </div>
         </div>
-
-        {/* Category Bar */}
-        <div className="border-t border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-8 py-3 overflow-x-auto scrollbar-hide">
-              {categories.map((cat) => {
-                const Icon = cat.Icon
-                const isActive = activeCategory === cat.id
-                return (
-                  <MagnetWrapper key={cat.id} className="inline-block">
-                    <button
-                      type="button"
-                      onClick={() => setActiveCategory(cat.id)}
-                      className={`flex flex-col items-center gap-1 min-w-[60px] transition-colors relative rounded-full px-2 py-2 ${
-                        isActive ? 'text-orange-500 bg-orange-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                      }`}
-                      role="tab"
-                      aria-selected={isActive}
-                    >
-                      <Icon size={22} className={isActive ? 'text-orange-500' : 'text-gray-400'} />
-                      <span className={`text-xs font-medium ${isActive ? 'font-semibold' : ''}`}>
-                        {cat.label}
-                      </span>
-                      {isActive && (
-                        <div className="absolute -bottom-1 w-6 h-0.5 bg-orange-500 rounded-full" />
-                      )}
-                    </button>
-                  </MagnetWrapper>
-                )
-              })}
-            </div>
-          </div>
-        </div>
       </header>
 
       {/* Mobile Header */}
-      <header className="md:hidden sticky top-0 z-50 bg-white border-b border-gray-100">
+      <header className="md:hidden sticky top-0 z-50 bg-orange-50 border-b border-gray-100">
         <div className="flex items-center justify-between px-4 h-14 gap-2">
           <MagnetWrapper>
             <button
@@ -223,7 +191,7 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
 
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
-          <div className="px-4 py-3 border-b border-gray-100 bg-white">
+          <div className="px-4 py-3 border-b border-gray-100 bg-orange-50">
             <MagnetWrapper>
               <button
                 type="button"
@@ -241,38 +209,17 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
         )}
 
         {/* Mobile Location & Search */}
-        <div className="px-4 pb-3 space-y-3">
+        <div className="px-4 pb-3 space-y-3 bg-orange-50">
           {/* Location */}
           <LocationSelector isMobile />
 
           {/* Search */}
           <SearchBar isMobile placeholder={placeholder} />
-
-          {/* Category Bar Mobile */}
-          <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide py-1">
-            {categories.map((cat) => {
-              const Icon = cat.Icon
-              const isActive = activeCategory === cat.id
-              return (
-                <MagnetWrapper key={cat.id} className="inline-block">
-                  <button
-                    type="button"
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={`flex flex-col items-center gap-1 min-w-[56px] transition-colors rounded-full px-2 py-2 ${
-                      isActive ? 'text-orange-500 bg-orange-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                    }`}
-                    role="tab"
-                    aria-selected={isActive}
-                  >
-                    <Icon size={20} className={isActive ? 'text-orange-500' : 'text-gray-400'} />
-                    <span className={`text-xs ${isActive ? 'font-semibold' : ''}`}>{cat.label}</span>
-                  </button>
-                </MagnetWrapper>
-              )
-            })}
-          </div>
         </div>
       </header>
+
+      {/* Content Bar */}
+      <ContentBar />
 
       <main>
         {/* Hero Section - Orange Background with Cards */}

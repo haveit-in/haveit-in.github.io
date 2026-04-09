@@ -276,8 +276,8 @@ export default function SearchBar({
   };
 
   const inputClasses = isMobile
-    ? "block w-full h-10 pl-10 pr-4 border border-gray-200 rounded-full bg-white text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A]/30 focus:border-[#E8711A]"
-    : "block w-full h-10 pl-11 pr-4 border border-gray-200 rounded-full bg-white text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A]/30 focus:border-[#E8711A]";
+    ? "block w-full h-10 pl-10 pr-4 border border-gray-200 rounded-full bg-orange-50 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A]/30 focus:border-[#E8711A]"
+    : "block w-full h-10 pl-11 pr-4 border border-gray-200 rounded-full bg-orange-50 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8711A]/30 focus:border-[#E8711A]";
 
   return (
     <div className={`relative h-10 ${isMobile ? 'w-full' : 'max-w-[220px]'}`} ref={dropdownRef}>
@@ -300,7 +300,7 @@ export default function SearchBar({
       </div>
 
       {isOpen && (
-        <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden ${isMobile ? 'max-h-[60vh]' : 'max-h-96'}`}>
+        <div className={`absolute top-full left-0 right-0 mt-2 bg-orange-50 rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden ${isMobile ? 'max-h-[60vh]' : 'max-h-96'}`}>
           {results.length > 0 ? (
             <div className="overflow-y-auto max-h-[inherit]">
               {Object.entries(groupedResults).map(([category, categoryResults]) => (
