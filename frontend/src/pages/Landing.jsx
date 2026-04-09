@@ -13,6 +13,8 @@ import {
   StarIcon,
   PlusIcon,
   LightningIcon,
+  CartIcon,
+  HeartIcon,
 } from '../components/Icons.jsx'
 import FoodCategories from '../components/FoodCategories.jsx'
 import GroceriesCategories from '../components/GroceriesCategories.jsx'
@@ -56,6 +58,8 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
   const [isDeleting, setIsDeleting] = useState(true)
   const [activeCategory, setActiveCategory] = useState('all')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false)
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false)
 
   useEffect(() => {
     const current = searchPhrases[phraseIndex]
@@ -111,6 +115,26 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
               </div>
 
               <div className="flex items-center gap-3 whitespace-nowrap">
+                <MagnetWrapper>
+                  <button
+                    type="button"
+                    onClick={() => setIsFavoritesModalOpen(true)}
+                    className="h-10 w-10 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-gray-700"
+                    aria-label="Favorites"
+                  >
+                    <HeartIcon size={20} />
+                  </button>
+                </MagnetWrapper>
+                <MagnetWrapper>
+                  <button
+                    type="button"
+                    onClick={() => setIsCartModalOpen(true)}
+                    className="h-10 w-10 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-gray-700"
+                    aria-label="Cart"
+                  >
+                    <CartIcon size={20} />
+                  </button>
+                </MagnetWrapper>
                 <MagnetWrapper>
                   <button
                     type="button"
@@ -173,7 +197,27 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
             </button>
           </MagnetWrapper>
           <span className="text-xl font-bold text-orange-500">Haveit</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <MagnetWrapper>
+              <button
+                type="button"
+                onClick={() => setIsFavoritesModalOpen(true)}
+                className="p-2 text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Favorites"
+              >
+                <HeartIcon size={20} />
+              </button>
+            </MagnetWrapper>
+            <MagnetWrapper>
+              <button
+                type="button"
+                onClick={() => setIsCartModalOpen(true)}
+                className="p-2 text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Cart"
+              >
+                <CartIcon size={20} />
+              </button>
+            </MagnetWrapper>
           </div>
         </div>
 
@@ -537,6 +581,82 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
           </div>
         </footer>
       </main>
+
+      {/* Favorites Modal */}
+      <>
+        <div
+          className={`authOverlay ${isFavoritesModalOpen ? 'authOverlayOpen' : ''}`}
+          onClick={() => setIsFavoritesModalOpen(false)}
+          aria-hidden={isFavoritesModalOpen ? undefined : true}
+        />
+
+        <aside
+          className={`authPanel ${isFavoritesModalOpen ? 'authPanelOpen' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Favorites"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="authPanelHandle" aria-hidden="true" />
+
+          <button
+            type="button"
+            className="authClose"
+            onClick={() => setIsFavoritesModalOpen(false)}
+            aria-label="Close favorites"
+          >
+            ✕
+          </button>
+
+          <div className="authPanelBody">
+            <div className="flex flex-col items-center justify-center py-12">
+              <HeartIcon size={64} className="text-gray-300 mb-4" />
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Your Favorites</h2>
+              <p className="text-gray-500 text-center">
+                Items you mark as favorite will appear here for quick access.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </>
+
+      {/* Cart Modal */}
+      <>
+        <div
+          className={`authOverlay ${isCartModalOpen ? 'authOverlayOpen' : ''}`}
+          onClick={() => setIsCartModalOpen(false)}
+          aria-hidden={isCartModalOpen ? undefined : true}
+        />
+
+        <aside
+          className={`authPanel ${isCartModalOpen ? 'authPanelOpen' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Cart"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="authPanelHandle" aria-hidden="true" />
+
+          <button
+            type="button"
+            className="authClose"
+            onClick={() => setIsCartModalOpen(false)}
+            aria-label="Close cart"
+          >
+            ✕
+          </button>
+
+          <div className="authPanelBody">
+            <div className="flex flex-col items-center justify-center py-12">
+              <CartIcon size={64} className="text-gray-300 mb-4" />
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Your Cart</h2>
+              <p className="text-gray-500 text-center">
+                Your cart is empty. Start adding your favorite items to get started!
+              </p>
+            </div>
+          </div>
+        </aside>
+      </>
     </div>
   )
 }
