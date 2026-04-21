@@ -15,6 +15,7 @@ import {
   LightningIcon,
   CartIcon,
   HeartIcon,
+  LogInIcon,
 } from '../components/Icons.jsx'
 import FoodCategories from '../components/FoodCategories.jsx'
 import GroceriesCategories from '../components/GroceriesCategories.jsx'
@@ -22,6 +23,17 @@ import LocationSelector from '../components/LocationSelector.jsx'
 import SearchBar from '../components/SearchBar.jsx'
 import MagnetWrapper from '../components/MagnetWrapper.jsx'
 import ContentBar from '../components/ContentBar.jsx'
+import {
+  UtensilsCrossed,
+  ShoppingCart,
+  SlidersHorizontal,
+  House,
+  ShoppingBag,
+  Heart,
+  User,
+  Search,
+  X,
+} from 'lucide-react'
 
 const searchPhrases = [
   'Biryani',
@@ -58,9 +70,15 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
   const [charIndex, setCharIndex] = useState(searchPhrases[0].length)
   const [isDeleting, setIsDeleting] = useState(true)
   const [activeCategory, setActiveCategory] = useState('all')
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false)
   const [isCartModalOpen, setIsCartModalOpen] = useState(false)
+  const [showBanner, setShowBanner] = useState(true)
+  const [activeMode, setActiveMode] = useState('food')
+  const [activeTab, setActiveTab] = useState('home')
+  const [foodSlide, setFoodSlide] = useState(0)
+  const [foodCategory, setFoodCategory] = useState('Burgers')
+  const [foodLikes, setFoodLikes] = useState({})
+  const [foodCart, setFoodCart] = useState({})
 
   useEffect(() => {
     const current = searchPhrases[phraseIndex]
@@ -93,9 +111,42 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
     return () => clearTimeout(timeout)
   }, [charIndex, isDeleting, phraseIndex])
 
+  useEffect(() => {
+    if (activeMode !== 'food') return
+    const interval = setInterval(() => {
+      setFoodSlide((prev) => (prev + 1) % 3)
+    }, 3500)
+    return () => clearInterval(interval)
+  }, [activeMode])
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Desktop Header */}
+      {/* PROMO BANNER */}
+      {showBanner && (
+        <div
+          className={`${
+            activeMode === 'food' ? 'bg-orange-500' : 'bg-green-600'
+          } text-white flex items-center justify-between px-4 py-2 md:px-8 md:py-3 relative`}
+        >
+          <div className="flex-1 text-center md:text-left md:max-w-6xl md:mx-auto">
+            <p className="text-sm md:text-sm">
+              {activeMode === 'food'
+                ? '🎉 Use HAVEIT20 for 20% off your next food order!'
+                : '🎉 Use FRESH10 for 10% off your first grocery order!'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowBanner(false)}
+            className="text-white hover:opacity-80 transition-opacity ml-4 flex-shrink-0"
+            aria-label="Close banner"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
+
+      {/* DESKTOP HEADER (Existing) */}
       <header className="hidden md:block sticky top-0 z-50 bg-orange-50 border-b border-gray-100 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-8">
           <div className="relative">
@@ -151,62 +202,48 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
         </div>
       </header>
 
-      {/* Mobile Header */}
+      {/* MOBILE HEADER (Existing) */}
       <header className="md:hidden sticky top-0 z-50 bg-orange-50 border-b border-gray-100 backdrop-blur-sm">
         <div className="flex items-center justify-between px-4 h-14 gap-2">
-          <MagnetWrapper>
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 -ml-2 text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Toggle menu"
-            >
-              <MenuIcon size={24} />
-            </button>
-          </MagnetWrapper>
+          <button
+            type="button"
+            onClick={() => {
+              setIsFavoritesModalOpen(false)
+              setIsCartModalOpen(false)
+              setTimeout(() => onOpenLogin(), 0)
+            }}
+            className="flex items-center gap-1 px-3 py-2 text-gray-700 rounded-full border border-gray-200 bg-gray-50 transition-all duration-200 text-sm font-medium hover:border-orange-400 hover:shadow-[0_0_0_3px_rgba(251,146,60,0.2)]"
+            aria-label="Login"
+          >
+            <UserIcon size={20} />
+            <span>Login</span>
+          </button>
           <span className="text-xl font-bold text-orange-500">Haveit</span>
           <div className="flex items-center gap-1">
-            <MagnetWrapper>
-              <button
-                type="button"
-                onClick={() => setIsFavoritesModalOpen(true)}
-                className="p-2 text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Favorites"
-              >
-                <HeartIcon size={20} />
-              </button>
-            </MagnetWrapper>
-            <MagnetWrapper>
-              <button
-                type="button"
-                onClick={() => setIsCartModalOpen(true)}
-                className="p-2 text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Cart"
-              >
-                <CartIcon size={20} />
-              </button>
-            </MagnetWrapper>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCartModalOpen(false)
+                setIsFavoritesModalOpen(true)
+              }}
+              className="p-2 text-gray-700 rounded-full border border-gray-200 bg-gray-50 transition-all duration-200 hover:border-orange-400 hover:shadow-[0_0_0_3px_rgba(251,146,60,0.2)]"
+              aria-label="Favorites"
+            >
+              <HeartIcon size={22} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsFavoritesModalOpen(false)
+                setIsCartModalOpen(true)
+              }}
+              className="p-2 text-gray-700 rounded-full border border-gray-200 bg-gray-50 transition-all duration-200 hover:border-orange-400 hover:shadow-[0_0_0_3px_rgba(251,146,60,0.2)]"
+              aria-label="Cart"
+            >
+              <CartIcon size={22} />
+            </button>
           </div>
         </div>
-
-        {/* Mobile Menu Dropdown */}
-        {isMobileMenuOpen && (
-          <div className="px-4 py-3 border-b border-gray-100 bg-orange-50">
-            <MagnetWrapper>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false)
-                  onOpenLogin()
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white text-base font-semibold rounded-xl hover:bg-orange-600 transition-colors shadow-sm"
-              >
-                <UserIcon size={20} />
-                <span>Login</span>
-              </button>
-            </MagnetWrapper>
-          </div>
-        )}
 
         {/* Mobile Location & Search */}
         <div className="px-4 pb-3 space-y-3 bg-orange-50">
@@ -218,261 +255,525 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
         </div>
       </header>
 
-      {/* Content Bar */}
-      <ContentBar />
-
-      <main className="relative z-0">
-        {/* Hero Section - White Background */}
-        <section className="relative z-0 bg-gradient-to-b from-gray-50 to-orange-100 py-12 md:py-20 border-b-4 border-orange-300 shadow-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="min-h-96 flex items-center justify-center">
-              {/* Empty placeholder for hero content */}
-              <div className="text-center text-gray-400">
-                <p className="text-lg font-semibold">Design coming soon</p>
-              </div>
+      {/* MODE TOGGLE */}
+      <div className="bg-white sticky top-14 md:top-20 z-40 border-b border-gray-100 md:border-b-0">
+        <div className="md:max-w-6xl md:mx-auto md:px-6">
+          <div className="px-4 py-4 md:py-6 flex justify-center md:justify-start">
+            <div className="bg-gray-100 rounded-2xl p-1 flex gap-1 md:max-w-sm w-full md:w-auto">
+              <button
+                type="button"
+                onClick={() => setActiveMode('food')}
+                className={`flex-1 md:flex-auto px-6 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+                  activeMode === 'food'
+                    ? 'bg-orange-500 text-white'
+                    : 'text-gray-500 bg-transparent'
+                }`}
+              >
+                <UtensilsCrossed size={20} />
+                <span>Food Delivery</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMode('groceries')}
+                className={`flex-1 md:flex-auto px-6 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+                  activeMode === 'groceries'
+                    ? 'bg-green-600 text-white'
+                    : 'text-gray-500 bg-transparent'
+                }`}
+              >
+                <ShoppingCart size={20} />
+                <span>Groceries</span>
+              </button>
             </div>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* Food Categories Section */}
-        <section className="relative z-0 bg-white py-8 md:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <FoodCategories />
+      {/* SEARCH BAR */}
+      <div className="bg-white px-4 md:px-0 py-4 md:py-6">
+        <div className="md:max-w-2xl md:mx-auto">
+          <div className="bg-gray-100 rounded-full px-4 py-3 flex items-center gap-3">
+            <Search size={20} className="text-gray-400" />
+            <input
+              type="text"
+              placeholder={
+                activeMode === 'food'
+                  ? 'Search for food, restaurants...'
+                  : 'Search for vegetables, groceries...'
+              }
+              className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-sm"
+            />
+            <button
+              type="button"
+              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                activeMode === 'food'
+                  ? 'bg-orange-500 text-white hover:bg-orange-600'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+              aria-label="Filters"
+            >
+              <SlidersHorizontal size={18} />
+            </button>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* Groceries Section */}
-        <section className="relative z-0 bg-white py-8 md:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <GroceriesCategories />
-          </div>
-        </section>
+      {/* SECONDARY NAV (Desktop Only) */}
+      <nav className="hidden md:block sticky top-32 z-30 bg-white border-b border-gray-100 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 flex justify-end gap-6 py-2">
+          <a href="#" className="text-gray-500 hover:text-gray-800 transition-colors text-sm">
+            Policy
+          </a>
+          <a href="#" className="text-gray-500 hover:text-gray-800 transition-colors text-sm">
+            FAQ's
+          </a>
+          <a href="#" className="text-gray-500 hover:text-gray-800 transition-colors text-sm">
+            Help & Support
+          </a>
+        </div>
+      </nav>
 
-        {/* Divider */}
-        <div className="border-t border-gray-200" />
+      {/* CONTENT AREA */}
+      <main
+        className={`min-h-screen bg-white md:max-w-6xl md:mx-auto md:px-6 pb-24 md:pb-0 ${
+          activeMode === 'food' ? 'food-content' : 'groceries-content'
+        }`}
+      >
+        {/* FOOD DELIVERY SECTIONS */}
+        {activeMode === 'food' && (
+          <div className="space-y-4 md:space-y-6 py-4 md:py-6">
+            {/* 1. HERO CAROUSEL */}
+            <div className="px-4 md:px-0">
+              <div className="rounded-2xl overflow-hidden relative h-48 md:h-80 bg-gray-200">
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/90 to-orange-400/40 z-10" />
 
-        {/* App Download Banner */}
-        <section className="bg-gray-900 py-8 md:py-12 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              {/* Left Content */}
-              <div className="text-center md:text-left">
-                <div className="flex items-center gap-2 mb-4 justify-center md:justify-start">
-                  <span className="text-orange-500 font-bold text-4xl">Haveit</span>
-                </div>
-                <h2 className="text-2xl md:text-2xl font-bold text-white mb-2">
-                  Get the Haveit App now!
-                </h2>
-                <p className="text-gray-400 text-sm md:text-base">
-                  For best offers and discounts curated specially for you.
-                </p>
-              </div>
-
-              {/* Right Content - Phone with QR */}
-              <div className="relative">
-                {/* Phone Frame */}
-                <div className="relative w-48 md:w-56">
-                  {/* Phone mockup */}
-                  <div className="bg-white rounded-3xl p-3 shadow-2xl">
-                    <div className="bg-gray-100 rounded-2xl p-4 aspect-[3/4] flex flex-col items-center justify-center">
-                      {/* QR Code placeholder */}
-                      <div className="w-32 h-32 bg-white p-2 rounded-lg shadow-sm mb-3">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <rect x="10" y="10" width="25" height="25" fill="#1f2937"/>
-                          <rect x="65" y="10" width="25" height="25" fill="#1f2937"/>
-                          <rect x="10" y="65" width="25" height="25" fill="#1f2937"/>
-                          <rect x="15" y="15" width="15" height="15" fill="white"/>
-                          <rect x="70" y="15" width="15" height="15" fill="white"/>
-                          <rect x="15" y="70" width="15" height="15" fill="white"/>
-                          <rect x="18" y="18" width="9" height="9" fill="#1f2937"/>
-                          <rect x="73" y="18" width="9" height="9" fill="#1f2937"/>
-                          <rect x="18" y="73" width="9" height="9" fill="#1f2937"/>
-                          <rect x="40" y="10" width="5" height="5" fill="#1f2937"/>
-                          <rect x="50" y="10" width="5" height="5" fill="#1f2937"/>
-                          <rect x="40" y="20" width="5" height="5" fill="#1f2937"/>
-                          <rect x="45" y="25" width="5" height="5" fill="#1f2937"/>
-                          <rect x="55" y="20" width="5" height="5" fill="#1f2937"/>
-                          <rect x="10" y="40" width="5" height="5" fill="#1f2937"/>
-                          <rect x="20" y="45" width="5" height="5" fill="#1f2937"/>
-                          <rect x="30" y="40" width="5" height="5" fill="#1f2937"/>
-                          <rect x="45" y="40" width="10" height="10" fill="#1f2937"/>
-                          <rect x="60" y="45" width="5" height="5" fill="#1f2937"/>
-                          <rect x="70" y="40" width="5" height="5" fill="#1f2937"/>
-                          <rect x="80" y="50" width="5" height="5" fill="#1f2937"/>
-                          <rect x="40" y="55" width="5" height="5" fill="#1f2937"/>
-                          <rect x="50" y="60" width="5" height="5" fill="#1f2937"/>
-                          <rect x="60" y="55" width="5" height="5" fill="#1f2937"/>
-                          <rect x="70" y="60" width="5" height="5" fill="#1f2937"/>
-                          <rect x="45" y="70" width="5" height="5" fill="#1f2937"/>
-                          <rect x="55" y="75" width="5" height="5" fill="#1f2937"/>
-                          <rect x="65" y="70" width="10" height="5" fill="#1f2937"/>
-                          <rect x="75" y="75" width="5" height="10" fill="#1f2937"/>
-                          <rect x="85" y="70" width="5" height="5" fill="#1f2937"/>
-                          <rect x="40" y="80" width="5" height="5" fill="#1f2937"/>
-                          <rect x="50" y="85" width="15" height="5" fill="#1f2937"/>
-                          <rect x="70" y="80" width="5" height="10" fill="#1f2937"/>
-                          <rect x="80" y="85" width="5" height="5" fill="#1f2937"/>
-                          <rect x="85" y="80" width="5" height="5" fill="#1f2937"/>
-                        </svg>
+                {/* Slide Content */}
+                <div className="absolute inset-0 z-20 flex flex-col justify-center pl-4 md:pl-8">
+                  {foodSlide === 0 && (
+                    <>
+                      <div className="bg-white/20 text-white text-xs rounded-full px-3 py-1 w-fit mb-2">
+                        🔥 Today's Deal
                       </div>
-                      <p className="text-orange-500 text-xs font-semibold">Scan to download</p>
-                    </div>
-                  </div>
-                  
-                  {/* Floating food decorations */}
-                  <div className="absolute -left-8 top-1/4 w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '3s' }}>
-                    <span className="text-xl">🍔</span>
-                  </div>
-                  <div className="absolute -right-6 top-1/3 w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }}>
-                    <span className="text-lg">🥗</span>
-                  </div>
-                  <div className="absolute -left-6 bottom-1/4 w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '2s', animationDelay: '1s' }}>
-                    <span className="text-lg">🍕</span>
-                  </div>
-                  <div className="absolute -right-8 bottom-1/3 w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '0.3s' }}>
-                    <span className="text-xl">🍱</span>
-                  </div>
+                      <h2 className="text-white font-black text-2xl md:text-4xl mb-1">Get 40% OFF</h2>
+                      <p className="text-white/90 text-sm mb-2">on your first order above ₹299</p>
+                      <div className="bg-white/20 text-white text-xs font-bold rounded px-2 py-0.5 w-fit mb-3">
+                        FIRST40
+                      </div>
+                      <button className="bg-white text-orange-500 font-bold rounded-full px-5 py-2 w-fit text-sm">
+                        Order Now →
+                      </button>
+                    </>
+                  )}
+                  {foodSlide === 1 && (
+                    <>
+                      <div className="bg-white/20 text-white text-xs rounded-full px-3 py-1 w-fit mb-2">
+                        ⚡ Flash Deal
+                      </div>
+                      <h2 className="text-white font-black text-2xl md:text-4xl mb-1">Buy 2 Get 1</h2>
+                      <p className="text-white/90 text-sm mb-2">on selected combos today only</p>
+                      <div className="bg-white/20 text-white text-xs font-bold rounded px-2 py-0.5 w-fit mb-3">
+                        COMBO21
+                      </div>
+                      <button className="bg-white text-orange-500 font-bold rounded-full px-5 py-2 w-fit text-sm">
+                        Grab Deal →
+                      </button>
+                    </>
+                  )}
+                  {foodSlide === 2 && (
+                    <>
+                      <div className="bg-white/20 text-white text-xs rounded-full px-3 py-1 w-fit mb-2">
+                        🎉 Weekend Special
+                      </div>
+                      <h2 className="text-white font-black text-2xl md:text-4xl mb-1">Free Delivery</h2>
+                      <p className="text-white/90 text-sm mb-2">on all orders above ₹149</p>
+                      <div className="bg-white/20 text-white text-xs font-bold rounded px-2 py-0.5 w-fit mb-3">
+                        FREEDEL
+                      </div>
+                      <button className="bg-white text-orange-500 font-bold rounded-full px-5 py-2 w-fit text-sm">
+                        Order Now →
+                      </button>
+                    </>
+                  )}
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Footer */}
-        <footer className="bg-gray-50 text-gray-700 py-12 md:py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Main Footer Content */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-              {/* Company Logo & Copyright */}
-              <div className="col-span-2 md:col-span-1">
-                <div className="flex items-center">
-                  <img
-                    src="/image/2.png"
-                    alt="Haveit"
-                    className="h-16 w-auto object-contain"
-                    style={{ mixBlendMode: 'multiply' }}
-                  />
-                </div>
-                {/* <p className="text-gray-500 text-xs mt-0">Food. Groceries. Delivery</p> */}
-                <p className="text-gray-500 text-sm mt-3">© 2026 Haveit Limited</p>
-              </div>
-
-              {/* Company Column */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Company</h3>
-                <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">About Us</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit Corporate</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Careers</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Team</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit One</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit Instamart</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit Dineout</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Minis</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Pyng</a></li>
-                </ul>
-              </div>
-
-              {/* Contact Us Column */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Contact us</h3>
-                <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Help & Support</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Partner With Us</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Ride With Us</a></li>
-                </ul>
-
-                <h3 className="font-semibold text-gray-900 mt-6 mb-4">Legal</h3>
-                <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Terms & Conditions</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Cookie Policy</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Privacy Policy</a></li>
-                </ul>
-              </div>
-
-              {/* Available In Column */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Available in:</h3>
-                <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Hyderabad</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Warangal</a></li>
-                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Hyderabad</a></li> */}
-                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Delhi</a></li> */}
-                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Mumbai</a></li> */}
-                  {/* <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Pune</a></li> */}
-                </ul>
-                <button className="mt-3 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 transition-colors flex items-center gap-2">
-                  5 cities
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m6 9 6 6 6-6" />
+                {/* Navigation Arrows */}
+                <button
+                  onClick={() => setFoodSlide((prev) => (prev - 1 + 3) % 3)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 text-white rounded-full p-1 transition-colors"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="m15 18-6-6 6-6" />
                   </svg>
                 </button>
-              </div>
+                <button
+                  onClick={() => setFoodSlide((prev) => (prev + 1) % 3)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 text-white rounded-full p-1 transition-colors"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
 
-              {/* Life at Haveit + Social */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Life at Haveit</h3>
-                <ul className="space-y-3 text-sm mb-6">
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Explore With Haveit</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Haveit News</a></li>
-                  <li><a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Snackables</a></li>
-                </ul>
-
-                <h3 className="font-semibold text-gray-900 mb-4">Social Links</h3>
-                <div className="flex items-center gap-3">
-                  <a href="https://www.linkedin.com/company/haveit/posts/?feedView=all" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="LinkedIn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                      <rect x="2" y="9" width="4" height="12"/>
-                      <circle cx="4" cy="4" r="2"/>
-                    </svg>
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Instagram">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                    </svg>
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Facebook">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-                    </svg>
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Twitter">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
-                    </svg>
-                  </a>
+                {/* Dot Pagination */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <button
+                      key={i}
+                      onClick={() => setFoodSlide(i)}
+                      className={`rounded-full transition-all ${
+                        i === foodSlide
+                          ? 'bg-orange-500 w-5 h-1.5'
+                          : 'bg-white/40 w-1.5 h-1.5'
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Bottom Section - App Download */}
-            <div className="border-t border-gray-200 pt-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <p className="text-gray-600 text-lg font-medium">For better experience, download the Haveit app now</p>
-                <div className="flex items-center gap-4">
-                  <a href="#" className="block">
-                    <img
-                      src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-                      alt="Download on the App Store"
-                      className="h-10"
-                    />
-                  </a>
-                  <a href="#" className="block">
-                    <img
-                      src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-                      alt="Get it on Google Play"
-                      className="h-12"
-                    />
-                  </a>
+            {/* 2. FEATURE PILLS */}
+            <div className="md:px-0">
+              <div className="flex flex-nowrap overflow-x-auto md:overflow-visible md:flex md:justify-center gap-3 md:gap-4 scrollbar-hide pb-2 md:pb-0 px-2 md:px-0">
+                <div className="flex flex-row items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-3 flex-shrink-0">
+                  <div className="text-xl whitespace-nowrap flex-shrink-0">🚀</div>
+                  <div className="flex flex-col">
+                    <p className="text-sm font-bold text-gray-900">Free Delivery</p>
+                    <p className="text-xs text-gray-400">Orders above ₹199</p>
+                  </div>
                 </div>
+                <div className="flex flex-row items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-3 flex-shrink-0">
+                  <div className="text-xl whitespace-nowrap flex-shrink-0">⏱</div>
+                  <div className="flex flex-col">
+                    <p className="text-sm font-bold text-gray-900">30 Min Delivery</p>
+                    <p className="text-xs text-gray-400">Guaranteed fast</p>
+                  </div>
+                </div>
+                <div className="flex flex-row items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-3 flex-shrink-0">
+                  <div className="text-xl whitespace-nowrap flex-shrink-0">🎁</div>
+                  <div className="flex flex-col">
+                    <p className="text-sm font-bold text-gray-900">Daily Offers</p>
+                    <p className="text-xs text-gray-400">New deal</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. WHAT'S ON YOUR MIND */}
+            <div className="md:px-0">
+              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+                <h2 className="font-bold text-lg">What's on your mind?</h2>
+                <a href="#" className="text-orange-500 text-sm font-medium hover:underline">
+                  See All
+                </a>
+              </div>
+              <div className="flex flex-nowrap overflow-x-auto md:overflow-visible md:flex md:justify-center md:gap-6 gap-2 scrollbar-hide pb-2 md:pb-0 px-2 md:px-0">
+                {['Burgers', 'Pizza', 'Sushi', 'Tacos', 'Pasta', 'Salads'].map((category, idx) => {
+                  const emojis = ['🍔', '🍕', '🍣', '🌮', '🍝', '🥗']
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setFoodCategory(category)}
+                      className="flex flex-col items-center gap-1 cursor-pointer flex-shrink-0"
+                    >
+                      <div
+                        className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-2xl md:text-3xl transition-colors ${
+                          foodCategory === category
+                            ? 'bg-orange-500'
+                            : 'bg-gray-100'
+                        }`}
+                      >
+                        {emojis[idx]}
+                      </div>
+                      <span
+                        className={`text-xs md:text-sm transition-colors ${
+                          foodCategory === category
+                            ? 'text-orange-500 font-semibold'
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {category}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="flex justify-center mt-4">
+                <button className="border border-orange-200 text-orange-500 rounded-full px-4 md:px-6 py-2 text-xs md:text-sm font-medium hover:bg-orange-50 transition-colors">
+                  🍽 Order your favourites
+                </button>
+              </div>
+            </div>
+
+            {/* 4. TODAY'S SPECIALS */}
+            <div className="md:px-0">
+              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+                <h2 className="font-bold text-lg">⭐ Today's Specials</h2>
+                <a href="#" className="text-orange-500 text-sm font-medium hover:underline">
+                  See All
+                </a>
+              </div>
+              <div className="flex flex-nowrap overflow-x-auto md:overflow-visible md:grid md:grid-cols-4 gap-2 md:gap-4 scrollbar-hide pb-2 md:pb-0 px-2 md:px-0">
+                {[
+                  { name: 'Pesto Pasta', star: '4.7', price: '279' },
+                  { name: 'Green Salad Bowl', star: '4.5', price: '199' },
+                  { name: 'Crispy Fried Chicken', star: '4.8', price: '329' },
+                  { name: 'Butter Chicken', star: '4.9', price: '349' },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="w-40 md:w-auto rounded-2xl bg-white shadow-sm overflow-hidden flex-shrink-0 relative"
+                  >
+                    <div className="h-28 bg-gray-200 relative" />
+                    <div className="p-3">
+                      <p className="font-semibold text-xs md:text-sm mb-1">{item.name}</p>
+                      <div className="flex items-center gap-1 mb-2 text-xs">
+                        <span className="text-yellow-500">⭐{item.star}</span>
+                      </div>
+                      <p className="text-orange-500 font-bold text-xs md:text-sm">₹{item.price}</p>
+                    </div>
+                    <button className="absolute bottom-2 right-2 bg-orange-500 text-white rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center hover:bg-orange-600 transition-colors text-sm">
+                      +
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 5. POPULAR RIGHT NOW */}
+            <div className="md:px-0">
+              <div className="flex items-center justify-between mb-4 px-4 md:px-0">
+                <h2 className="font-bold text-lg">🔥 Popular Right Now</h2>
+                <a href="#" className="text-orange-500 text-sm font-medium hover:underline">
+                  View All
+                </a>
+              </div>
+              <div className="md:grid md:grid-cols-2 gap-3 md:gap-4 px-4 md:px-0">
+                {[
+                  {
+                    name: 'Classic Smash Burger',
+                    restaurant: 'Burger Barn',
+                    star: '4.8',
+                    time: '22',
+                    price: '249',
+                    original: '349',
+                    badge: { label: 'Bestseller', color: 'bg-orange-500' },
+                  },
+                  {
+                    name: 'Margherita Pizza',
+                    restaurant: 'Pizza Palace',
+                    star: '4.6',
+                    time: '28',
+                    price: '299',
+                    original: '399',
+                    badge: { label: '20% OFF', color: 'bg-red-500' },
+                  },
+                  {
+                    name: 'Salmon Sushi Bowl',
+                    restaurant: 'Tokyo Bites',
+                    star: '4.9',
+                    time: '35',
+                    price: '449',
+                    original: '549',
+                    badge: { label: 'New', color: 'bg-teal-500' },
+                  },
+                  {
+                    name: 'Crispy Chicken Tacos',
+                    restaurant: 'Taco Town',
+                    star: '4.5',
+                    time: '18',
+                    price: '199',
+                    original: '249',
+                    badge: { label: 'Trending', color: 'bg-yellow-500 text-black' },
+                  },
+                ].map((item, idx) => {
+                  const itemId = `${item.name}-${idx}`
+                  const inCart = foodCart[itemId] || 0
+                  return (
+                    <div key={idx} className="flex bg-white rounded-2xl shadow-sm overflow-hidden mb-3 md:mb-0">
+                      {/* Image Area */}
+                      <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-200 relative flex-shrink-0">
+                        <div className={`absolute top-2 left-2 text-white text-xs font-bold rounded px-2 py-0.5 ${item.badge.color}`}>
+                          {item.badge.label}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setFoodLikes((prev) => ({
+                              ...prev,
+                              [itemId]: !prev[itemId],
+                            }))
+                          }}
+                          className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 transition-colors"
+                        >
+                          {foodLikes[itemId] ? (
+                            <Heart size={16} className="fill-red-500 text-red-500" />
+                          ) : (
+                            <Heart size={16} className="text-gray-600" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-2 md:p-3 flex flex-col justify-between flex-1">
+                        <div>
+                          <p className="font-bold text-xs md:text-sm">{item.name}</p>
+                          <p className="text-gray-400 text-xs mb-1 md:mb-2">{item.restaurant}</p>
+                          <div className="flex items-center gap-1 text-xs">
+                            <span className="text-yellow-500">⭐{item.star}</span>
+                            <span>•</span>
+                            <span className="text-gray-400">🕐 {item.time}min</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-orange-500 font-bold text-xs md:text-sm">₹{item.price}</span>
+                            <span className="text-gray-400 line-through text-xs ml-1">₹{item.original}</span>
+                          </div>
+                          {inCart === 0 ? (
+                            <button
+                              onClick={() => {
+                                setFoodCart((prev) => ({
+                                  ...prev,
+                                  [itemId]: 1,
+                                }))
+                              }}
+                              className="bg-orange-500 text-white rounded-full px-2 md:px-3 py-0.5 md:py-1 text-xs md:text-sm font-medium hover:bg-orange-600 transition-colors"
+                            >
+                              + Add
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-1 bg-orange-500 text-white rounded-full px-1 md:px-2 py-0.5 text-xs md:text-sm">
+                              <button
+                                onClick={() => {
+                                  setFoodCart((prev) => ({
+                                    ...prev,
+                                    [itemId]: Math.max(0, prev[itemId] - 1),
+                                  }))
+                                }}
+                                className="hover:opacity-80"
+                              >
+                                −
+                              </button>
+                              <span className="w-4 md:w-6 text-center text-xs">{inCart}</span>
+                              <button
+                                onClick={() => {
+                                  setFoodCart((prev) => ({
+                                    ...prev,
+                                    [itemId]: prev[itemId] + 1,
+                                  }))
+                                }}
+                                className="hover:opacity-80"
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 6. HUNGRY FOR MORE */}
+            <div className="px-4 md:px-0">
+              <div className="bg-orange-500 rounded-2xl p-4 md:p-5 relative overflow-hidden">
+                {/* Dot Pattern */}
+                <div
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                    backgroundSize: '20px 20px',
+                  }}
+                />
+                <div className="relative z-10">
+                  <h3 className="font-bold text-white text-lg md:text-xl mb-1">Hungry for more? 🍕</h3>
+                  <p className="text-white/80 text-xs md:text-sm mb-3">Explore 200+ restaurants in your area</p>
+                  <button className="border-2 border-white text-white rounded-full px-4 md:px-5 py-2 text-xs md:text-sm font-semibold hover:bg-white/10 transition-colors">
+                    Explore All Restaurants →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 7. REFER & EARN */}
+            <div className="px-4 md:px-0">
+              <div className="bg-purple-600 rounded-2xl p-4 md:p-5 flex items-center justify-between gap-3 md:gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="text-3xl md:text-4xl flex-shrink-0">🎉</div>
+                  <div>
+                    <h3 className="font-bold text-white text-sm md:text-base">Refer & Earn ₹100!</h3>
+                    <p className="text-white/80 text-xs md:text-sm">Invite friends and get ₹100 for each referral</p>
+                  </div>
+                </div>
+                <button className="bg-white text-purple-600 font-bold rounded-full px-3 md:px-5 py-1.5 md:py-2 flex-shrink-0 hover:bg-gray-100 transition-colors text-xs md:text-sm">
+                  Invite
+                </button>
               </div>
             </div>
           </div>
-        </footer>
+        )}
+
+        {activeMode === 'groceries' && <div className="py-8">Groceries content goes here</div>}
       </main>
+
+      {/* BOTTOM NAV (Mobile Only) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center h-20 z-40">
+        <button
+          type="button"
+          onClick={() => setActiveTab('home')}
+          className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            activeTab === 'home' ? 'text-orange-500' : 'text-gray-500'
+          }`}
+        >
+          <House size={24} />
+          {activeTab === 'home' && <div className="w-1 h-1 bg-orange-500 rounded-full mt-1" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('search')}
+          className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            activeTab === 'search' ? 'text-orange-500' : 'text-gray-500'
+          }`}
+        >
+          <Search size={24} />
+          {activeTab === 'search' && <div className="w-1 h-1 bg-orange-500 rounded-full mt-1" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('orders')}
+          className={`flex flex-col items-center justify-center flex-1 h-full transition-colors relative ${
+            activeTab === 'orders' ? 'text-orange-500' : 'text-gray-500'
+          }`}
+        >
+          <ShoppingBag size={24} />
+          <span className="absolute top-2 right-6 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            2
+          </span>
+          {activeTab === 'orders' && <div className="w-1 h-1 bg-orange-500 rounded-full mt-1" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('saved')}
+          className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            activeTab === 'saved' ? 'text-orange-500' : 'text-gray-500'
+          }`}
+        >
+          <Heart size={24} />
+          {activeTab === 'saved' && <div className="w-1 h-1 bg-orange-500 rounded-full mt-1" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('profile')}
+          className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            activeTab === 'profile' ? 'text-orange-500' : 'text-gray-500'
+          }`}
+        >
+          <User size={24} />
+          {activeTab === 'profile' && <div className="w-1 h-1 bg-orange-500 rounded-full mt-1" />}
+        </button>
+      </nav>
 
       {/* Favorites Modal */}
       <>

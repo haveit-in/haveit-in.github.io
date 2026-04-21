@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import MagnetWrapper from './MagnetWrapper.jsx'
 
 const ChevronDownIcon = ({ size = 20, isOpen = false }) => (
@@ -26,6 +26,44 @@ const ContentBar = () => {
   const [hoveredRightMobile, setHoveredRightMobile] = useState(null)
   const [hoverLeftTrigger, setHoverLeftTrigger] = useState(false)
   const [hoverRightTrigger, setHoverRightTrigger] = useState(false)
+
+  const mobileDropdownRef = useRef(null)
+
+  // Handle outside clicks and close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target)) {
+        setLeftOpen(false)
+        setRightOpen(false)
+      }
+    }
+
+    if (leftOpen || rightOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [leftOpen, rightOpen])
+
+  // Handle scroll to close dropdowns
+  useEffect(() => {
+    const handleScroll = () => {
+      if (leftOpen || rightOpen) {
+        setLeftOpen(false)
+        setRightOpen(false)
+      }
+    }
+
+    if (leftOpen || rightOpen) {
+      window.addEventListener('scroll', handleScroll)
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [leftOpen, rightOpen])
 
   const leftMenuItems = [
     { id: 'shop', label: 'Shop' },
@@ -110,16 +148,19 @@ const ContentBar = () => {
         }}
       >
         <div className="px-4 py-2">
-          <div className="flex items-center justify-between gap-2">
+          <div ref={mobileDropdownRef} className="flex items-center justify-between w-full gap-2">
             {/* Left Dropdown */}
-            <div className="relative flex-1">
+            <div className="relative">
               <MagnetWrapper>
                 <button
                   type="button"
-                  onClick={() => setLeftOpen(!leftOpen)}
+                  onClick={() => {
+                    setLeftOpen(!leftOpen)
+                    if (rightOpen) setRightOpen(false)
+                  }}
                   onMouseEnter={() => setHoverLeftTrigger(true)}
                   onMouseLeave={() => setHoverLeftTrigger(false)}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-full transition-all duration-200 text-gray-700 font-semibold text-sm backdrop-blur-md"
+                  className="flex items-center justify-between px-3 py-2 rounded-full transition-all duration-200 text-gray-700 font-semibold text-sm backdrop-blur-md whitespace-nowrap"
                   style={{
                     background: 'rgba(255, 255, 255, 0.25)',
                     border: hoverLeftTrigger ? '2px solid rgba(255, 140, 0, 0.8)' : '2px solid rgba(180, 180, 180, 0.4)',
@@ -168,14 +209,17 @@ const ContentBar = () => {
             </div>
 
             {/* Right Dropdown */}
-            <div className="relative flex-1">
+            <div className="relative">
               <MagnetWrapper>
                 <button
                   type="button"
-                  onClick={() => setRightOpen(!rightOpen)}
+                  onClick={() => {
+                    setRightOpen(!rightOpen)
+                    if (leftOpen) setLeftOpen(false)
+                  }}
                   onMouseEnter={() => setHoverRightTrigger(true)}
                   onMouseLeave={() => setHoverRightTrigger(false)}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-full transition-all duration-200 text-gray-700 font-semibold text-sm backdrop-blur-md"
+                  className="flex items-center justify-between px-3 py-2 rounded-full transition-all duration-200 text-gray-700 font-semibold text-sm backdrop-blur-md whitespace-nowrap"
                   style={{
                     background: 'rgba(255, 255, 255, 0.25)',
                     border: hoverRightTrigger ? '2px solid rgba(255, 140, 0, 0.8)' : '2px solid rgba(180, 180, 180, 0.4)',
