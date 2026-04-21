@@ -202,54 +202,58 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
         </div>
       </header>
 
-      {/* MOBILE HEADER (Existing) */}
-      <header className="md:hidden sticky top-0 z-50 bg-orange-50 border-b border-gray-100 backdrop-blur-sm">
-        <div className="flex items-center justify-between px-4 h-14 gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setIsFavoritesModalOpen(false)
-              setIsCartModalOpen(false)
-              setTimeout(() => onOpenLogin(), 0)
-            }}
-            className="flex items-center gap-1 px-3 py-2 text-gray-700 rounded-full border border-gray-200 bg-gray-50 transition-all duration-200 text-sm font-medium hover:border-orange-400 hover:shadow-[0_0_0_3px_rgba(251,146,60,0.2)]"
-            aria-label="Login"
-          >
-            <UserIcon size={20} />
-            <span>Login</span>
-          </button>
+      {/* MOBILE HEADER */}
+      <header className="md:hidden sticky top-0 z-50 bg-white border-b border-gray-100 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 h-16 gap-2">
+          {/* Location Selector Left */}
+          <LocationSelector isMobile />
+          
+          {/* Logo Center */}
           <span className="text-xl font-bold text-orange-500">Haveit</span>
-          <div className="flex items-center gap-1">
+          
+          {/* Icons Right */}
+          <div className="flex items-center gap-2">
+            {/* Notification */}
             <button
               type="button"
-              onClick={() => {
-                setIsCartModalOpen(false)
-                setIsFavoritesModalOpen(true)
-              }}
-              className="p-2 text-gray-700 rounded-full border border-gray-200 bg-gray-50 transition-all duration-200 hover:border-orange-400 hover:shadow-[0_0_0_3px_rgba(251,146,60,0.2)]"
-              aria-label="Favorites"
+              className="p-2 text-gray-700 hover:opacity-70 transition-opacity relative"
+              aria-label="Notifications"
             >
-              <HeartIcon size={22} />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
+            
+            {/* Cart */}
             <button
               type="button"
               onClick={() => {
                 setIsFavoritesModalOpen(false)
                 setIsCartModalOpen(true)
               }}
-              className="p-2 text-gray-700 rounded-full border border-gray-200 bg-gray-50 transition-all duration-200 hover:border-orange-400 hover:shadow-[0_0_0_3px_rgba(251,146,60,0.2)]"
+              className="p-2 text-gray-700 hover:opacity-70 transition-opacity relative"
               aria-label="Cart"
             >
-              <CartIcon size={22} />
+              <CartIcon size={24} />
+              <span className="absolute top-0 right-0 w-5 h-5 bg-orange-500 text-white text-xs font-bold flex items-center justify-center rounded-full">2</span>
+            </button>
+            
+            {/* User Profile */}
+            <button
+              type="button"
+              onClick={onOpenLogin}
+              className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors"
+              aria-label="Profile"
+            >
+              <UserIcon size={20} />
             </button>
           </div>
         </div>
 
         {/* Mobile Location & Search */}
-        <div className="px-4 pb-3 space-y-3 bg-orange-50">
-          {/* Location */}
-          <LocationSelector isMobile />
-
+        <div className="px-4 pb-3 space-y-3 bg-white">
           {/* Search */}
           <SearchBar isMobile placeholder={placeholder} />
         </div>
@@ -435,21 +439,21 @@ export default function Landing({ onOpenLogin, onOpenSignup }) {
             {/* 2. FEATURE PILLS */}
             <div className="md:px-0">
               <div className="flex flex-nowrap overflow-x-auto md:overflow-visible md:flex md:justify-center gap-3 md:gap-4 scrollbar-hide pb-2 md:pb-0 px-2 md:px-0">
-                <div className="flex flex-row items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-3 flex-shrink-0">
+                <div className="flex flex-row items-center gap-3 bg-orange-50 rounded-2xl shadow-sm px-4 py-3 flex-shrink-0 border border-gray-200">
                   <div className="text-xl whitespace-nowrap flex-shrink-0">🚀</div>
                   <div className="flex flex-col">
                     <p className="text-sm font-bold text-gray-900">Free Delivery</p>
                     <p className="text-xs text-gray-400">Orders above ₹199</p>
                   </div>
                 </div>
-                <div className="flex flex-row items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-3 flex-shrink-0">
+                <div className="flex flex-row items-center gap-3 bg-orange-50 rounded-2xl shadow-sm px-4 py-3 flex-shrink-0 border border-gray-200">
                   <div className="text-xl whitespace-nowrap flex-shrink-0">⏱</div>
                   <div className="flex flex-col">
                     <p className="text-sm font-bold text-gray-900">30 Min Delivery</p>
                     <p className="text-xs text-gray-400">Guaranteed fast</p>
                   </div>
                 </div>
-                <div className="flex flex-row items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-3 flex-shrink-0">
+                <div className="flex flex-row items-center gap-3 bg-orange-50 rounded-2xl shadow-sm px-4 py-3 flex-shrink-0 border border-gray-200">
                   <div className="text-xl whitespace-nowrap flex-shrink-0">🎁</div>
                   <div className="flex flex-col">
                     <p className="text-sm font-bold text-gray-900">Daily Offers</p>
