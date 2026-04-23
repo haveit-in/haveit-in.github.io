@@ -242,7 +242,7 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
           {/* Icons Right */}
           <div className="flex items-center gap-2">
             {/* Notification */}
-            <button
+            {/* <button
               type="button"
               className={`p-2 ${accent.icon} hover:opacity-70 transition-opacity relative`}
               aria-label="Notifications"
@@ -252,7 +252,7 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            </button> */}
             
             {/* Cart */}
             <button
