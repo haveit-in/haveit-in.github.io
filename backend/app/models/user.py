@@ -1,9 +1,7 @@
-from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy import Column, String, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from app.database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -13,5 +11,6 @@ class User(Base):
     email = Column(String)
     phone = Column(String)
     name = Column(String)
+    photo_url = Column(String)
     role = Column(String, default="user")
     is_active = Column(Boolean, default=True)

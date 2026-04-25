@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
         // Clear corrupted data
         localStorage.removeItem('user')
         localStorage.removeItem('access_token')
+        localStorage.removeItem('role')
       }
     }
     setLoading(false)
@@ -58,6 +59,7 @@ export const AuthProvider = ({ children }) => {
       // Store in localStorage
       localStorage.setItem('access_token', data.access_token)
       localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.setItem('role', data.user.role)
       
       return data
     } catch (error) {
@@ -74,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     // Clear localStorage
     localStorage.removeItem('access_token')
     localStorage.removeItem('user')
+    localStorage.removeItem('role')
   }
 
   const value = {

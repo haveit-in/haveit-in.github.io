@@ -4,9 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 
-from app.database import engine, get_db
+from app.database import Base, engine, get_db
 from app.firebase import verify_firebase_token
-from app.models import User
+from app.models import user, restaurant
+from app.models.user import User
 from app.schemas import TokenRequest
 from app.dependencies import get_current_user
 from app.routers import restaurant, admin
@@ -14,6 +15,9 @@ from app.routers import restaurant, admin
 load_dotenv()
 
 app = FastAPI()
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 app.include_router(restaurant.router)
 app.include_router(admin.router)
@@ -48,6 +52,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
         email = decoded.get("email")
         phone = decoded.get("phone_number")
         name = decoded.get("name")
+        photo_url = decoded.get("picture")
 
         # 🔍 Check user
         user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
@@ -58,11 +63,19 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
                 email=email,
                 phone=phone,
                 name=name,
+                photo_url=photo_url,
                 role="user"
             )
             db.add(user)
-            db.commit()
-            db.refresh(user)
+        else:
+            # 🔥 UPDATE EXISTING USER WITH CURRENT INFO
+            user.email = email
+            user.name = name
+            if photo_url:
+                user.photo_url = photo_url
+
+        db.commit()
+        db.refresh(user)
 
         token = create_access_token({
             "user_id": str(user.id),
@@ -75,7 +88,8 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
             "user": {
                 "id": str(user.id),
                 "role": user.role,
-                "email": user.email
+                "email": user.email,
+                "photo_url": user.photo_url
             }
         }
 
