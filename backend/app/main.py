@@ -46,6 +46,8 @@ def test_db():
 @app.post("/auth/login")
 def login(data: TokenRequest, db: Session = Depends(get_db)):
     try:
+        print(f"Received token type: {type(data.token)}")
+        print(f"Received token value: {data.token[:50]}..." if len(data.token) > 50 else f"Received token value: {data.token}")
         decoded = verify_firebase_token(data.token)
 
         firebase_uid = decoded.get("uid")
@@ -95,7 +97,8 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid Firebase token")
+        print(f"Firebase token verification error: {str(e)}")
+        raise HTTPException(status_code=401, detail=f"Invalid Firebase token: {str(e)}")
 
 @app.get("/protected")
 def protected(user=Depends(get_current_user)):
