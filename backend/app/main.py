@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
+import uuid
 
 from app.database import Base, engine, get_db
 from app.firebase import verify_firebase_token
@@ -66,7 +67,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
                 phone=phone,
                 name=name,
                 photo_url=photo_url,
-                role="user"
+                roles=["user"]  # Initialize with user role
             )
             db.add(user)
         else:
@@ -81,7 +82,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
 
         token = create_access_token({
             "user_id": str(user.id),
-            "role": user.role
+            "roles": user.roles
         })
 
         return {
@@ -89,7 +90,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
             "access_token": token,
             "user": {
                 "id": str(user.id),
-                "role": user.role,
+                "roles": user.roles,
                 "email": user.email,
                 "name": user.name,
                 "photo_url": user.photo_url
@@ -99,6 +100,26 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Firebase token verification error: {str(e)}")
         raise HTTPException(status_code=401, detail=f"Invalid Firebase token: {str(e)}")
+
+@app.get("/auth/me")
+def get_current_user_info(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    """Get current user info with roles"""
+    try:
+        user_id = uuid.UUID(user["user_id"])
+        db_user = db.query(User).filter(User.id == user_id).first()
+        
+        if not db_user:
+            raise HTTPException(404, "User not found")
+        
+        return {
+            "id": str(db_user.id),
+            "roles": db_user.roles,
+            "email": db_user.email,
+            "name": db_user.name,
+            "photo_url": db_user.photo_url
+        }
+    except Exception as e:
+        raise HTTPException(500, f"Error fetching user: {str(e)}")
 
 @app.get("/protected")
 def protected(user=Depends(get_current_user)):

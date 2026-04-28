@@ -6,7 +6,9 @@ import ProfilePage from './pages/ProfilePage.jsx'
 import PartnerLanding from './pages/PartnerLanding.jsx'
 import PartnerLogin from './pages/PartnerLogin.jsx'
 import PartnerRegister from './pages/PartnerRegister.jsx'
+import PartnerDashboard from './pages/PartnerDashboard.jsx'
 import AuthPanel from './components/AuthPanel.jsx'
+import { ProtectedPartnerRoute } from './components/ProtectedPartnerRoute.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 
 function App() {
@@ -67,6 +69,14 @@ function App() {
         <Route
           path="/partner/register"
           element={<PartnerRegister />}
+        />
+        <Route
+          path="/partner/dashboard"
+          element={
+            <ProtectedPartnerRoute>
+              <PartnerDashboard />
+            </ProtectedPartnerRoute>
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
