@@ -1,7 +1,15 @@
 import { Link, useNavigate } from "react-router";
-import { Store, Check, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import Store from "lucide-react/dist/esm/icons/store";
+import Check from "lucide-react/dist/esm/icons/check";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Lazy loaded step components
+const Step1 = lazy(() => import("../components/steps/Step1"));
+const Step2 = lazy(() => import("../components/steps/Step2"));
+const Step3 = lazy(() => import("../components/steps/Step3"));
+const Step4 = lazy(() => import("../components/steps/Step4"));
+const Step5 = lazy(() => import("../components/steps/Step5"));
 
 const steps = [
   { id: 1, name: "Basic Details" },
@@ -93,8 +101,9 @@ export function RegistrationPage() {
   };
 
   const validatePhone = (phone) => {
-    const phoneRegex = /^[+]?[\d\s-()]{10,}$/;
-    return phoneRegex.test(phone);
+    // Indian phone number validation: +91 followed by 10 digits, or just 10 digits
+    const phoneRegex = /^(\+91[\s-]?)?[6-9]\d{9}$/;
+    return phoneRegex.test(phone.replace(/\s/g, ''));
   };
 
   const validateIFSC = (ifsc) => {
@@ -304,354 +313,13 @@ export function RegistrationPage() {
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.25 }}
             >
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">Basic Details</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
-                <input
-                  type="text"
-                  value={formData.restaurantName}
-                  onChange={(e) => {
-                    setFormData({ ...formData, restaurantName: e.target.value });
-                    if (errors.restaurantName) {
-                      setErrors({ ...errors, restaurantName: "" });
-                    }
-                  }}
-                  placeholder="Enter restaurant name"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.restaurantName ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.restaurantName && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.restaurantName}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Owner Name</label>
-                <input
-                  type="text"
-                  value={formData.ownerName}
-                  onChange={(e) => {
-                    setFormData({ ...formData, ownerName: e.target.value });
-                    if (errors.ownerName) {
-                      setErrors({ ...errors, ownerName: "" });
-                    }
-                  }}
-                  placeholder="Enter owner name"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.ownerName ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.ownerName && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.ownerName}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => {
-                    setFormData({ ...formData, email: e.target.value });
-                    if (errors.email) {
-                      setErrors({ ...errors, email: "" });
-                    }
-                  }}
-                  placeholder="restaurant@example.com"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.email ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.email && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.email}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => {
-                    setFormData({ ...formData, phone: e.target.value });
-                    if (errors.phone) {
-                      setErrors({ ...errors, phone: "" });
-                    }
-                  }}
-                  placeholder="+91 98765 43210"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.phone ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.phone && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.phone}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">Restaurant Information</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) => {
-                    setFormData({ ...formData, address: e.target.value });
-                    if (errors.address) {
-                      setErrors({ ...errors, address: "" });
-                    }
-                  }}
-                  placeholder="Enter complete address"
-                  rows={3}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.address ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.address && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.address}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => {
-                    setFormData({ ...formData, city: e.target.value });
-                    if (errors.city) {
-                      setErrors({ ...errors, city: "" });
-                    }
-                  }}
-                  placeholder="Enter city"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.city ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.city && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.city}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Cuisine Types</label>
-                <div className={`grid grid-cols-2 gap-3 ${errors.cuisine ? "border border-red-500 rounded-lg p-2" : ""}`}>
-                  {["North Indian", "South Indian", "Chinese", "Continental", "Italian", "Fast Food"].map((cuisine) => (
-                    <label key={cuisine} className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg hover:border-orange-500 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.cuisine.includes(cuisine)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFormData({ ...formData, cuisine: [...formData.cuisine, cuisine] });
-                          } else {
-                            setFormData({ ...formData, cuisine: formData.cuisine.filter((c) => c !== cuisine) });
-                          }
-                          if (errors.cuisine) {
-                            setErrors({ ...errors, cuisine: "" });
-                          }
-                        }}
-                        className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                      />
-                      <span className="text-sm">{cuisine}</span>
-                    </label>
-                  ))}
-                </div>
-                {errors.cuisine && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.cuisine}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">FSSAI License Number</label>
-                <input
-                  type="text"
-                  value={formData.fssai}
-                  onChange={(e) => {
-                    setFormData({ ...formData, fssai: e.target.value });
-                    if (errors.fssai) {
-                      setErrors({ ...errors, fssai: "" });
-                    }
-                  }}
-                  placeholder="Enter FSSAI license number"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.fssai ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.fssai && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.fssai}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">Upload Documents</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Images</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-500 cursor-pointer">
-                  <p className="text-gray-600">Click to upload or drag and drop</p>
-                  <p className="text-sm text-gray-500 mt-1">PNG, JPG up to 10MB (Max 5 images)</p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Menu Upload</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-500 cursor-pointer">
-                  <p className="text-gray-600">Click to upload menu</p>
-                  <p className="text-sm text-gray-500 mt-1">PDF, PNG, JPG up to 10MB</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">Bank Details</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
-                <input
-                  type="text"
-                  value={formData.accountNumber}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFormData({ ...formData, accountNumber: value });
-                    
-                    // Real-time validation
-                    if (value.trim() && !validateAccountNumber(value)) {
-                      setErrors({ ...errors, accountNumber: "Account number should be 9-18 digits" });
-                    } else if (errors.accountNumber) {
-                      setErrors({ ...errors, accountNumber: "" });
-                    }
-                  }}
-                  placeholder="Enter account number"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.accountNumber ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.accountNumber && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.accountNumber}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">IFSC Code</label>
-                <input
-                  type="text"
-                  value={formData.ifsc}
-                  onChange={(e) => {
-                    setFormData({ ...formData, ifsc: e.target.value });
-                    if (errors.ifsc) {
-                      setErrors({ ...errors, ifsc: "" });
-                    }
-                  }}
-                  placeholder="Enter IFSC code (e.g., SBIN0001234)"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.ifsc ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.ifsc && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.ifsc}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Account Holder Name</label>
-                <input
-                  type="text"
-                  value={formData.accountHolder}
-                  onChange={(e) => {
-                    setFormData({ ...formData, accountHolder: e.target.value });
-                    if (errors.accountHolder) {
-                      setErrors({ ...errors, accountHolder: "" });
-                    }
-                  }}
-                  placeholder="Enter account holder name"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-200 focus:scale-[1.01] ${
-                    errors.accountHolder ? "border-red-500" : "border-gray-200"
-                  }`}
-                />
-                {errors.accountHolder && (
-                  <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.accountHolder}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {currentStep === 5 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">Review & Submit</h2>
-              <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-                <div>
-                  <p className="text-sm text-gray-600">Restaurant Name</p>
-                  <p className="font-medium">{formData.restaurantName || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Owner Name</p>
-                  <p className="font-medium">{formData.ownerName || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-medium">{formData.email || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Phone</p>
-                  <p className="font-medium">{formData.phone || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Address</p>
-                  <p className="font-medium">{formData.address || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">City</p>
-                  <p className="font-medium">{formData.city || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Cuisine Types</p>
-                  <p className="font-medium">{formData.cuisine.join(", ") || "Not selected"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">FSSAI License</p>
-                  <p className="font-medium">{formData.fssai || "Not provided"}</p>
-                </div>
-              </div>
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <p className="text-sm text-orange-800">
-                  By submitting, you agree to our terms and conditions. Your application will be reviewed within 24-48 hours.
-                </p>
-              </div>
-            </div>
-          )}
+          <Suspense fallback={<div className="flex justify-center p-8">Loading...</div>}>
+            {currentStep === 1 && <Step1 formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
+            {currentStep === 2 && <Step2 formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
+            {currentStep === 3 && <Step3 formData={formData} setFormData={setFormData} />}
+            {currentStep === 4 && <Step4 formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
+            {currentStep === 5 && <Step5 formData={formData} />}
+          </Suspense>
             </motion.div>
           </AnimatePresence>
           </div>

@@ -1,5 +1,8 @@
 import { Link } from "react-router";
-import { Store, TrendingUp, BarChart3, Clock } from "lucide-react";
+import Store from "lucide-react/dist/esm/icons/store";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
+import Clock from "lucide-react/dist/esm/icons/clock";
 
 export default function PartnerLanding() {
   return (

@@ -1,5 +1,7 @@
 import { Link } from "react-router";
-import { Store, Mail, Lock } from "lucide-react";
+import Store from "lucide-react/dist/esm/icons/store";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Lock from "lucide-react/dist/esm/icons/lock";
 import { useState } from "react";
 
 export default function PartnerLogin() {
