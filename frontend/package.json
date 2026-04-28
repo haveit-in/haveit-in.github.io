@@ -6,7 +6,7 @@
   "homepage": "https://haveit-in.github.io",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp _redirects dist/_redirects",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
