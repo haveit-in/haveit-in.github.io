@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, Boolean, DateTime
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy import Column, String, Boolean
+from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from datetime import datetime
 from app.database import Base
 
 class User(Base):
@@ -13,7 +12,5 @@ class User(Base):
     phone = Column(String)
     name = Column(String)
     photo_url = Column(String)
-    roles = Column(ARRAY(String), default=["user"])  # Changed from role (string) to roles (array)
+    role = Column(String, default="user")
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

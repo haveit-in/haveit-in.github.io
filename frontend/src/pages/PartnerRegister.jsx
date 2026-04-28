@@ -35,18 +35,7 @@ export function RegistrationPage() {
     accountHolder: "",
   });
   const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [restaurantId, setRestaurantId] = useState(null);
   const navigate = useNavigate();
-
-  // Get access token from localStorage
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("access_token");
-    return {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    };
-  };
 
   // Clear form data on successful submission
   const clearFormData = () => {
@@ -96,12 +85,6 @@ export function RegistrationPage() {
           // Restore current step if valid
           if (parsedData.currentStep && parsedData.currentStep >= 1 && parsedData.currentStep <= 5) {
             setCurrentStep(parsedData.currentStep);
-          }
-          
-          // Restore restaurantId if it exists
-          const savedRestaurantId = localStorage.getItem("partnerRestaurantId");
-          if (savedRestaurantId) {
-            setRestaurantId(parseInt(savedRestaurantId));
           }
         }
       }
@@ -191,107 +174,14 @@ export function RegistrationPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (validateStep(currentStep)) {
-      try {
-        setSubmitting(true);
-
-        if (currentStep === 1 && !restaurantId) {
-          // Step 1: Create draft restaurant with basic details
-          console.log("📝 Creating restaurant draft...");
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/restaurants/draft`,
-            {
-              method: "POST",
-              headers: getAuthHeader(),
-              body: JSON.stringify({
-                name: formData.restaurantName,
-                address: formData.address,
-                city: formData.city,
-                cuisine_types: formData.cuisine.join(","),
-                fssai_license: formData.fssai,
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || "Failed to create restaurant draft");
-          }
-
-          const data = await response.json();
-          console.log("✅ Restaurant draft created:", data.id);
-          setRestaurantId(data.id);
-          localStorage.setItem("partnerRestaurantId", data.id);
-        } else if (currentStep > 1 && restaurantId) {
-          // Update restaurant with current step data
-          console.log("🔄 Updating restaurant...");
-          const updateData = {};
-
-          if (currentStep === 2 || currentStep > 2) {
-            updateData.address = formData.address;
-            updateData.city = formData.city;
-            updateData.cuisine_types = formData.cuisine.join(",");
-            updateData.fssai_license = formData.fssai;
-          }
-
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/restaurants/${restaurantId}`,
-            {
-              method: "PUT",
-              headers: getAuthHeader(),
-              body: JSON.stringify(updateData),
-            }
-          );
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || "Failed to update restaurant");
-          }
-
-          console.log("✅ Restaurant updated");
-        }
-
-        // Move to next step or submit
-        if (currentStep < 5) {
-          setCurrentStep(currentStep + 1);
-        } else {
-          // Step 5: Final submission - upgrade role
-          console.log("🚀 Submitting restaurant for final approval...");
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/restaurants/${restaurantId}/submit`,
-            {
-              method: "POST",
-              headers: getAuthHeader(),
-            }
-          );
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || "Failed to submit restaurant");
-          }
-
-          const data = await response.json();
-          console.log("✅ Restaurant submitted:", data.roles);
-
-          // Update local storage with new roles
-          const user = JSON.parse(localStorage.getItem("user"));
-          user.roles = data.roles;
-          localStorage.setItem("user", JSON.stringify(user));
-
-          // Clear form data
-          clearFormData();
-          localStorage.removeItem("partnerRestaurantId");
-
-          // Redirect to dashboard
-          console.log("🎉 Redirecting to partner dashboard...");
-          navigate("/partner/dashboard");
-        }
-      } catch (error) {
-        console.error("❌ Error:", error);
-        setErrors({ ...errors, submit: error.message });
-      } finally {
-        setSubmitting(false);
+      if (currentStep < 5) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        // Clear form data on successful submission
+        clearFormData();
+        navigate("/pending");
       }
     }
   };
@@ -436,41 +326,25 @@ export function RegistrationPage() {
 
           {/* Sticky Bottom CTA */}
           <div className="sticky bottom-0 bg-white border-t p-4">
-            {errors.submit && (
-              <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                {errors.submit}
-              </div>
-            )}
             <div className="flex justify-end gap-3">
               {currentStep > 1 ? (
                 <button
                   onClick={handleBack}
-                  disabled={submitting}
-                  className="px-6 py-3 border rounded-lg disabled:opacity-50"
+                  className="px-6 py-3 border rounded-lg"
                 >
                   Back
                 </button>
               ) : (
-                <Link to="/partner/login" className="px-6 py-3 border rounded-lg text-center">
+                <Link to="/" className="px-6 py-3 border rounded-lg text-center">
                   Cancel
                 </Link>
               )}
 
               <button
                 onClick={handleNext}
-                disabled={submitting}
-                className="px-6 py-3 bg-orange-600 text-white rounded-lg shadow-md hover:bg-orange-700 disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-3 bg-orange-600 text-white rounded-lg shadow-md"
               >
-                {submitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Processing...
-                  </>
-                ) : currentStep === 5 ? (
-                  "Submit & Go to Dashboard"
-                ) : (
-                  "Continue"
-                )}
+                {currentStep === 5 ? "Submit" : "Continue"}
               </button>
             </div>
           </div>
