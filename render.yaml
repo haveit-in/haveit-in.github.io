@@ -3,8 +3,8 @@ services:
     name: haveit-official
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    staticPublishPath: .
     routes:
       - type: rewrite
-        source: /(.*)
+        source: /*
         destination: /index.html
