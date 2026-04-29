@@ -1,7 +1,7 @@
 # Environment files (NEVER commit real credentials)
-.env
-.env.local
-.env.production
+# .env
+# .env.local
+# .env.production
 
 # Firebase service account
 firebase_admin.json
