@@ -174,14 +174,50 @@ export function RegistrationPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateStep(currentStep)) {
       if (currentStep < 5) {
         setCurrentStep(currentStep + 1);
       } else {
-        // Clear form data on successful submission
-        clearFormData();
-        navigate("/pending");
+        // Submit form data to backend
+        try {
+          const token = localStorage.getItem("access_token");
+          console.log("Token from localStorage:", token);
+
+          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/restaurant/apply`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              restaurant_name: formData.restaurantName,
+              owner_name: formData.ownerName,
+              email: formData.email,
+              phone: formData.phone,
+              address: formData.address,
+              city: formData.city,
+              cuisine: formData.cuisine,
+              fssai: formData.fssai,
+              account_number: formData.accountNumber,
+              ifsc: formData.ifsc,
+              account_holder: formData.accountHolder,
+            }),
+          });
+
+          console.log("Response status:", res.status);
+          const data = await res.json();
+          console.log("Response data:", data);
+
+          if (data.success) {
+            // Clear form data on successful submission
+            clearFormData();
+            navigate("/dashboard");
+          }
+        } catch (error) {
+          console.error("Registration submission failed:", error);
+          alert("Failed to submit registration. Please try again.");
+        }
       }
     }
   };

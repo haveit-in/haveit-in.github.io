@@ -2,8 +2,8 @@ import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth()
+const ProtectedRoute = ({ children, requiredRole }) => {
+  const { isAuthenticated, loading, user } = useAuth()
 
   if (loading) {
     return (
@@ -14,6 +14,15 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  // Check role if required
+  if (requiredRole && user?.role !== requiredRole) {
+    // Redirect to appropriate login page based on required role
+    if (requiredRole === 'restaurant_owner') {
+      return <Navigate to="/partner" replace />
+    }
     return <Navigate to="/" replace />
   }
 

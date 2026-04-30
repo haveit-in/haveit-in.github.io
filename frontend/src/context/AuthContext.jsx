@@ -36,15 +36,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  const login = async (firebaseToken) => {
+  const login = async (firebaseToken, role = "user") => {
     try {
-      // Call backend with Firebase ID token
+      // Call backend with Firebase ID token and role
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token: firebaseToken }),
+        body: JSON.stringify({ token: firebaseToken, role }),
       })
 
       if (!response.ok) {
@@ -52,6 +52,17 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json()
+      
+      console.log("Login response data:", data)
+      
+      // If onboarding is required, store token but not user state
+      if (data.requiresOnboarding) {
+        console.log("Onboarding required, storing token:", data.access_token)
+        // Store token for authenticated requests during onboarding
+        setToken(data.access_token)
+        localStorage.setItem('access_token', data.access_token)
+        return data
+      }
       
       // Store in state
       setUser(data.user)

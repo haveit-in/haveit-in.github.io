@@ -13,4 +13,5 @@ class User(Base):
     name = Column(String)
     photo_url = Column(String)
     role = Column(String, default="user")
+    profile_completed = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)

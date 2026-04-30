@@ -45,3 +45,32 @@ export const loginWithGoogle = async (loginCallback) => {
     throw error;
   }
 };
+
+// Partner Google login function
+export const loginWithGooglePartner = async (loginCallback) => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    console.log("Partner User:", result.user);
+    
+    const user = auth.currentUser;
+    
+    // ✅ MUST USE THIS
+    const token = await user.getIdToken();
+    
+    // Debug log
+    console.log("ID TOKEN:", token);
+    console.log("ACCESS TOKEN:", user.accessToken);
+    
+    // 🔥 CALL BACKEND THROUGH AUTH CONTEXT WITH ROLE AND RETURN RESPONSE
+    if (loginCallback) {
+      const response = await loginCallback(token, "partner");
+      return response;
+    }
+    
+    return result.user;
+  } catch (error) {
+    console.error("Partner Google login error:", error);
+    throw error;
+  }
+};

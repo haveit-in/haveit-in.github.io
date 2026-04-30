@@ -21,3 +21,8 @@ def require_admin(user=Depends(get_current_user)):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
+
+def require_restaurant_owner(user=Depends(get_current_user)):
+    if user.get("role") != "restaurant_owner":
+        raise HTTPException(status_code=403, detail="Restaurant owner access required")
+    return user

@@ -5,6 +5,7 @@ import SocialButton from '../components/SocialButton.jsx'
 import TextField from '../components/TextField.jsx'
 import { FacebookIcon, GoogleIcon } from '../components/Icons.jsx'
 import { loginWithGoogle } from '../utils/auth.js'
+import { useAuth } from '../context/AuthContext.jsx'
 
 function isValidPhone(value) {
   const digits = value.replace(/[^\d]/g, '')
@@ -13,9 +14,26 @@ function isValidPhone(value) {
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [phone, setPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [touched, setTouched] = useState(false)
+
+  const handleGoogleLogin = async () => {
+    try {
+      setSubmitting(true)
+      const response = await loginWithGoogle(login)
+      console.log("Login response:", response)
+      
+      // User login should always succeed and set user
+      navigate('/')
+    } catch (error) {
+      console.error("Google login failed:", error)
+      alert("Login failed. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   const errors = useMemo(() => {
     if (!touched) return {}
@@ -61,7 +79,8 @@ export default function SignIn() {
             <SocialButton
               provider="Google"
               icon={<GoogleIcon />}
-              onClick={loginWithGoogle}
+              onClick={handleGoogleLogin}
+              disabled={submitting}
             />
             <SocialButton
               provider="Facebook"

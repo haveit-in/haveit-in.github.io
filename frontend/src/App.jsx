@@ -8,6 +8,9 @@ import PartnerLogin from './pages/PartnerLogin.jsx'
 import PartnerRegister from './pages/PartnerRegister.jsx'
 import AuthPanel from './components/AuthPanel.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
+import { DashboardLayout } from './components/DashboardLayout.jsx'
+import { DashboardHome } from './components/DashboardHome.jsx'
 
 function App() {
   const [authOpen, setAuthOpen] = useState(false)
@@ -68,6 +71,16 @@ function App() {
           path="/partner/register"
           element={<PartnerRegister />}
         />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute requiredRole="restaurant_owner">
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<DashboardHome />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
