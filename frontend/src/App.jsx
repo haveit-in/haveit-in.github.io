@@ -9,6 +9,11 @@ import PartnerRegister from './pages/PartnerRegister.jsx'
 import PartnerWaitingApproval from './pages/PartnerWaitingApproval.jsx'
 import PartnerRejected from './pages/PartnerRejected.jsx'
 import AdminRestaurants from './pages/AdminRestaurants.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
+import AdminOrders from './pages/AdminOrders.jsx'
+import AdminUsers from './pages/AdminUsers.jsx'
+import AdminAnalytics from './pages/AdminAnalytics.jsx'
+import { AdminLayout } from './components/AdminLayout.jsx'
 import AuthPanel from './components/AuthPanel.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
@@ -86,10 +91,52 @@ function App() {
           path="/admin/restaurants"
           element={
             <ProtectedRoute requiredRole="admin">
-              <AdminRestaurants />
+              <AdminLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AdminRestaurants />} />
+        </Route>
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+        </Route>
+        <Route
+          path="/admin/orders"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminOrders />} />
+        </Route>
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminUsers />} />
+        </Route>
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminAnalytics />} />
+        </Route>
         <Route
           path="/dashboard"
           element={

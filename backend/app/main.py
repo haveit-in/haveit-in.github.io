@@ -53,6 +53,10 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
         print(f"=== GOOGLE LOGIN ATTEMPT ===")
         print(f"Received token type: {type(data.token)}")
         print(f"Received role: {data.role}")
+        print(f"Token length: {len(data.token)}")
+        print(f"Token segments: {len(data.token.split('.'))}")
+        print(f"Token starts with: {data.token[:50]}...")
+        print(f"Token ends with: {data.token[-50:]}...")
         decoded = verify_firebase_token(data.token)
 
         firebase_uid = decoded.get("uid")
@@ -74,7 +78,7 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
         user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
         print(f"User found: {user is not None}")
         if user:
-            print(f"Existing user role: {user.role}, profile_completed: {user.profile_completed}")
+            print(f"Existing user role: {user.role}")
 
         if not user:
             # First time login - create user with mapped role
@@ -85,8 +89,7 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
                 phone=phone,
                 name=name,
                 photo_url=photo_url,
-                role=role_mapped,
-                profile_completed=False
+                role=role_mapped
             )
             db.add(user)
             db.commit()
@@ -95,7 +98,7 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
             # Generate access token
             token = create_access_token({
                 "user_id": str(user.id),
-                "role": user.role
+                "roles": [user.role]
             })
 
             # If partner and new user, require onboarding
@@ -134,19 +137,25 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
             # Generate access token
             token = create_access_token({
                 "user_id": str(user.id),
-                "role": user.role
+                "roles": [user.role]
             })
 
-            # If partner and profile not completed, require onboarding
-            if data.role == "partner" and not user.profile_completed:
-                print(f"Existing partner requires onboarding")
-                return {
-                    "requiresOnboarding": True,
-                    "access_token": token
-                }
+            # If partner, check if restaurant profile exists
+            if data.role == "partner":
+                from app.models.restaurant import RestaurantProfile
+                restaurant = db.query(RestaurantProfile).filter(
+                    RestaurantProfile.user_id == user.id
+                ).first()
+                
+                if not restaurant:
+                    print(f"Existing partner requires onboarding")
+                    return {
+                        "requiresOnboarding": True,
+                        "access_token": token
+                    }
 
             # If partner, check restaurant status
-            if data.role == "partner" and user.profile_completed:
+            if data.role == "partner":
                 from app.models.restaurant import RestaurantProfile
                 restaurant = db.query(RestaurantProfile).filter(
                     RestaurantProfile.user_id == user.id
@@ -175,7 +184,7 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
 
         token = create_access_token({
             "user_id": str(user.id),
-            "role": user.role
+            "roles": [user.role]
         })
 
         print(f"Google login successful for user: {email}, role: {user.role}")
@@ -201,6 +210,10 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
         print(f"=== LOGIN ATTEMPT ===")
         print(f"Received token type: {type(data.token)}")
         print(f"Received role: {data.role}")
+        print(f"Token length: {len(data.token)}")
+        print(f"Token segments: {len(data.token.split('.'))}")
+        print(f"Token starts with: {data.token[:50]}...")
+        print(f"Token ends with: {data.token[-50:]}...")
         decoded = verify_firebase_token(data.token)
 
         firebase_uid = decoded.get("uid")
@@ -222,7 +235,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
         user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
         print(f"User found: {user is not None}")
         if user:
-            print(f"Existing user role: {user.role}, profile_completed: {user.profile_completed}")
+            print(f"Existing user role: {user.role}")
 
         if not user:
             # First time login - create user with mapped role
@@ -233,8 +246,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
                 phone=phone,
                 name=name,
                 photo_url=photo_url,
-                role=role_mapped,
-                profile_completed=False
+                role=role_mapped
             )
             db.add(user)
             db.commit()
@@ -243,7 +255,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
             # Generate access token
             token = create_access_token({
                 "user_id": str(user.id),
-                "role": user.role
+                "roles": [user.role]
             })
 
             # If partner and new user, require onboarding
@@ -282,19 +294,25 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
             # Generate access token
             token = create_access_token({
                 "user_id": str(user.id),
-                "role": user.role
+                "roles": [user.role]
             })
 
-            # If partner and profile not completed, require onboarding
-            if data.role == "partner" and not user.profile_completed:
-                print(f"Existing partner requires onboarding")
-                return {
-                    "requiresOnboarding": True,
-                    "access_token": token
-                }
+            # If partner, check if restaurant profile exists
+            if data.role == "partner":
+                from app.models.restaurant import RestaurantProfile
+                restaurant = db.query(RestaurantProfile).filter(
+                    RestaurantProfile.user_id == user.id
+                ).first()
+                
+                if not restaurant:
+                    print(f"Existing partner requires onboarding")
+                    return {
+                        "requiresOnboarding": True,
+                        "access_token": token
+                    }
 
             # If partner, check restaurant status
-            if data.role == "partner" and user.profile_completed:
+            if data.role == "partner":
                 from app.models.restaurant import RestaurantProfile
                 restaurant = db.query(RestaurantProfile).filter(
                     RestaurantProfile.user_id == user.id
@@ -323,7 +341,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
 
         token = create_access_token({
             "user_id": str(user.id),
-            "role": user.role
+            "roles": [user.role]
         })
 
         print(f"Login successful for user: {email}, role: {user.role}")
