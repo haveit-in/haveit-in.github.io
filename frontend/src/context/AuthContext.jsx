@@ -166,8 +166,8 @@ export const useRoleRedirect = () => {
     
     switch (userRole) {
       case 'admin':
-        console.log("Redirecting admin to /admin/restaurants")
-        navigate('/admin/restaurants')
+        console.log("Redirecting admin to /admin/dashboard")
+        navigate('/admin/dashboard')
         break
       case 'restaurant_owner':
         console.log("Redirecting partner to /dashboard")

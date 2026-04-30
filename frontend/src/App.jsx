@@ -13,6 +13,7 @@ import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminOrders from './pages/AdminOrders.jsx'
 import AdminUsers from './pages/AdminUsers.jsx'
 import AdminAnalytics from './pages/AdminAnalytics.jsx'
+import AdminLogin from './pages/AdminLogin.jsx'
 import { AdminLayout } from './components/AdminLayout.jsx'
 import AuthPanel from './components/AuthPanel.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
@@ -86,6 +87,10 @@ function App() {
         <Route
           path="/partner/rejected"
           element={<PartnerRejected />}
+        />
+        <Route
+          path="/admin/login"
+          element={<AdminLogin />}
         />
         <Route
           path="/admin/restaurants"

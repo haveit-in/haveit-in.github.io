@@ -25,19 +25,18 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/login");
+    logout();
+    navigate("/admin/login");
   };
 
   const isActive = (path) => location.pathname === path;
 
   // Protect admin route - only admins can access
   if (!isAuthenticated || !user || user.role !== "admin") {
-    navigate("/login");
+    navigate("/admin/login");
     return null;
   }
 

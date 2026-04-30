@@ -1137,6 +1137,7 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
               <ul className="space-y-2">
                 <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Privacy Policy</a></li>
                 <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Terms & Conditions</a></li>
+                <li><a href="/admin/login" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Admin</a></li>
                 <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Cookie Policy</a></li>
                 <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Contact Us</a></li>
               </ul>
@@ -1293,6 +1294,7 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
           </div>
         </aside>
       </>
+
     </div>
   )
 }

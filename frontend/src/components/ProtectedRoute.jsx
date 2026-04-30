@@ -23,6 +23,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     if (requiredRole === 'restaurant_owner') {
       return <Navigate to="/partner" replace />
     }
+    if (requiredRole === 'admin') {
+      return <Navigate to="/admin/login" replace />
+    }
     return <Navigate to="/" replace />
   }
 
