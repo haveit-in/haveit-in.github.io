@@ -5,8 +5,16 @@ const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID
 };
+
+console.log("=== FIREBASE CONFIG LOADED ===");
+console.log("Project ID:", firebaseConfig.projectId);
+console.log("App ID:", firebaseConfig.appId);
+console.log("Full config:", firebaseConfig);
 
 const app = initializeApp(firebaseConfig);
 

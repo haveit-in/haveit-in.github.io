@@ -4,13 +4,12 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import Lock from "lucide-react/dist/esm/icons/lock";
 import { useState } from "react";
 import { loginWithGooglePartner } from "../utils/auth.js";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth, useRoleRedirect } from "../context/AuthContext.jsx";
 
 export default function PartnerLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { handleLoginRedirect } = useRoleRedirect();
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -22,14 +21,16 @@ export default function PartnerLogin() {
       
       if (response.requiresOnboarding) {
         navigate("/partner/register");
-        return;
+      } else if (response.requiresApproval) {
+        navigate("/partner/waiting-approval");
+      } else if (response.rejected) {
+        navigate("/partner/rejected");
+      } else {
+        // Handle role-based redirect for successful login
+        handleLoginRedirect(response);
       }
-      
-      // existing partner with completed profile
-      navigate("/dashboard");
     } catch (error) {
-      console.error("Partner login failed:", error);
-      alert("Login failed. Please try again.");
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
@@ -68,62 +69,6 @@ export default function PartnerLogin() {
             </svg>
             <span>{loading ? "Signing in..." : "Continue with Google"}</span>
           </button>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">Or continue with email</span>
-            </div>
-          </div>
-
-          <form className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="restaurant@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" className="rounded border-gray-300 text-orange-600 focus:ring-orange-500" />
-                <span className="text-gray-600">Remember me</span>
-              </label>
-              <a href="#" className="text-orange-600 hover:text-orange-700">
-                Forgot password?
-              </a>
-            </div>
-
-            <Link
-              to="/dashboard"
-              className="block w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all text-center"
-            >
-              Sign In
-            </Link>
-          </form>
 
           <p className="text-center text-sm text-gray-600 mt-6">
             New here?{" "}

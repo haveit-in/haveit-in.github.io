@@ -212,7 +212,7 @@ export function RegistrationPage() {
           if (data.success) {
             // Clear form data on successful submission
             clearFormData();
-            navigate("/dashboard");
+            navigate("/partner/waiting-approval");
           }
         } catch (error) {
           console.error("Registration submission failed:", error);

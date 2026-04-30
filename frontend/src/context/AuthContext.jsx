@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const AuthContext = createContext()
 
@@ -36,45 +37,85 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  const login = async (firebaseToken, role = "user") => {
+  const login = async (data, role = "user") => {
     try {
-      // Call backend with Firebase ID token and role
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+      let endpoint = "/auth/login";
+      let body;
+
+      // If it's a Google token (string), use /auth/google endpoint
+      if (typeof data === "string") {
+        endpoint = "/auth/google";
+        body = JSON.stringify({ token: data, role });
+        console.log("=== AUTH CONTEXT: GOOGLE LOGIN ===");
+        console.log("Endpoint:", endpoint);
+        console.log("Role:", role);
+        console.log("Token length:", data.length);
+        console.log("Token starts with:", data.substring(0, 50) + "...");
+      } else {
+        // Normal email/password login
+        endpoint = "/auth/login";
+        body = JSON.stringify(data);
+        console.log("=== AUTH CONTEXT: EMAIL LOGIN ===");
+        console.log("Endpoint:", endpoint);
+      }
+
+      console.log("Full URL:", `${import.meta.env.VITE_API_BASE_URL}${endpoint}`);
+      console.log("Body:", body);
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token: firebaseToken, role }),
+        body,
       })
 
       if (!response.ok) {
         throw new Error('Login failed')
       }
 
-      const data = await response.json()
+      const result = await response.json()
       
-      console.log("Login response data:", data)
+      console.log("Login response data:", result)
       
       // If onboarding is required, store token but not user state
-      if (data.requiresOnboarding) {
-        console.log("Onboarding required, storing token:", data.access_token)
+      if (result.requiresOnboarding) {
+        console.log("Onboarding required, storing token:", result.access_token)
         // Store token for authenticated requests during onboarding
-        setToken(data.access_token)
-        localStorage.setItem('access_token', data.access_token)
-        return data
+        setToken(result.access_token)
+        localStorage.setItem('access_token', result.access_token)
+        return result
+      }
+      
+      // If approval is required, store token but not user state
+      if (result.requiresApproval) {
+        console.log("Approval required, storing token:", result.access_token)
+        // Store token for authenticated requests during approval waiting
+        setToken(result.access_token)
+        localStorage.setItem('access_token', result.access_token)
+        return result
+      }
+      
+      // If rejected, store token but not user state
+      if (result.rejected) {
+        console.log("Application rejected, storing token:", result.access_token)
+        // Store token for authenticated requests during rejection
+        setToken(result.access_token)
+        localStorage.setItem('access_token', result.access_token)
+        return result
       }
       
       // Store in state
-      setUser(data.user)
-      setToken(data.access_token)
+      setUser(result.user)
+      setToken(result.access_token)
       
       // Store in localStorage
-      localStorage.setItem('access_token', data.access_token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      localStorage.setItem('role', data.user.role)
-      localStorage.setItem('name', data.user.name)
+      localStorage.setItem('access_token', result.access_token)
+      localStorage.setItem('user', JSON.stringify(result.user))
+      localStorage.setItem('role', result.user.role)
+      localStorage.setItem('name', result.user.name)
       
-      return data
+      return result
     } catch (error) {
       console.error('Login error:', error)
       throw error
@@ -93,12 +134,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('name')
   }
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('access_token')
+    return token ? { 'Authorization': `Bearer ${token}` } : {}
+  }
+
   const value = {
     user,
     token,
     loading,
     login,
     logout,
+    getAuthHeaders,
     isAuthenticated: !!user && !!token
   }
 
@@ -107,4 +154,38 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   )
+}
+
+// Custom hook for role-based redirects
+export const useRoleRedirect = () => {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
+  const redirectByRole = (userRole) => {
+    console.log("Redirecting based on role:", userRole)
+    
+    switch (userRole) {
+      case 'admin':
+        console.log("Redirecting admin to /admin/restaurants")
+        navigate('/admin/restaurants')
+        break
+      case 'restaurant_owner':
+        console.log("Redirecting partner to /dashboard")
+        navigate('/dashboard')
+        break
+      case 'user':
+      default:
+        console.log("Redirecting user to /")
+        navigate('/')
+        break
+    }
+  }
+
+  const handleLoginRedirect = (loginResult) => {
+    if (loginResult.user) {
+      redirectByRole(loginResult.user.role)
+    }
+  }
+
+  return { redirectByRole, handleLoginRedirect }
 }

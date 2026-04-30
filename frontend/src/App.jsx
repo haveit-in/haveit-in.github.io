@@ -6,6 +6,9 @@ import ProfilePage from './pages/ProfilePage.jsx'
 import PartnerLanding from './pages/PartnerLanding.jsx'
 import PartnerLogin from './pages/PartnerLogin.jsx'
 import PartnerRegister from './pages/PartnerRegister.jsx'
+import PartnerWaitingApproval from './pages/PartnerWaitingApproval.jsx'
+import PartnerRejected from './pages/PartnerRejected.jsx'
+import AdminRestaurants from './pages/AdminRestaurants.jsx'
 import AuthPanel from './components/AuthPanel.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
@@ -70,6 +73,22 @@ function App() {
         <Route
           path="/partner/register"
           element={<PartnerRegister />}
+        />
+        <Route
+          path="/partner/waiting-approval"
+          element={<PartnerWaitingApproval />}
+        />
+        <Route
+          path="/partner/rejected"
+          element={<PartnerRejected />}
+        />
+        <Route
+          path="/admin/restaurants"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminRestaurants />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/dashboard"

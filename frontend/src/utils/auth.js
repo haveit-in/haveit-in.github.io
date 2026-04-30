@@ -1,5 +1,17 @@
-import { RecaptchaVerifier, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { RecaptchaVerifier, GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
 import { auth } from "../firebase";
+
+// Test Firebase configuration
+export const testFirebaseConfig = () => {
+  const auth = getAuth();
+  console.log("=== FIREBASE CONFIG TEST ===");
+  console.log("Auth app:", auth.app);
+  console.log("Project ID:", auth.app.options.projectId);
+  console.log("App ID:", auth.app.options.appId);
+  console.log("API Key:", auth.app.options.apiKey);
+  console.log("Auth Domain:", auth.app.options.authDomain);
+  return auth.app.options.projectId;
+};
 
 // reCAPTCHA setup for OTP
 export const setupRecaptcha = () => {
@@ -55,14 +67,14 @@ export const loginWithGooglePartner = async (loginCallback) => {
     
     const user = auth.currentUser;
     
-    // ✅ MUST USE THIS
+    // MUST USE THIS
     const token = await user.getIdToken();
     
     // Debug log
     console.log("ID TOKEN:", token);
     console.log("ACCESS TOKEN:", user.accessToken);
     
-    // 🔥 CALL BACKEND THROUGH AUTH CONTEXT WITH ROLE AND RETURN RESPONSE
+    // CALL BACKEND THROUGH AUTH CONTEXT WITH ROLE AND RETURN RESPONSE
     if (loginCallback) {
       const response = await loginCallback(token, "partner");
       return response;
@@ -71,6 +83,42 @@ export const loginWithGooglePartner = async (loginCallback) => {
     return result.user;
   } catch (error) {
     console.error("Partner Google login error:", error);
+    throw error;
+  }
+};
+
+// Admin Google login function
+export const loginWithGoogleAdmin = async (loginCallback) => {
+  try {
+    // Test Firebase configuration first
+    testFirebaseConfig();
+    
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    console.log("Admin User:", result.user);
+    
+    const user = auth.currentUser;
+    
+    // MUST USE THIS
+    const token = await user.getIdToken();
+    
+    // Debug log
+    console.log("ID TOKEN:", token);
+    console.log("ID TOKEN length:", token.length);
+    console.log("ID TOKEN starts with:", token.substring(0, 50) + "...");
+    console.log("ACCESS TOKEN:", user.accessToken);
+    console.log("User email:", user.email);
+    console.log("User UID:", user.uid);
+    
+    // CALL BACKEND THROUGH AUTH CONTEXT WITH ADMIN ROLE AND RETURN RESPONSE
+    if (loginCallback) {
+      const response = await loginCallback(token, "admin");
+      return response;
+    }
+    
+    return result.user;
+  } catch (error) {
+    console.error("Admin Google login error:", error);
     throw error;
   }
 };

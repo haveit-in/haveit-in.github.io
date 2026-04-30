@@ -5,7 +5,7 @@ import SocialButton from '../components/SocialButton.jsx'
 import TextField from '../components/TextField.jsx'
 import { FacebookIcon, GoogleIcon } from '../components/Icons.jsx'
 import { loginWithGoogle } from '../utils/auth.js'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useAuth, useRoleRedirect } from '../context/AuthContext.jsx'
 
 function isValidPhone(value) {
   const digits = value.replace(/[^\d]/g, '')
@@ -15,6 +15,7 @@ function isValidPhone(value) {
 export default function SignIn() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { handleLoginRedirect } = useRoleRedirect()
   const [phone, setPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [touched, setTouched] = useState(false)
@@ -25,8 +26,12 @@ export default function SignIn() {
       const response = await loginWithGoogle(login)
       console.log("Login response:", response)
       
-      // User login should always succeed and set user
-      navigate('/')
+      // Handle role-based redirect for successful login
+      if (response && response.user) {
+        handleLoginRedirect(response)
+      } else {
+        navigate('/')
+      }
     } catch (error) {
       console.error("Google login failed:", error)
       alert("Login failed. Please try again.")

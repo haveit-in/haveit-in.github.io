@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import Brand from './Brand.jsx'
 import TextField from './TextField.jsx'
 import { FacebookIcon, GoogleIcon } from './Icons.jsx'
-import { loginWithGoogle } from '../utils/auth.js'
-import { useAuth } from '../context/AuthContext.jsx'
+import { loginWithGoogle, loginWithGoogleAdmin } from '../utils/auth.js'
+import { useAuth, useRoleRedirect } from '../context/AuthContext.jsx'
 import SocialAuthButtons from './SocialAuthButtons.jsx'
 
 function isValidPhone(value) {
@@ -13,7 +13,9 @@ function isValidPhone(value) {
 
 export default function AuthLogin({ onSuccess, onOpenSignup, activeMode = 'food' }) {
   const { login } = useAuth()
+  const { handleLoginRedirect } = useRoleRedirect()
   const [loginMethod, setLoginMethod] = useState('email')
+  const [isAdminMode, setIsAdminMode] = useState(false)
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
@@ -160,13 +162,45 @@ export default function AuthLogin({ onSuccess, onOpenSignup, activeMode = 'food'
         </div> */}
       </form>
 
+      {/* Admin Login Toggle */}
+      <div style={{ marginBottom: '16px' }}>
+        <button
+          type="button"
+          onClick={() => setIsAdminMode(!isAdminMode)}
+          style={{
+            width: '100%',
+            padding: '8px 12px',
+            fontSize: '12px',
+            backgroundColor: isAdminMode ? '#dc2626' : '#f3f4f6',
+            color: isAdminMode ? '#ffffff' : '#374151',
+            border: `1px solid ${isAdminMode ? '#dc2626' : '#d1d5db'}`,
+            borderRadius: '6px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          {isAdminMode ? 'Admin Login Mode ON' : 'Switch to Admin Login'}
+        </button>
+      </div>
+
       <div className="divider">or</div>
 
       <SocialAuthButtons
         onGoogleLogin={async () => {
           try {
             setSubmitting(true)
-            await loginWithGoogle(login)
+            let loginResult
+            if (isAdminMode) {
+              loginResult = await loginWithGoogleAdmin(login)
+            } else {
+              loginResult = await loginWithGoogle(login)
+            }
+            
+            // Handle role-based redirect
+            if (loginResult && loginResult.user) {
+              handleLoginRedirect(loginResult)
+            }
+            
             onSuccess?.()
           } catch (error) {
             console.error('Google login failed:', error)

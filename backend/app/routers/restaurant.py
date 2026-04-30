@@ -66,6 +66,14 @@ def apply_restaurant(
 
     return {"success": True}
 
+@router.get("/restaurants")
+def get_approved_restaurants(db=Depends(get_db)):
+    """Get all approved and active restaurants for public users"""
+    return db.query(RestaurantProfile).filter(
+        RestaurantProfile.status == "approved",
+        RestaurantProfile.is_active == True
+    ).order_by(RestaurantProfile.created_at.desc()).all()
+
 @router.get("/restaurant/profile")
 def get_restaurant_profile(
     db=Depends(get_db),
