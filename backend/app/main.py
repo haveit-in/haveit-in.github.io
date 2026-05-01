@@ -115,10 +115,15 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
             if photo_url:
                 user.photo_url = photo_url
 
-            # Enforce role rules - existing user cannot change role
+            # Enforce role rules - existing user cannot change role (except for admin promotion)
             if user.role != role_mapped:
                 print(f"Role mismatch: user.role={user.role}, requested role={data.role}")
-                if user.role == "user" and data.role == "partner":
+                
+                # Allow admin promotion for existing users
+                if data.role == "admin" and user.role == "user":
+                    print(f"Promoting user to admin role")
+                    user.role = "admin"
+                elif user.role == "user" and data.role == "partner":
                     raise HTTPException(
                         status_code=403, 
                         detail="This account is registered as a user. Please use the user login page."
@@ -127,6 +132,11 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
                     raise HTTPException(
                         status_code=403, 
                         detail="This account is registered as a restaurant owner. Please use the partner login page."
+                    )
+                elif user.role == "admin" and data.role != "admin":
+                    raise HTTPException(
+                        status_code=403, 
+                        detail="Admin account cannot login with other roles."
                     )
                 else:
                     raise HTTPException(status_code=403, detail="Invalid role login")
@@ -272,10 +282,15 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
             if photo_url:
                 user.photo_url = photo_url
 
-            # Enforce role rules - existing user cannot change role
+            # Enforce role rules - existing user cannot change role (except for admin promotion)
             if user.role != role_mapped:
                 print(f"Role mismatch: user.role={user.role}, requested role={data.role}")
-                if user.role == "user" and data.role == "partner":
+                
+                # Allow admin promotion for existing users
+                if data.role == "admin" and user.role == "user":
+                    print(f"Promoting user to admin role")
+                    user.role = "admin"
+                elif user.role == "user" and data.role == "partner":
                     raise HTTPException(
                         status_code=403, 
                         detail="This account is registered as a user. Please use the user login page."
@@ -284,6 +299,11 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
                     raise HTTPException(
                         status_code=403, 
                         detail="This account is registered as a restaurant owner. Please use the partner login page."
+                    )
+                elif user.role == "admin" and data.role != "admin":
+                    raise HTTPException(
+                        status_code=403, 
+                        detail="Admin account cannot login with other roles."
                     )
                 else:
                     raise HTTPException(status_code=403, detail="Invalid role login")
