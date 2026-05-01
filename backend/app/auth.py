@@ -17,7 +17,26 @@ def create_access_token(data: dict):
 
 def verify_access_token(token: str):
     try:
+        print(f"=== TOKEN VERIFICATION DEBUG ===")
+        print(f"SECRET_KEY exists: {SECRET_KEY is not None}")
+        print(f"SECRET_KEY length: {len(SECRET_KEY) if SECRET_KEY else 0}")
+        print(f"Algorithm: {ALGORITHM}")
+        
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"Token decoded successfully: {payload}")
+        print("=== TOKEN VERIFICATION SUCCESS ===")
         return payload
-    except JWTError:
+    except JWTError as e:
+        print(f"=== TOKEN VERIFICATION ERROR ===")
+        print(f"JWT Error: {str(e)}")
+        print(f"Error type: {type(e).__name__}")
+        print("=== END TOKEN ERROR ===")
+        return None
+    except Exception as e:
+        print(f"=== UNEXPECTED TOKEN ERROR ===")
+        print(f"Error: {str(e)}")
+        print(f"Error type: {type(e).__name__}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END UNEXPECTED TOKEN ERROR ===")
         return None

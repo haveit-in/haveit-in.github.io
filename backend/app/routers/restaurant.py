@@ -27,49 +27,80 @@ def apply_restaurant(
     db=Depends(get_db),
     user=Depends(get_current_user)
 ):
-    # Allow users to apply for restaurant ownership
-    # This endpoint is for the onboarding flow
-    # Check existing application
-    user_uuid = uuid.UUID(user["user_id"])
-    existing = db.query(RestaurantProfile).filter(
-        RestaurantProfile.user_id == user_uuid
-    ).first()
+    try:
+        print(f"=== RESTAURANT APPLICATION DEBUG ===")
+        print(f"Received application data: {data}")
+        print(f"User from token: {user}")
+        
+        # Allow users to apply for restaurant ownership
+        # This endpoint is for the onboarding flow
+        # Check existing application
+        user_uuid = uuid.UUID(user["user_id"])
+        print(f"User UUID: {user_uuid}")
+        
+        existing = db.query(RestaurantProfile).filter(
+            RestaurantProfile.user_id == user_uuid
+        ).first()
+        print(f"Existing application found: {existing is not None}")
 
-    if existing:
-        raise HTTPException(400, "You already applied")
+        if existing:
+            print("User already applied - returning 400")
+            raise HTTPException(400, "You already applied")
 
-    profile = RestaurantProfile(
-        user_id=user_uuid,
-        restaurant_name=data.restaurant_name,
-        owner_name=data.owner_name,
-        email=data.email,
-        phone=data.phone,
-        address=data.address,
-        city=data.city,
-        cuisine=json.dumps(data.cuisine),
-        fssai=data.fssai,
-        account_number=data.account_number,
-        ifsc=data.ifsc,
-        account_holder=data.account_holder,
-        status="pending"
-    )
+        print("Creating new restaurant profile...")
+        profile = RestaurantProfile(
+            user_id=user_uuid,
+            restaurant_name=data.restaurant_name,
+            owner_name=data.owner_name,
+            email=data.email,
+            phone=data.phone,
+            address=data.address,
+            city=data.city,
+            cuisine=json.dumps(data.cuisine),
+            fssai=data.fssai,
+            account_number=data.account_number,
+            ifsc=data.ifsc,
+            account_holder=data.account_holder,
+            status="pending"
+        )
 
-    db.add(profile)
-    db.commit()
+        print("Adding profile to database...")
+        db.add(profile)
+        print("Committing profile...")
+        db.commit()
+        print("Profile committed successfully")
 
-    # Update user profile_completed to True (if column exists)
-    from app.models.user import User
-    user_obj = db.query(User).filter(User.id == user_uuid).first()
-    if user_obj:
-        try:
-            user_obj.profile_completed = True
-            db.commit()
-        except Exception as e:
-            # If profile_completed column doesn't exist, just continue
-            print(f"Warning: Could not update profile_completed: {str(e)}")
-            db.rollback()
+        # Update user profile_completed to True (if column exists)
+        print("Updating user profile_completed...")
+        from app.models.user import User
+        user_obj = db.query(User).filter(User.id == user_uuid).first()
+        print(f"User object found: {user_obj is not None}")
+        
+        if user_obj:
+            try:
+                user_obj.profile_completed = True
+                db.commit()
+                print("profile_completed updated successfully")
+            except Exception as e:
+                # If profile_completed column doesn't exist, just continue
+                print(f"Warning: Could not update profile_completed: {str(e)}")
+                db.rollback()
 
-    return {"success": True}
+        print("=== APPLICATION SUCCESSFUL ===")
+        return {"success": True}
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        print(f"=== RESTAURANT APPLICATION ERROR ===")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        print(f"Error details: {repr(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END ERROR ===")
+        raise HTTPException(500, f"Internal server error: {str(e)}")
 
 @router.get("/restaurants")
 def get_approved_restaurants(db=Depends(get_db)):
