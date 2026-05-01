@@ -19,6 +19,25 @@ app = FastAPI()
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+# Add debugging middleware
+@app.middleware("http")
+async def debug_requests(request, call_next):
+    print(f"=== INCOMING REQUEST ===")
+    print(f"Method: {request.method}")
+    print(f"URL: {request.url}")
+    print(f"Headers: {dict(request.headers)}")
+    print(f"Origin: {request.headers.get('origin', 'No origin header')}")
+    print(f"=========================")
+    
+    response = await call_next(request)
+    
+    print(f"=== RESPONSE ===")
+    print(f"Status: {response.status_code}")
+    print(f"Headers: {dict(response.headers)}")
+    print(f"===============")
+    
+    return response
+
 app.include_router(restaurant.router)
 app.include_router(admin.router)
 
