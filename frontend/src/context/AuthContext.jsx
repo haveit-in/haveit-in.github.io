@@ -50,7 +50,10 @@ export const AuthProvider = ({ children }) => {
         console.log("Endpoint:", endpoint);
         console.log("Role:", role);
         console.log("Token length:", data.length);
+        console.log("Token segments:", data.split('.').length);
         console.log("Token starts with:", data.substring(0, 50) + "...");
+        console.log("Token ends with:", data.substring(data.length - 50) + "...");
+        console.log("Full body being sent:", body);
       } else {
         // Normal email/password login
         endpoint = "/auth/login";
