@@ -14,3 +14,4 @@ class User(Base):
     photo_url = Column(String)
     role = Column(String, default="user")  # Changed from roles to role to match DB schema
     is_active = Column(Boolean, default=True)
+    profile_completed = Column(Boolean, default=False)

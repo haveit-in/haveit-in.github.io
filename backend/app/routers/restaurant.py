@@ -57,12 +57,17 @@ def apply_restaurant(
     db.add(profile)
     db.commit()
 
-    # Update user profile_completed to True
+    # Update user profile_completed to True (if column exists)
     from app.models.user import User
     user_obj = db.query(User).filter(User.id == user_uuid).first()
     if user_obj:
-        user_obj.profile_completed = True
-        db.commit()
+        try:
+            user_obj.profile_completed = True
+            db.commit()
+        except Exception as e:
+            # If profile_completed column doesn't exist, just continue
+            print(f"Warning: Could not update profile_completed: {str(e)}")
+            db.rollback()
 
     return {"success": True}
 
