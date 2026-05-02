@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import './App.css'
 import Landing from './pages/Landing.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
+import UserDashboard from './pages/UserDashboard.jsx'
 import PartnerLanding from './pages/PartnerLanding.jsx'
 import PartnerLogin from './pages/PartnerLogin.jsx'
 import PartnerRegister from './pages/PartnerRegister.jsx'
@@ -20,6 +21,11 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { DashboardLayout } from './components/DashboardLayout.jsx'
 import { DashboardHome } from './components/DashboardHome.jsx'
+import PartnerOrders from './pages/PartnerOrders.jsx'
+import PartnerMenu from './pages/PartnerMenu.jsx'
+import PartnerEarnings from './pages/PartnerEarnings.jsx'
+import PartnerSettings from './pages/PartnerSettings.jsx'
+import PartnerDashboard from './pages/PartnerDashboard.jsx'
 
 function App() {
   const [authOpen, setAuthOpen] = useState(false)
@@ -143,14 +149,26 @@ function App() {
           <Route index element={<AdminAnalytics />} />
         </Route>
         <Route
-          path="/dashboard"
+          path="/user/dashboard"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/partner/dashboard"
           element={
             <ProtectedRoute requiredRole="restaurant_owner">
               <DashboardLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<DashboardHome />} />
+          <Route index element={<PartnerDashboard />} />
+          <Route path="orders" element={<PartnerOrders />} />
+          <Route path="menu" element={<PartnerMenu />} />
+          <Route path="earnings" element={<PartnerEarnings />} />
+          <Route path="settings" element={<PartnerSettings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

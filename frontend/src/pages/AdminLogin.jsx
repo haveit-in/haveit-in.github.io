@@ -41,11 +41,13 @@ export default function AdminLogin() {
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-lg">H</span>
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
-              HaveIt
+            <img 
+              src="/image/22.png" 
+              alt="HaveIt Logo" 
+              className="h-10 w-auto"
+            />
+            <span className="text-2xl font-semibold">
+              <span className="text-orange-500">HaveIt</span>
             </span>
           </div>
         </div>

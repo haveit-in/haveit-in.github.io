@@ -173,10 +173,13 @@ export const useRoleRedirect = () => {
         navigate('/admin/dashboard')
         break
       case 'restaurant_owner':
-        console.log("Redirecting partner to /dashboard")
-        navigate('/dashboard')
+        console.log("Redirecting partner to /partner/dashboard")
+        navigate('/partner/dashboard')
         break
       case 'user':
+        console.log("Redirecting user to /user/dashboard")
+        navigate('/user/dashboard')
+        break
       default:
         console.log("Redirecting user to /")
         navigate('/')

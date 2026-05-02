@@ -1,26 +1,15 @@
 import { Link, useNavigate } from "react-router";
-import Store from "lucide-react/dist/esm/icons/store";
-import Check from "lucide-react/dist/esm/icons/check";
-import { useState, useEffect, lazy, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Store, Upload, ChevronRight } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
-// Lazy loaded step components
-const Step1 = lazy(() => import("../components/steps/Step1"));
-const Step2 = lazy(() => import("../components/steps/Step2"));
-const Step3 = lazy(() => import("../components/steps/Step3"));
-const Step4 = lazy(() => import("../components/steps/Step4"));
-const Step5 = lazy(() => import("../components/steps/Step5"));
-
-const steps = [
-  { id: 1, name: "Basic Details" },
-  { id: 2, name: "Restaurant Info" },
-  { id: 3, name: "Uploads" },
-  { id: 4, name: "Bank Details" },
-  { id: 5, name: "Review & Submit" },
+const sections = [
+  { id: "basic", name: "Basic Details" },
+  { id: "restaurant", name: "Restaurant Info" },
+  { id: "documents", name: "Documents" },
+  { id: "bank", name: "Bank Details" },
 ];
 
 export function RegistrationPage() {
-  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     restaurantName: "",
     ownerName: "",
@@ -34,357 +23,349 @@ export function RegistrationPage() {
     ifsc: "",
     accountHolder: "",
   });
-  const [errors, setErrors] = useState({});
+  const [activeSection, setActiveSection] = useState("basic");
   const navigate = useNavigate();
+  const sectionRefs = useRef({});
 
-  // Clear form data on successful submission
-  const clearFormData = () => {
-    localStorage.removeItem("partnerFormData");
-  };
-
-  // Auto-save draft functionality
   useEffect(() => {
-    try {
-      const dataToSave = {
-        ...formData,
-        currentStep,
-        timestamp: Date.now()
-      };
-      localStorage.setItem("partnerFormData", JSON.stringify(dataToSave));
-    } catch (error) {
-      console.log("Error saving form data:", error);
-    }
-  }, [formData, currentStep]);
-
-  // Restore on reload
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("partnerFormData");
-      if (saved) {
-        const parsedData = JSON.parse(saved);
-        
-        // Only restore if data is recent (within 24 hours)
-        const isRecent = (Date.now() - parsedData.timestamp) < 24 * 60 * 60 * 1000;
-        
-        if (isRecent) {
-          // Restore form data
-          setFormData({
-            restaurantName: parsedData.restaurantName || "",
-            ownerName: parsedData.ownerName || "",
-            email: parsedData.email || "",
-            phone: parsedData.phone || "",
-            address: parsedData.address || "",
-            city: parsedData.city || "",
-            cuisine: parsedData.cuisine || [],
-            fssai: parsedData.fssai || "",
-            accountNumber: parsedData.accountNumber || "",
-            ifsc: parsedData.ifsc || "",
-            accountHolder: parsedData.accountHolder || "",
-          });
-          
-          // Restore current step if valid
-          if (parsedData.currentStep && parsedData.currentStep >= 1 && parsedData.currentStep <= 5) {
-            setCurrentStep(parsedData.currentStep);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
           }
-        }
-      }
-    } catch (error) {
-      console.log("Error restoring form data:", error);
-      // Clear corrupted data
-      localStorage.removeItem("partnerFormData");
-    }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    Object.values(sectionRefs.current).forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  const scrollToSection = (sectionId) => {
+    sectionRefs.current[sectionId]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const validatePhone = (phone) => {
-    // Indian phone number validation: +91 followed by 10 digits, or just 10 digits
-    const phoneRegex = /^(\+91[\s-]?)?[6-9]\d{9}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
-  };
-
-  const validateIFSC = (ifsc) => {
-    const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-    return ifscRegex.test(ifsc.toUpperCase());
-  };
-
-  const validateAccountNumber = (accountNumber) => {
-    // Account number should be 9-18 digits
-    const accountRegex = /^\d{9,18}$/;
-    return accountRegex.test(accountNumber.replace(/\s/g, ''));
-  };
-
-  const validateStep = (step) => {
-    const newErrors = {};
-
-    if (step === 1) {
-      if (!formData.restaurantName.trim()) {
-        newErrors.restaurantName = "Restaurant name is required";
-      }
-      if (!formData.ownerName.trim()) {
-        newErrors.ownerName = "Owner name is required";
-      }
-      if (!formData.email.trim()) {
-        newErrors.email = "Email is required";
-      } else if (!validateEmail(formData.email)) {
-        newErrors.email = "Please enter a valid email address";
-      }
-      if (!formData.phone.trim()) {
-        newErrors.phone = "Phone number is required";
-      } else if (!validatePhone(formData.phone)) {
-        newErrors.phone = "Please enter a valid phone number";
-      }
-    }
-
-    if (step === 2) {
-      if (!formData.address.trim()) {
-        newErrors.address = "Address is required";
-      }
-      if (!formData.city.trim()) {
-        newErrors.city = "City is required";
-      }
-      if (formData.cuisine.length === 0) {
-        newErrors.cuisine = "Please select at least one cuisine type";
-      }
-      if (!formData.fssai.trim()) {
-        newErrors.fssai = "FSSAI license number is required";
-      }
-    }
-
-    if (step === 4) {
-      if (!formData.accountNumber.trim()) {
-        newErrors.accountNumber = "Account number is required";
-      } else if (!validateAccountNumber(formData.accountNumber)) {
-        newErrors.accountNumber = "Account number should be 9-18 digits";
-      }
-      if (!formData.ifsc.trim()) {
-        newErrors.ifsc = "IFSC code is required";
-      } else if (!validateIFSC(formData.ifsc)) {
-        newErrors.ifsc = "Please enter a valid IFSC code";
-      }
-      if (!formData.accountHolder.trim()) {
-        newErrors.accountHolder = "Account holder name is required";
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = async () => {
-    if (validateStep(currentStep)) {
-      if (currentStep < 5) {
-        setCurrentStep(currentStep + 1);
-      } else {
-        // Submit form data to backend
-        try {
-          const token = localStorage.getItem("access_token");
-          console.log("Token from localStorage:", token);
-
-          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/restaurant/apply`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              restaurant_name: formData.restaurantName,
-              owner_name: formData.ownerName,
-              email: formData.email,
-              phone: formData.phone,
-              address: formData.address,
-              city: formData.city,
-              cuisine: formData.cuisine,
-              fssai: formData.fssai,
-              account_number: formData.accountNumber,
-              ifsc: formData.ifsc,
-              account_holder: formData.accountHolder,
-            }),
-          });
-
-          console.log("Response status:", res.status);
-          const data = await res.json();
-          console.log("Response data:", data);
-
-          if (data.success) {
-            // Clear form data on successful submission
-            clearFormData();
-            navigate("/partner/waiting-approval");
-          }
-        } catch (error) {
-          console.error("Registration submission failed:", error);
-          alert("Failed to submit registration. Please try again.");
-        }
-      }
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    navigate("/partner/waiting-approval");
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-50 to-orange-50 overflow-hidden">
-      {/* Sticky Header + Stepper */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          
-          {/* Header */}
-          <div className="flex items-center justify-center gap-2 mb-3 md:hidden">
-            <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
-              <Store className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-semibold">HaveIt Partner</span>
-          </div>
-
-          {/* Mobile Progress */}
-          <div className="md:hidden">
-            <div className="flex justify-between text-xs text-gray-600 mb-1">
-              <span>Step {currentStep} of {steps.length}</span>
-              <span>{steps[currentStep - 1].name}</span>
-            </div>
-            <div className="w-full h-1 bg-gray-200 rounded-full">
-              <div
-                className="h-1 bg-orange-600 rounded-full transition-all"
-                style={{ width: `${(currentStep / steps.length) * 100}%` }}
+    <div className="min-h-screen bg-white">
+      <div className="flex">
+        <aside className="hidden lg:block w-80 fixed h-screen bg-gradient-to-br from-orange-50 to-white border-r border-gray-200 p-8">
+          <Link to="/" className="flex items-center gap-3 mb-12">
+              <img 
+                src="/image/22.png" 
+                alt="HaveIt Logo" 
+                className="h-10 w-auto"
               />
-            </div>
-          </div>
-        </div>
-      </div>
+              <span className="text-xl font-semibold">
+                <span className="text-orange-500">HaveIt</span>{' '}
+                <span className="text-gray-900">Partner</span>
+              </span>
+          </Link>
 
-      {/* Split Layout */}
-      <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 h-full px-4">
-        
-        {/* Left Panel - Branding + Vertical Stepper (Sticky) */}
-        <div className="hidden md:flex flex-col h-full sticky top-0 py-10">
-          
-          {/* Logo */}
           <div>
-            <div className="flex items-center gap-2 mb-10">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                <Store className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-semibold">HaveIt Partner</span>
-            </div>
+            <h2 className="text-2xl font-bold mb-2">Register Your Restaurant</h2>
+            <p className="text-gray-600 mb-8">Partner with HaveIt and grow your business</p>
 
-            {/* Stepper */}
-            <div className="space-y-8">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex items-start gap-4 relative">
-                  
-                  {/* Vertical Line */}
-                  {index !== steps.length - 1 && (
-                    <div className="absolute left-[15px] top-8 h-full w-[2px] bg-gray-200"></div>
-                  )}
-
-                  {/* Active Progress Line */}
-                  {index !== steps.length - 1 && currentStep > step.id && (
-                    <div className="absolute left-[15px] top-8 h-full w-[2px] bg-orange-600"></div>
-                  )}
-
-                  {/* Circle */}
-                  <div
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 z-10 bg-white
-                    ${
-                      currentStep > step.id
-                        ? "bg-orange-600 border-orange-600 text-white"
-                        : currentStep === step.id
-                        ? "border-orange-600 text-orange-600 ring-4 ring-orange-100"
-                        : "border-gray-300 text-gray-400"
-                    }`}
-                  >
-                    {currentStep > step.id ? <Check className="w-4 h-4" /> : step.id}
-                  </div>
-
-                  {/* Content */}
-                  <div className="pt-1">
-                    <p
-                      className={`text-sm font-medium ${
-                        currentStep >= step.id ? "text-gray-900" : "text-gray-400"
+            <nav className="space-y-2">
+              {sections.map((section, index) => (
+                <button
+                  key={section.id}
+                  onClick={() => scrollToSection(section.id)}
+                  className={`w-full text-left p-4 rounded-lg transition-all ${
+                    activeSection === section.id
+                      ? "bg-white shadow-sm border border-orange-200"
+                      : "hover:bg-white/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        activeSection === section.id
+                          ? "bg-orange-600 text-white"
+                          : "bg-gray-200 text-gray-600"
                       }`}
                     >
-                      {step.name}
-                    </p>
+                      {index + 1}
+                    </div>
+                    <span className={activeSection === section.id ? "font-medium" : ""}>
+                      {section.name}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </aside>
 
-                    {currentStep === step.id && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Fill required details
-                      </p>
-                    )}
+        <main className="flex-1 lg:ml-80">
+          <div className="lg:hidden sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+            <Link to="/" className="flex items-center gap-2">
+              <img 
+                src="/image/22.png" 
+                alt="HaveIt Logo" 
+                className="h-8 w-auto"
+              />
+              <span className="font-semibold">
+                <span className="text-orange-500">HaveIt</span>{' '}
+                <span className="text-gray-900">Partner</span>
+              </span>
+            </Link>
+          </div>
+
+          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 lg:p-12">
+            <div className="lg:hidden mb-8">
+              <h1 className="text-2xl font-bold mb-2">Register Your Restaurant</h1>
+              <p className="text-gray-600">Fill in your details to get started</p>
+            </div>
+
+            <div
+              id="basic"
+              ref={(el) => (sectionRefs.current.basic = el)}
+              className="mb-16 scroll-mt-8"
+            >
+              <h2 className="text-2xl font-bold mb-6">Basic Details</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block font-medium mb-2">Restaurant Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.restaurantName}
+                    onChange={(e) => setFormData({ ...formData, restaurantName: e.target.value })}
+                    placeholder="e.g., Spice Garden Restaurant"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-2">Owner Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.ownerName}
+                    onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                    placeholder="Full name as per documents"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block font-medium mb-2">Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="your@email.com"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-2">Phone Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
 
-          {/* Bottom fixed content */}
-          <div className="mt-auto text-sm text-gray-500">
-            Need help? Contact support
-          </div>
-        </div>
-
-        {/* Right Panel - Form Area (Scrollable) */}
-        <div className="md:col-span-2 h-full overflow-y-auto py-10 pr-2">
-          
-          <h1 className="text-3xl font-bold mb-2">
-            Register Your Restaurant
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Complete the steps below to get started
-          </p>
-
-          <div className="bg-white rounded-2xl shadow-xl p-10 border mb-20">
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.25 }}
+            <div
+              id="restaurant"
+              ref={(el) => (sectionRefs.current.restaurant = el)}
+              className="mb-16 scroll-mt-8"
             >
-          <Suspense fallback={<div className="flex justify-center p-8">Loading...</div>}>
-            {currentStep === 1 && <Step1 formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
-            {currentStep === 2 && <Step2 formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
-            {currentStep === 3 && <Step3 formData={formData} setFormData={setFormData} />}
-            {currentStep === 4 && <Step4 formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
-            {currentStep === 5 && <Step5 formData={formData} />}
-          </Suspense>
-            </motion.div>
-          </AnimatePresence>
-          </div>
-
-          {/* Sticky Bottom CTA */}
-          <div className="sticky bottom-0 bg-white border-t p-4">
-            <div className="flex justify-end gap-3">
-              {currentStep > 1 ? (
-                <button
-                  onClick={handleBack}
-                  className="px-6 py-3 border rounded-lg"
-                >
-                  Back
-                </button>
-              ) : (
-                <Link to="/" className="px-6 py-3 border rounded-lg text-center">
-                  Cancel
-                </Link>
-              )}
-
-              <button
-                onClick={handleNext}
-                className="px-6 py-3 bg-orange-600 text-white rounded-lg shadow-md"
-              >
-                {currentStep === 5 ? "Submit" : "Continue"}
-              </button>
+              <h2 className="text-2xl font-bold mb-6">Restaurant Information</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block font-medium mb-2">Complete Address *</label>
+                  <textarea
+                    required
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="Enter your restaurant's complete address"
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-2">City *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    placeholder="e.g., Mumbai, Bangalore, Delhi"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-3">Cuisine Type(s) *</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {["North Indian", "South Indian", "Chinese", "Continental", "Italian", "Fast Food"].map((cuisine) => (
+                      <label
+                        key={cuisine}
+                        className={`flex items-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          formData.cuisine.includes(cuisine)
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.cuisine.includes(cuisine)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({ ...formData, cuisine: [...formData.cuisine, cuisine] });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                cuisine: formData.cuisine.filter((c) => c !== cuisine),
+                              });
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                        />
+                        <span className="text-sm font-medium">{cuisine}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-medium mb-2">FSSAI License Number *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.fssai}
+                    onChange={(e) => setFormData({ ...formData, fssai: e.target.value })}
+                    placeholder="14-digit FSSAI license number"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Your FSSAI license is required to partner with us
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+
+            <div
+              id="documents"
+              ref={(el) => (sectionRefs.current.documents = el)}
+              className="mb-16 scroll-mt-8"
+            >
+              <h2 className="text-2xl font-bold mb-6">Upload Documents</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block font-medium mb-3">Restaurant Photos</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-500 cursor-pointer transition-colors">
+                    <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                    <p className="font-medium text-gray-700 mb-1">
+                      Click to upload restaurant images
+                    </p>
+                    <p className="text-sm text-gray-500">PNG, JPG up to 10MB (Max 5 images)</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-medium mb-3">Menu Card</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-500 cursor-pointer transition-colors">
+                    <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                    <p className="font-medium text-gray-700 mb-1">Click to upload menu</p>
+                    <p className="text-sm text-gray-500">PDF, PNG, or JPG up to 10MB</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="bank"
+              ref={(el) => (sectionRefs.current.bank = el)}
+              className="mb-16 scroll-mt-8"
+            >
+              <h2 className="text-2xl font-bold mb-6">Bank Details</h2>
+              <p className="text-gray-600 mb-6">
+                This information is needed to process your payments
+              </p>
+              <div className="space-y-6">
+                <div>
+                  <label className="block font-medium mb-2">Account Holder Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.accountHolder}
+                    onChange={(e) => setFormData({ ...formData, accountHolder: e.target.value })}
+                    placeholder="Name as per bank account"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block font-medium mb-2">Account Number *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.accountNumber}
+                      onChange={(e) =>
+                        setFormData({ ...formData, accountNumber: e.target.value })
+                      }
+                      placeholder="Bank account number"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-2">IFSC Code *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.ifsc}
+                      onChange={(e) => setFormData({ ...formData, ifsc: e.target.value })}
+                      placeholder="e.g., SBIN0001234"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 -mx-6 lg:-mx-12 px-6 lg:px-12 py-6 mt-12">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-gray-600">
+                  By submitting, you agree to our{" "}
+                  <a href="#" className="text-orange-600 hover:underline">
+                    terms and conditions
+                  </a>
+                </p>
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <Link
+                    to="/"
+                    className="flex-1 sm:flex-none px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                  >
+                    Cancel
+                  </Link>
+                  <button
+                    type="submit"
+                    className="flex-1 sm:flex-none px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    Submit Application
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </main>
       </div>
     </div>
   );
