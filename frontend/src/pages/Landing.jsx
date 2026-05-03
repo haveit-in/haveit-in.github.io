@@ -1113,9 +1113,9 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
             <div>
               <h3 className="font-bold text-lg mb-4">Haveit</h3>
               <ul className="space-y-2">
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>About Us</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Blog</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Careers</a></li>
+                <li><a href="/about" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>About Us</a></li>
+                <li><a href="/blog" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Blog</a></li>
+                <li><a href="/careers" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Careers</a></li>
                 <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Press</a></li>
               </ul>
             </div>
@@ -1124,10 +1124,10 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
             <div>
               <h3 className="font-bold text-lg mb-4">For Users</h3>
               <ul className="space-y-2">
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>FAQs</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Help Center</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Track Order</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Feedback</a></li>
+                <li><a href="/faqs" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>FAQs</a></li>
+                <li><a href="/help" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Help Center</a></li>
+                <li><a href="/track-order" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Track Order</a></li>
+                <li><a href="/feedback" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Feedback</a></li>
               </ul>
             </div>
 
@@ -1135,11 +1135,11 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
             <div>
               <h3 className="font-bold text-lg mb-4">Legal</h3>
               <ul className="space-y-2">
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Privacy Policy</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Terms & Conditions</a></li>
+                <li><a href="/privacy" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Privacy Policy</a></li>
+                <li><a href="/terms" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Terms & Conditions</a></li>
                 <li><a href="/admin/login" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Admin</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Cookie Policy</a></li>
-                <li><a href="#" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Contact Us</a></li>
+                <li><a href="/cookies" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Cookie Policy</a></li>
+                <li><a href="/contact" className={`${activeMode === 'food' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'} text-sm`}>Contact Us</a></li>
               </ul>
             </div>
 

@@ -26,6 +26,17 @@ import PartnerMenu from './pages/PartnerMenu.jsx'
 import PartnerEarnings from './pages/PartnerEarnings.jsx'
 import PartnerSettings from './pages/PartnerSettings.jsx'
 import PartnerDashboard from './pages/PartnerDashboard.jsx'
+import AboutUs from './pages/AboutUs.jsx'
+import FAQs from './pages/FAQs.jsx'
+import ContactUs from './pages/ContactUs.jsx'
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
+import TermsConditions from './pages/TermsConditions.jsx'
+import HelpCenter from './pages/HelpCenter.jsx'
+import TrackOrder from './pages/TrackOrder.jsx'
+import Feedback from './pages/Feedback.jsx'
+import Careers from './pages/Careers.jsx'
+import Blog from './pages/Blog.jsx'
+import CookiePolicy from './pages/CookiePolicy.jsx'
 
 function App() {
   const [authOpen, setAuthOpen] = useState(false)
@@ -74,6 +85,17 @@ function App() {
           path="/profile"
           element={<ProfilePage activeMode={activeMode} />}
         />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/faqs" element={<FAQs />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsConditions />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/track-order" element={<TrackOrder />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/cookies" element={<CookiePolicy />} />
         <Route
           path="/partner"
           element={<PartnerLanding />}
