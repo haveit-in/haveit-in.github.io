@@ -25,36 +25,56 @@ def approve_restaurant(
     db=Depends(get_db),
     user=Depends(require_admin)
 ):
-    profile = db.query(RestaurantProfile).filter(
-        RestaurantProfile.id == id
-    ).first()
+    try:
+        print(f"=== APPROVE RESTaurant REQUEST ===")
+        print(f"Restaurant ID: {id}")
+        print(f"User: {user}")
+        
+        profile = db.query(RestaurantProfile).filter(
+            RestaurantProfile.id == id
+        ).first()
 
-    if not profile:
-        raise HTTPException(404, "Restaurant not found")
+        if not profile:
+            print(f"Restaurant not found: {id}")
+            raise HTTPException(status_code=404, detail="Restaurant not found")
 
-    if profile.status != "pending":
-        raise HTTPException(400, "Application already processed")
+        if profile.status != "pending":
+            print(f"Restaurant already processed: {profile.status}")
+            raise HTTPException(status_code=400, detail="Application already processed")
 
-    # Update status and approval fields
-    profile.status = "approved"
-    profile.is_active = True
-    profile.approved_by = user["user_id"]
-    profile.approved_at = datetime.utcnow()
+        # Update status and approval fields
+        profile.status = "approved"
+        profile.is_active = True
+        profile.approved_by = user["user_id"]
+        profile.approved_at = datetime.utcnow()
 
-    # Update user role
-    import json
-    user_obj = db.query(User).filter(
-        User.id == profile.user_id
-    ).first()
+        # Update user role
+        import json
+        user_obj = db.query(User).filter(
+            User.id == profile.user_id
+        ).first()
 
-    user_roles = json.loads(user_obj.roles) if user_obj.roles else ["user"]
-    if "restaurant_owner" not in user_roles:
-        user_roles.append("restaurant_owner")
-    user_obj.roles = json.dumps(user_roles)
+        if not user_obj:
+            print(f"User not found for restaurant: {profile.user_id}")
+            raise HTTPException(status_code=404, detail="User not found")
 
-    db.commit()
+        user_roles = json.loads(user_obj.roles) if user_obj.roles else ["user"]
+        if "restaurant_owner" not in user_roles:
+            user_roles.append("restaurant_owner")
+        user_obj.roles = json.dumps(user_roles)
 
-    return {"message": "Restaurant approved successfully"}
+        db.commit()
+        print(f"Restaurant approved successfully: {id}")
+
+        return {"message": "Restaurant approved successfully"}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error approving restaurant: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 class RejectRequest(BaseModel):
     rejection_reason: str

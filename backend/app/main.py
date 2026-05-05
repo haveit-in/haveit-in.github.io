@@ -19,6 +19,21 @@ app = FastAPI()
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+app.include_router(restaurant.router)
+app.include_router(admin.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://haveit-official.vercel.app"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Add debugging middleware
 @app.middleware("http")
 async def debug_requests(request, call_next):
@@ -37,21 +52,6 @@ async def debug_requests(request, call_next):
     print(f"===============")
     
     return response
-
-app.include_router(restaurant.router)
-app.include_router(admin.router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://haveit-official.vercel.app"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/")
 def root():
