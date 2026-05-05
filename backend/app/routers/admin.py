@@ -49,7 +49,6 @@ def approve_restaurant(
         profile.approved_at = datetime.utcnow()
 
         # Update user role
-        import json
         user_obj = db.query(User).filter(
             User.id == profile.user_id
         ).first()
@@ -58,10 +57,9 @@ def approve_restaurant(
             print(f"User not found for restaurant: {profile.user_id}")
             raise HTTPException(status_code=404, detail="User not found")
 
-        user_roles = json.loads(user_obj.roles) if user_obj.roles else ["user"]
-        if "restaurant_owner" not in user_roles:
-            user_roles.append("restaurant_owner")
-        user_obj.roles = json.dumps(user_roles)
+        # Update user role to restaurant_owner if not already set
+        if user_obj.role != "restaurant_owner":
+            user_obj.role = "restaurant_owner"
 
         db.commit()
         print(f"Restaurant approved successfully: {id}")
