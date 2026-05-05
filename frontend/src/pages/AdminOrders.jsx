@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Search, Clock, MapPin, Phone, DollarSign, Package, Calendar } from "lucide-react";
 
@@ -128,8 +128,7 @@ const AdminOrders = () => {
     },
   ];
 
-  useEffect(() => {
-    const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
       try {
         setLoading(true);
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/orders`, {
@@ -150,10 +149,11 @@ const AdminOrders = () => {
       } finally {
         setLoading(false);
       }
-    };
+    }, [getAuthHeaders]);
 
+  useEffect(() => {
     fetchOrders();
-  }, [getAuthHeaders]);
+  }, [fetchOrders]);
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
@@ -261,7 +261,7 @@ const AdminOrders = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -270,12 +270,12 @@ const AdminOrders = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-slate-600 mb-1">{stat.title}</p>
-                    <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stat.value}</p>
                   </div>
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md`}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md`}
                   >
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -287,13 +287,13 @@ const AdminOrders = () => {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle>All Orders</CardTitle>
               <CardDescription>View and manage customer orders</CardDescription>
             </div>
-            <div className="flex gap-3">
-              <div className="relative w-64">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
@@ -329,7 +329,74 @@ const AdminOrders = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {filteredOrders.length === 0 ? (
+              <div className="text-center py-12 text-slate-500">
+                No orders found matching your criteria
+              </div>
+            ) : (
+              filteredOrders.map((order) => (
+                <div key={order.id} className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+                  {/* Order Header */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-900">{order.id}</p>
+                      <StatusBadge status={order.status} />
+                    </div>
+                    <p className="font-bold text-slate-900 text-lg">{order.amount}</p>
+                  </div>
+
+                  {/* Customer Info */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center ring-2 ring-orange-100">
+                      <span className="text-white font-semibold text-sm">
+                        {order.customer?.charAt(0) || 'C'}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-900">{order.customer}</p>
+                      <div className="flex items-center gap-1 text-xs text-slate-500">
+                        <Phone className="w-3 h-3" />
+                        <span>{order.phone}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Details */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <Package className="w-4 h-4 text-slate-400" />
+                      <span>{order.restaurant}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <span>{order.items} items</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <span className="truncate">{order.address}</span>
+                    </div>
+                  </div>
+
+                  {/* Time & Action */}
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-1 text-xs text-slate-500">
+                      <Clock className="w-3 h-3" />
+                      <span>{order.time}</span>
+                    </div>
+                    <button
+                      className="inline-flex items-center px-3 py-1.5 border border-orange-200 text-xs font-medium rounded-lg text-orange-600 bg-white hover:bg-orange-50 transition-colors"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">

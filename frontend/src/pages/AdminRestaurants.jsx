@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
-import { Check, X, Store, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
+import { Check, X, Store, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 const AdminRestaurants = () => {
   const [restaurants, setRestaurants] = useState([])
@@ -12,44 +12,34 @@ const AdminRestaurants = () => {
   const [activeTab, setActiveTab] = useState('pending')
   const { getAuthHeaders } = useAuth()
 
-  const fetchRestaurants = async () => {
+  const fetchRestaurants = useCallback(async () => {
     try {
       setLoading(true)
-      const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/restaurants?status=pending`, {
-          headers: getAuthHeaders()
-        }),
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/restaurants?status=approved`, {
-          headers: getAuthHeaders()
-        }),
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/restaurants?status=rejected`, {
-          headers: getAuthHeaders()
-        })
-      ])
+      // Single API call to get all restaurants
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/restaurants`, {
+        headers: getAuthHeaders()
+      })
       
-      if (!pendingRes.ok || !approvedRes.ok || !rejectedRes.ok) {
+      if (!response.ok) {
         throw new Error('Failed to fetch restaurants')
       }
       
-      const [pendingData, approvedData, rejectedData] = await Promise.all([
-        pendingRes.json(),
-        approvedRes.json(),
-        rejectedRes.json()
-      ])
+      const allRestaurants = await response.json()
       
-      setRestaurants(pendingData)
-      setApprovedRestaurants(approvedData)
-      setRejectedRestaurants(rejectedData)
+      // Filter restaurants by status on frontend
+      setRestaurants(allRestaurants.filter(r => r.status === 'pending'))
+      setApprovedRestaurants(allRestaurants.filter(r => r.status === 'approved'))
+      setRejectedRestaurants(allRestaurants.filter(r => r.status === 'rejected'))
     } catch (err) {
       setError(err.message)
     } finally {
       setLoading(false)
     }
-  }
+  }, [getAuthHeaders])
 
   useEffect(() => {
     fetchRestaurants()
-  }, [])
+  }, [fetchRestaurants])
 
   const handleApprove = async (id) => {
     try {
@@ -167,8 +157,8 @@ const AdminRestaurants = () => {
 
       {/* Tabs Card */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm">
-        <div className="p-6 pb-4">
-          <div className="flex items-center justify-between">
+        <div className="p-4 sm:p-6 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-slate-900">Applications</h3>
               <p className="text-sm text-slate-500 mt-1">Review and manage restaurant applications</p>
@@ -183,14 +173,14 @@ const AdminRestaurants = () => {
             </div>
           </div>
         </div>
-        <div className="px-6 pb-6">
+        <div className="px-4 sm:px-6 pb-6">
           {/* Tabs */}
-          <div className="flex space-x-1 mb-6">
+          <div className="flex space-x-1 mb-6 overflow-x-auto">
             {['pending', 'approved', 'rejected'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab
                     ? 'bg-orange-500 text-white'
                     : 'text-slate-600 hover:bg-slate-100'
@@ -201,109 +191,171 @@ const AdminRestaurants = () => {
             ))}
           </div>
 
-          {/* Table */}
-          {getFilteredRestaurants().length === 0 ? (
-            <EmptyState status={activeTab} />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Restaurant
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Owner
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Contact
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      {activeTab === 'pending' ? 'Applied On' : activeTab === 'approved' ? 'Approved On' : 'Rejected On'}
-                    </th>
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {getFilteredRestaurants().length === 0 ? (
+              <EmptyState status={activeTab} />
+            ) : (
+              getFilteredRestaurants().map((restaurant) => (
+                <div key={restaurant.id} className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+                  {/* Restaurant Header */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center ring-2 ring-orange-100">
+                      <span className="text-white font-semibold text-sm">
+                        {restaurant.restaurant_name?.charAt(0) || 'R'}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-900">{restaurant.restaurant_name}</p>
+                      <p className="text-sm text-slate-500">{restaurant.email}</p>
+                    </div>
+                    {activeTab !== 'pending' && getStatusBadge(activeTab)}
+                  </div>
+
+                  {/* Owner Info */}
+                  <div className="space-y-2">
+                    <div className="text-sm">
+                      <span className="text-slate-500">Owner: </span>
+                      <span className="font-medium text-slate-900">{restaurant.owner_name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <span className="text-slate-500">Contact:</span>
+                      <span>{restaurant.phone}</span>
+                    </div>
+                  </div>
+
+                  {/* Date & Actions */}
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div className="text-xs text-slate-500">
+                      {activeTab === 'pending' ? 'Applied' : activeTab === 'approved' ? 'Approved' : 'Rejected'} {new Date(restaurant.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </div>
                     {activeTab === 'pending' && (
-                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
-                        Actions
-                      </th>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(restaurant.id)}
+                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-sm"
+                        >
+                          <Check className="w-3 h-3 mr-1" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => openRejectModal(restaurant.id)}
+                          className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded-lg text-red-600 bg-white hover:bg-red-50"
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Restaurant
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Owner
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Contact
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    {activeTab === 'pending' ? 'Applied On' : activeTab === 'approved' ? 'Approved On' : 'Rejected On'}
+                  </th>
+                  {activeTab === 'pending' && (
+                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
+                  {activeTab !== 'pending' && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-200">
+                {getFilteredRestaurants().map((restaurant) => (
+                  <tr key={restaurant.id} className="hover:bg-slate-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center ring-2 ring-orange-100">
+                          <span className="text-white font-semibold text-sm">
+                            {restaurant.restaurant_name?.charAt(0) || 'R'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {restaurant.restaurant_name}
+                          </p>
+                          <p className="text-sm text-slate-500">{restaurant.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-slate-900">{restaurant.owner_name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-600">{restaurant.phone}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-600">
+                        {new Date(restaurant.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </div>
+                    </td>
+                    {activeTab === 'pending' && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleApprove(restaurant.id)}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-sm"
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => openRejectModal(restaurant.id)}
+                            className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded-lg text-red-600 bg-white hover:bg-red-50"
+                          >
+                            <X className="w-3 h-3 mr-1" />
+                            Reject
+                          </button>
+                        </div>
+                      </td>
                     )}
                     {activeTab !== 'pending' && (
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                        Status
-                      </th>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(activeTab)}
+                      </td>
                     )}
                   </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
-                  {getFilteredRestaurants().map((restaurant) => (
-                    <tr key={restaurant.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center ring-2 ring-orange-100">
-                            <span className="text-white font-semibold text-sm">
-                              {restaurant.restaurant_name?.charAt(0) || 'R'}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900">
-                              {restaurant.restaurant_name}
-                            </p>
-                            <p className="text-sm text-slate-500">{restaurant.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-slate-900">{restaurant.owner_name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">{restaurant.phone}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">
-                          {new Date(restaurant.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </div>
-                      </td>
-                      {activeTab === 'pending' && (
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleApprove(restaurant.id)}
-                              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-sm"
-                            >
-                              <Check className="w-3 h-3 mr-1" />
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => openRejectModal(restaurant.id)}
-                              className="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded-lg text-red-600 bg-white hover:bg-red-50"
-                            >
-                              <X className="w-3 h-3 mr-1" />
-                              Reject
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                      {activeTab !== 'pending' && (
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(activeTab)}
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* Reject Modal */}
       {rejectModal.open && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+          <div className="relative top-20 mx-auto max-w-md w-full p-5 border shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                 Reject Restaurant Application

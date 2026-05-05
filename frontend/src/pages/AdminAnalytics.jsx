@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import {
   AreaChart,
@@ -90,29 +90,29 @@ const AdminAnalytics = () => {
     },
   ]);
 
-  useEffect(() => {
-    const fetchAnalyticsData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/analytics`, {
-          headers: getAuthHeaders()
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.kpi) {
-            setKpiData(data.kpi);
-          }
+  const fetchAnalyticsData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/analytics`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.kpi) {
+          setKpiData(data.kpi);
         }
-      } catch (err) {
-        console.error('Failed to fetch analytics data:', err);
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchAnalyticsData();
+    } catch (err) {
+      console.error('Failed to fetch analytics data:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [getAuthHeaders]);
+
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, [fetchAnalyticsData]);
 
   const Card = ({ children, className = "" }) => (
     <div className={`bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 ${className}`}>
@@ -149,7 +149,7 @@ const AdminAnalytics = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
           <p className="text-slate-500 mt-1">
@@ -169,7 +169,7 @@ const AdminAnalytics = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiData.map((kpi) => {
           const Icon = kpi.icon;
           return (
@@ -178,16 +178,16 @@ const AdminAnalytics = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <p className="text-sm text-slate-600 mb-1">{kpi.title}</p>
-                    <p className="text-2xl font-bold text-slate-900 mb-2">{kpi.value}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">{kpi.value}</p>
                     <div className="inline-flex items-center gap-1 text-sm font-medium text-green-600">
                       <ArrowUpRight className="w-4 h-4" />
                       <span>{kpi.change}</span>
                     </div>
                   </div>
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center shadow-md`}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center shadow-md`}
                   >
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -202,7 +202,7 @@ const AdminAnalytics = () => {
           <CardTitle>Revenue & Orders Trend (12 Months)</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={300}>
             <AreaChart
               data={revenueData}
               margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
@@ -255,7 +255,7 @@ const AdminAnalytics = () => {
       </Card>
 
       {/* Category Performance & Delivery Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Category Performance */}
         <Card>
           <CardHeader>
@@ -341,7 +341,7 @@ const AdminAnalytics = () => {
           <CardTitle>Customer Satisfaction Insights</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl font-bold text-green-700">4.3</span>

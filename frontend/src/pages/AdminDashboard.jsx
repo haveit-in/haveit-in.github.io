@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -132,27 +132,26 @@ const AdminDashboard = () => {
 
   const { getAuthHeaders } = useAuth();
 
-  useEffect(() => {
-    // Fetch dashboard data from API
-    const fetchDashboardData = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard`, {
-          headers: getAuthHeaders()
-        });
-        if (response.ok) {
-          const data = await response.json();
-          // Update KPI data with real data
-          if (data.kpi) {
-            setKpiData(data.kpi);
-          }
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard`, {
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Update KPI data with real data
+        if (data.kpi) {
+          setKpiData(data.kpi);
         }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
       }
-    };
-
-    fetchDashboardData();
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    }
   }, [getAuthHeaders]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const statusColors = {
     delivered: "bg-green-100 text-green-700 border-green-200",
@@ -199,7 +198,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiData.map((kpi) => {
           const Icon = kpi.icon;
           const TrendIcon = kpi.trend === "up" ? TrendingUp : TrendingDown;
@@ -209,7 +208,7 @@ const AdminDashboard = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <p className="text-sm text-slate-600 mb-1">{kpi.title}</p>
-                    <p className="text-2xl font-bold text-slate-900 mb-2">{kpi.value}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">{kpi.value}</p>
                     <div
                       className={`inline-flex items-center gap-1 text-sm font-medium ${
                         kpi.trend === "up" ? "text-green-600" : "text-red-600"
@@ -220,13 +219,13 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${
                       kpi.trend === "up"
                         ? "bg-gradient-to-br from-orange-500 to-orange-600"
                         : "bg-gradient-to-br from-slate-400 to-slate-500"
                     } shadow-md`}
                   >
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -236,7 +235,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Orders Chart */}
         <Card>
           <CardHeader>
@@ -329,7 +328,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Top Restaurants */}
         <Card>
           <CardHeader>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Search, Users as UsersIcon, UserCheck, UserX, Mail, Phone, Shield, User } from "lucide-react";
 
@@ -143,8 +143,7 @@ const AdminUsers = () => {
     },
   ];
 
-  useEffect(() => {
-    const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
       try {
         setLoading(true);
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/users`, {
@@ -165,10 +164,11 @@ const AdminUsers = () => {
       } finally {
         setLoading(false);
       }
-    };
+    }, [getAuthHeaders]);
 
+  useEffect(() => {
     fetchUsers();
-  }, [getAuthHeaders]);
+  }, [fetchUsers]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -268,7 +268,7 @@ const AdminUsers = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -277,12 +277,12 @@ const AdminUsers = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-slate-600 mb-1">{stat.title}</p>
-                    <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stat.value}</p>
                   </div>
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md`}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md`}
                   >
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -294,13 +294,13 @@ const AdminUsers = () => {
       {/* Users Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle>All Users</CardTitle>
               <CardDescription>View and manage platform users</CardDescription>
             </div>
-            <div className="flex gap-3">
-              <div className="relative w-64">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
@@ -334,7 +334,80 @@ const AdminUsers = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {filteredUsers.length === 0 ? (
+              <div className="text-center py-12 text-slate-500">
+                No users found matching your search
+              </div>
+            ) : (
+              filteredUsers.map((user) => (
+                <div key={user.id} className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+                  {/* User Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center ring-2 ring-orange-100">
+                        <span className="text-white font-semibold text-sm">
+                          {user.name?.charAt(0) || 'U'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">{user.name}</p>
+                        <p className="text-xs text-slate-500">ID: {user.id}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <RoleBadge role={user.role} />
+                      <StatusBadge status={user.status} />
+                    </div>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <Mail className="w-4 h-4 text-slate-400" />
+                      <span className="truncate">{user.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <Phone className="w-4 h-4 text-slate-400" />
+                      <span>{user.phone}</span>
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-4 py-2">
+                    <div>
+                      <p className="text-xs text-slate-500">Total Orders</p>
+                      <p className="font-semibold text-slate-900">{user.totalOrders}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500">Total Spent</p>
+                      <p className="font-semibold text-slate-900">{user.totalSpent}</p>
+                    </div>
+                  </div>
+
+                  {/* Joined Date & Action */}
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div className="text-xs text-slate-500">
+                      Joined {new Date(user.joinedDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </div>
+                    <button
+                      className="inline-flex items-center px-3 py-1.5 border border-orange-200 text-xs font-medium rounded-lg text-orange-600 bg-white hover:bg-orange-50 transition-colors"
+                    >
+                      View Profile
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const AuthContext = createContext()
@@ -137,10 +137,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('name')
   }
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('access_token')
     return token ? { 'Authorization': `Bearer ${token}` } : {}
-  }
+  }, [])
 
   const value = {
     user,
