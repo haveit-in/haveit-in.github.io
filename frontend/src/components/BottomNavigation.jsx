@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Home, Search, ShoppingCart, User, Menu } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
-const BottomNavigation = () => {
+const BottomNavigation = ({ onLoginClick }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
@@ -13,6 +13,14 @@ const BottomNavigation = () => {
   useEffect(() => {
     setImageError(false)
   }, [user?.photo_url])
+
+  const handleProfileClick = () => {
+    if (user) {
+      navigate('/profile')
+    } else if (onLoginClick) {
+      onLoginClick()
+    }
+  }
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
@@ -37,7 +45,7 @@ const BottomNavigation = () => {
           return (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => item.label === 'Profile' ? handleProfileClick() : navigate(item.path)}
               className={`flex flex-col items-center justify-center min-w-16 h-full p-2 transition-all duration-200 active:scale-95 ${
                 active 
                   ? 'text-orange-500' 

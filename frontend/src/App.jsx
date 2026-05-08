@@ -230,7 +230,7 @@ function App() {
             <FloatingCartBar />
             <RestaurantConflictModal />
             <Toast />
-            {!location.pathname.startsWith('/partner/dashboard') && <BottomNavigation />}
+            {!location.pathname.startsWith('/partner/dashboard') && <BottomNavigation onLoginClick={openLogin} />}
           </div>
         </CartProvider>
       </ToastProvider>
