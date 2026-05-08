@@ -53,6 +53,7 @@ import Blog from './pages/Blog.jsx'
 import CookiePolicy from './pages/CookiePolicy.jsx'
 
 function App() {
+  const location = useLocation()
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login') // 'login' | 'signup'
   const [activeMode, setActiveMode] = useState('food') // 'food' | 'groceries'
@@ -229,7 +230,7 @@ function App() {
             <FloatingCartBar />
             <RestaurantConflictModal />
             <Toast />
-            <BottomNavigation />
+            {!location.pathname.startsWith('/partner/dashboard') && <BottomNavigation />}
           </div>
         </CartProvider>
       </ToastProvider>

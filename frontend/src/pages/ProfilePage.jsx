@@ -5,7 +5,7 @@ import { UserIcon, ArrowLeftIcon, EditIcon, PlusIcon, CameraIcon } from '../comp
 import UserDetailsModal from '../components/UserDetailsModal.jsx'
 
 const ProfilePage = ({ activeMode }) => {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -43,6 +43,11 @@ const ProfilePage = ({ activeMode }) => {
 
   const handleCloseModal = () => {
     setShowUserDetailsModal(false)
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
   }
 
   if (!user) {
@@ -129,6 +134,17 @@ const ProfilePage = ({ activeMode }) => {
                 >
                   <EditIcon size={18} />
                   Edit Profile
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 shadow-lg whitespace-nowrap"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16,17 21,12 16,7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Logout
                 </button>
               </div>
             </div>
