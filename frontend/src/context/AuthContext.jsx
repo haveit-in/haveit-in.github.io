@@ -22,13 +22,19 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem('access_token')
     
     if (storedUser && storedToken) {
-      try {
-        setUser(JSON.parse(storedUser))
-        setToken(storedToken)
-      } catch (error) {
-        console.error('Error parsing stored user data:', error)
-        // Clear corrupted data
-        localStorage.removeItem('user')
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser)
+          setUser(parsedUser)
+          setToken(storedToken)
+        } catch (error) {
+          console.error('Error parsing stored user data:', error)
+          // Clear corrupted data
+          localStorage.removeItem('user')
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('role')
+          localStorage.removeItem('name')
+        }
         localStorage.removeItem('access_token')
         localStorage.removeItem('role')
         localStorage.removeItem('name')
@@ -80,6 +86,8 @@ export const AuthProvider = ({ children }) => {
       const result = await response.json()
       
       console.log("Login response data:", result)
+      console.log("User photo_url:", result.user?.photo_url)
+      console.log("User full object:", result.user)
       
       // If onboarding is required, store token but not user state
       if (result.requiresOnboarding) {

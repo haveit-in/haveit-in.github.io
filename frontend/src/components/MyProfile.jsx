@@ -5,6 +5,7 @@ import { UserIcon, MailIcon, SaveIcon, XIcon, PhoneIcon, MapPinIcon } from './Ic
 const MyProfile = ({ onClose, activeMode }) => {
   const { user } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
+  const [imageError, setImageError] = useState(false)
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -12,6 +13,11 @@ const MyProfile = ({ onClose, activeMode }) => {
     address: user?.address || ''
   })
   const [saveStatus, setSaveStatus] = useState('')
+
+  // Reset image error when user changes
+  useEffect(() => {
+    setImageError(false)
+  }, [user?.photo_url])
 
   // Update form data when user data changes
   useEffect(() => {
@@ -103,11 +109,19 @@ const MyProfile = ({ onClose, activeMode }) => {
           <div className="flex flex-col items-center text-center">
             <div className="relative mb-4">
               <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center overflow-hidden ring-4 ring-white/30">
-                {user?.photo_url ? (
+                {user?.photo_url && !imageError ? (
                   <img 
                     src={user.photo_url} 
                     alt={user.name || 'Profile'} 
                     className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    onError={() => {
+                      setImageError(true)
+                    }}
+                    onLoad={() => {
+                      setImageError(false);
+                    }}
                   />
                 ) : (
                   <UserIcon size={48} className="text-white" />

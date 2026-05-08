@@ -24,12 +24,7 @@ def upgrade() -> None:
     op.drop_table('example')
     op.drop_index('ix_restaurants_id', table_name='restaurants')
     op.drop_table('restaurants')
-    op.alter_column('restaurant_profiles', 'id',
-               existing_type=sa.UUID(),
-               type_=sa.Integer(),
-               existing_nullable=False,
-               autoincrement=True,
-               existing_server_default=sa.text('gen_random_uuid()'))
+    # Keep restaurant_profiles.id as UUID - no conversion needed
     op.alter_column('restaurant_profiles', 'user_id',
                existing_type=sa.UUID(),
                nullable=False)
@@ -42,7 +37,7 @@ def upgrade() -> None:
                type_=sa.String(),
                existing_nullable=True,
                existing_server_default=sa.text("'pending'::restaurant_status"))
-    op.drop_constraint('unique_user_restaurant', 'restaurant_profiles', type_='unique')
+    op.drop_constraint('unique_user_restaurant', 'restaurant_profiles', type_='unique', cascade=True)
     op.create_index(op.f('ix_restaurant_profiles_id'), 'restaurant_profiles', ['id'], unique=False)
     op.drop_constraint('restaurant_profiles_user_id_fkey', 'restaurant_profiles', type_='foreignkey')
     op.create_foreign_key(None, 'restaurant_profiles', 'users', ['user_id'], ['id'])
@@ -128,12 +123,7 @@ def downgrade() -> None:
     op.alter_column('restaurant_profiles', 'user_id',
                existing_type=sa.UUID(),
                nullable=True)
-    op.alter_column('restaurant_profiles', 'id',
-               existing_type=sa.Integer(),
-               type_=sa.UUID(),
-               existing_nullable=False,
-               autoincrement=True,
-               existing_server_default=sa.text('gen_random_uuid()'))
+    # Keep restaurant_profiles.id as UUID - no conversion needed
     op.create_table('restaurants',
     sa.Column('id', sa.INTEGER(), autoincrement=True, nullable=False),
     sa.Column('owner_id', sa.UUID(), autoincrement=False, nullable=False),

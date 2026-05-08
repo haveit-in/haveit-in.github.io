@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   CubeIcon,
   FoodIcon,
@@ -651,9 +652,12 @@ export default function Landing({ onOpenLogin, onOpenSignup, activeMode, setActi
                 <div className="relative z-10">
                   <h3 className="font-bold text-white text-lg md:text-xl mb-1">Hungry for more? 🍕</h3>
                   <p className="text-white/80 text-xs md:text-sm mb-3">Explore 200+ restaurants in your area</p>
-                  <button className="border-2 border-white text-white rounded-full px-4 md:px-5 py-2 text-xs md:text-sm font-semibold hover:bg-white/10 transition-colors hover:opacity-90 transition-opacity duration-150">
+                  <Link 
+                    to="/restaurants"
+                    className="inline-block border-2 border-white text-white rounded-full px-4 md:px-5 py-2 text-xs md:text-sm font-semibold hover:bg-white/10 transition-colors hover:opacity-90 transition-opacity duration-150"
+                  >
                     Explore All Restaurants →
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

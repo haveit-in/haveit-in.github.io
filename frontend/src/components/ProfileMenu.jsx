@@ -7,7 +7,13 @@ const ProfileMenu = ({ activeMode, setIsCartModalOpen, setIsFavoritesModalOpen }
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
   const dropdownRef = useRef(null)
+
+  // Reset image error when user changes
+  useEffect(() => {
+    setImageError(false)
+  }, [user?.photo_url])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -74,11 +80,19 @@ const ProfileMenu = ({ activeMode, setIsCartModalOpen, setIsFavoritesModalOpen }
         aria-expanded={isDropdownOpen}
         aria-haspopup="true"
       >
-        {user.photo_url ? (
+        {user.photo_url && !imageError ? (
           <img 
             src={user.photo_url} 
             alt={user.name || 'Profile'} 
             className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
+            onError={() => {
+              setImageError(true)
+            }}
+            onLoad={() => {
+              setImageError(false);
+            }}
           />
         ) : (
           <UserIcon size={20} />
@@ -97,11 +111,19 @@ const ProfileMenu = ({ activeMode, setIsCartModalOpen, setIsFavoritesModalOpen }
             <div className="flex items-center gap-3">
               {/* Avatar */}
               <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center overflow-hidden ring-2 ring-white/30">
-                {user.photo_url ? (
+                {user.photo_url && !imageError ? (
                   <img 
                     src={user.photo_url} 
                     alt={user.name || 'Profile'} 
                     className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    onError={() => {
+                      setImageError(true)
+                    }}
+                    onLoad={() => {
+                      setImageError(false);
+                    }}
                   />
                 ) : (
                   <UserIcon size={28} className="text-white" />

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Boolean, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 import uuid
 from app.database import Base
 
@@ -15,3 +16,6 @@ class User(Base):
     role = Column(String, default="user")  # Changed from roles to role to match DB schema
     is_active = Column(Boolean, default=True)
     profile_completed = Column(Boolean, default=False)
+    
+    # Relationships
+    orders = relationship("Order", back_populates="user")

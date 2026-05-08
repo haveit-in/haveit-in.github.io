@@ -1,8 +1,12 @@
 from app.auth import create_access_token
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
+from uuid import UUID
+import json
+
+from app.websocket.manager import manager
 
 from app.database import Base, engine, get_db
 from app.firebase import verify_firebase_token
@@ -11,6 +15,13 @@ from app.models.user import User
 from app.schemas import TokenRequest
 from app.dependencies import get_current_user
 from app.routers import restaurant, admin
+from app.routes import menu
+from app.routes import cart
+from app.routes import orders
+from app.routes import payments
+from app.routes import restaurant_orders
+from app.middleware.rate_limit import rate_limit_middleware
+from app.middleware.validation import validation_middleware
 
 load_dotenv()
 
@@ -21,18 +32,29 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(restaurant.router)
 app.include_router(admin.router)
+app.include_router(menu.router)
+app.include_router(cart.router)
+app.include_router(orders.router)
+app.include_router(payments.router)
+app.include_router(restaurant_orders.router)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:5174", 
         "http://localhost:3000",
         "https://haveit-official.vercel.app"
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    max_age=3600,
+    expose_headers=["Content-Length", "Content-Type"]
 )
+
+app.middleware("http")(rate_limit_middleware)
+app.middleware("http")(validation_middleware)
 
 # Add debugging middleware
 @app.middleware("http")
@@ -400,9 +422,139 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
         print(f"Firebase token verification error: {str(e)}")
         raise HTTPException(status_code=401, detail=f"Invalid Firebase token: {str(e)}")
 
+@app.get("/restaurants")
+def get_approved_restaurants(db: Session = Depends(get_db)):
+    """Public endpoint to get approved restaurants for all users"""
+    try:
+        from app.models.restaurant import RestaurantProfile
+        
+        restaurants = db.query(RestaurantProfile).filter(
+            RestaurantProfile.status == "approved",
+            RestaurantProfile.is_active == True
+        ).order_by(RestaurantProfile.created_at.desc()).all()
+        
+        result = []
+        for restaurant in restaurants:
+            result.append({
+                "id": str(restaurant.id),
+                "restaurant_name": restaurant.restaurant_name,
+                "email": restaurant.email,
+                "phone": restaurant.phone,
+                "address": restaurant.address,
+                "city": restaurant.city,
+                "state": restaurant.state,
+                "zipcode": restaurant.zipcode,
+                "cuisine_type": restaurant.cuisine_type,
+                "delivery_time": restaurant.delivery_time,
+                "rating": float(restaurant.rating) if restaurant.rating else 4.0,
+                "approved_at": restaurant.approved_at,
+                "created_at": restaurant.created_at,
+                # New fields
+                "banner_image": restaurant.banner_image,
+                "logo": restaurant.logo,
+                "latitude": float(restaurant.latitude) if restaurant.latitude else None,
+                "longitude": float(restaurant.longitude) if restaurant.longitude else None,
+                "minimum_order": float(restaurant.minimum_order) if restaurant.minimum_order else 0,
+                "delivery_fee": float(restaurant.delivery_fee) if restaurant.delivery_fee else 0,
+                "delivery_radius_km": restaurant.delivery_radius_km,
+                "is_open": restaurant.is_open,
+                "total_reviews": restaurant.total_reviews
+            })
+        
+        return result
+    except Exception as e:
+        print(f"Error fetching approved restaurants: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch restaurants")
+
 @app.get("/protected")
 def protected(user=Depends(get_current_user)):
     return {
         "message": "Access granted",
         "user": user
     }
+
+@app.websocket("/ws/orders/{order_id}")
+async def websocket_endpoint(websocket: WebSocket, order_id: str):
+    """
+    WebSocket endpoint for real-time order tracking
+    
+    Clients connect to: ws://localhost:8000/ws/orders/{order_id}
+    
+    Authentication: Token should be passed as query parameter: ?token=firebase_token
+    """
+    await websocket.accept()
+    
+    try:
+        # Get token from query parameters
+        token = websocket.query_params.get("token")
+        if not token:
+            await websocket.close(code=4001, reason="Authentication token required")
+            return
+        
+        # Verify Firebase token
+        decoded = verify_firebase_token(token)
+        user_id = decoded.get("uid")
+        
+        # Validate user has access to this order
+        from app.models.order import Order
+        from app.models.restaurant import RestaurantProfile
+        
+        db = next(get_db())
+        try:
+            order = db.query(Order).filter(Order.id == order_id).first()
+            if not order:
+                await websocket.close(code=4004, reason="Order not found")
+                return
+            
+            # Check if user owns the order or owns the restaurant
+            user_is_owner = order.user_id == user_id
+            user_is_restaurant_owner = False
+            
+            if not user_is_owner:
+                restaurant = db.query(RestaurantProfile).filter(
+                    RestaurantProfile.user_id == user_id,
+                    RestaurantProfile.id == order.restaurant_id
+                ).first()
+                user_is_restaurant_owner = restaurant is not None
+            
+            if not (user_is_owner or user_is_restaurant_owner):
+                await websocket.close(code=4003, reason="Access denied")
+                return
+            
+            # Connect to manager
+            await manager.connect(websocket, order_id, user_id)
+            
+            # Send initial status
+            from app.utils.order_transition import get_tracking_message
+            initial_message = {
+                "type": "connection_established",
+                "order_id": order_id,
+                "current_status": order.order_status,
+                "message": get_tracking_message(order.order_status or "PENDING"),
+                "estimated_delivery_time": order.estimated_delivery_time
+            }
+            await manager.send_personal_message(json.dumps(initial_message), websocket)
+            
+            # Keep connection alive
+            while True:
+                try:
+                    # Wait for client messages (ping/pong)
+                    data = await websocket.receive_text()
+                    
+                    # Handle ping messages
+                    if data == "ping":
+                        await websocket.send_text("pong")
+                    
+                except WebSocketDisconnect:
+                    break
+                    
+        finally:
+            db.close()
+            
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, order_id)
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        await websocket.close(code=4000, reason="Internal server error")
+    finally:
+        manager.disconnect(websocket, order_id)

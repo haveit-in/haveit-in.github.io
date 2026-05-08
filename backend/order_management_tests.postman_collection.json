@@ -1,0 +1,538 @@
+{
+  "info": {
+    "name": "Order Management API Tests",
+    "description": "Comprehensive test collection for the order management system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.access_token);",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/auth/login",
+              "host": ["{{BASE_URL}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cart Setup",
+      "item": [
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"menu_item_id\": \"test-menu-item-id\",\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/cart/items",
+              "host": ["{{BASE_URL}}"],
+              "path": ["cart", "items"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/cart",
+              "host": ["{{BASE_URL}}"],
+              "path": ["cart"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Order Creation Tests",
+      "item": [
+        {
+          "name": "Test 1: Empty Cart - Should Fail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Empty cart should return 400\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(400);",
+                  "    pm.expect(pm.response.json().detail).to.include(\"Cart is empty\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_method\": \"cash\",\n  \"delivery_address\": \"123 Test Street, Test City\",\n  \"customer_lat\": 40.7128,\n  \"customer_lng\": -74.0060\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/orders",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 2: Valid Order Creation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Order created successfully\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.order_id).to.be.a('string');",
+                  "    pm.expect(response.order_number).to.match(/^HVT-\\d{8}-[A-F0-9]{4}$/);",
+                  "    pm.expect(response.items).to.be.an('array').that.is.not.empty;",
+                  "    pm.expect(response.tracking_logs).to.be.an('array').that.is.not.empty;",
+                  "    pm.expect(response.tracking_logs[0].status).to.equal('order_confirmed');",
+                  "    pm.expect(response.tracking_logs[0].message).to.equal('Your order has been confirmed');",
+                  "    ",
+                  "    // Store order ID for subsequent tests",
+                  "    pm.collectionVariables.set('order_id', response.order_id);",
+                  "    pm.collectionVariables.set('order_number', response.order_number);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_method\": \"cash\",\n  \"delivery_address\": \"123 Test Street, Test City\",\n  \"customer_lat\": 40.7128,\n  \"customer_lng\": -74.0060\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/orders",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 3: Verify Cart Cleared After Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Cart should be empty after order\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.cart_items || response.items).to.be.an('array').that.is.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/cart",
+              "host": ["{{BASE_URL}}"],
+              "path": ["cart"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Order Retrieval Tests",
+      "item": [
+        {
+          "name": "Test 4: Get Order History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Order history retrieved\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.be.an('array');",
+                  "    if (response.length > 0) {",
+                  "        pm.expect(response[0]).to.have.property('order_id');",
+                  "        pm.expect(response[0]).to.have.property('order_number');",
+                  "        pm.expect(response[0]).to.have.property('restaurant_name');",
+                  "        pm.expect(response[0]).to.have.property('total_amount');",
+                  "        pm.expect(response[0]).to.have.property('order_status');",
+                  "        pm.expect(response[0]).to.have.property('created_at');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/orders?page=1&limit=10",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 5: Get Specific Order Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Order details retrieved\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('order_id');",
+                  "    pm.expect(response).to.have.property('order_number');",
+                  "    pm.expect(response).to.have.property('restaurant');",
+                  "    pm.expect(response).to.have.property('items');",
+                  "    pm.expect(response).to.have.property('subtotal');",
+                  "    pm.expect(response).to.have.property('tax_amount');",
+                  "    pm.expect(response).to.have.property('delivery_fee');",
+                  "    pm.expect(response).to.have.property('total_amount');",
+                  "    pm.expect(response).to.have.property('payment_method');",
+                  "    pm.expect(response).to.have.property('payment_status');",
+                  "    pm.expect(response).to.have.property('order_status');",
+                  "    pm.expect(response).to.have.property('estimated_delivery_time');",
+                  "    pm.expect(response).to.have.property('tracking_logs');",
+                  "    pm.expect(response).to.have.property('created_at');",
+                  "    ",
+                  "    // Verify tracking logs",
+                  "    pm.expect(response.tracking_logs).to.be.an('array').that.is.not.empty;",
+                  "    pm.expect(response.tracking_logs[0].status).to.equal('order_confirmed');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/orders/{{order_id}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders", "{{order_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 6: Get Order Tracking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Order tracking retrieved\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('order_status');",
+                  "    pm.expect(response).to.have.property('timeline');",
+                  "    pm.expect(response.timeline).to.be.an('array').that.is.not.empty;",
+                  "    pm.expect(response.timeline[0]).to.have.property('status');",
+                  "    pm.expect(response.timeline[0]).to.have.property('message');",
+                  "    pm.expect(response.timeline[0]).to.have.property('created_at');",
+                  "    ",
+                  "    // Verify initial tracking log",
+                  "    pm.expect(response.timeline[0].status).to.equal('order_confirmed');",
+                  "    pm.expect(response.timeline[0].message).to.equal('Your order has been confirmed');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/orders/{{order_id}}/tracking",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders", "{{order_id}}", "tracking"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling Tests",
+      "item": [
+        {
+          "name": "Test 7: Get Non-Existent Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Non-existent order returns 404\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(404);",
+                  "    pm.expect(pm.response.json().detail).to.include('Order not found');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/orders/00000000-0000-0000-0000-000000000000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders", "00000000-0000-0000-0000-000000000000"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 8: Unauthorized Access",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Unauthorized access returns 401\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/orders",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Multiple Orders Test",
+      "item": [
+        {
+          "name": "Test 9: Create Multiple Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Multiple orders created successfully\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.be.an('array');",
+                  "    pm.expect(response.length).to.be.at.least(2);",
+                  "    ",
+                  "    // Verify orders are sorted by created_at desc",
+                  "    for (let i = 0; i < response.length - 1; i++) {",
+                  "        const currentDate = new Date(response[i].created_at);",
+                  "        const nextDate = new Date(response[i + 1].created_at);",
+                  "        pm.expect(currentDate >= nextDate).to.be.true;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/orders?page=1&limit=5",
+              "host": ["{{BASE_URL}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "auth_token",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "order_id",
+      "value": ""
+    },
+    {
+      "key": "order_number",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script",
+          "console.log('Running order management tests...');"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script",
+          "console.log('Test completed for: ' + pm.info.requestName);"
+        ]
+      }
+    }
+  ]
+}

@@ -66,9 +66,15 @@ export default function MobileBottomNav({
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const [imageError, setImageError] = useState(false)
   const searchInputRef = useRef(null)
   const profileDropdownRef = useRef(null)
   const debounceTimerRef = useRef(null)
+
+  // Reset image error when user changes
+  useEffect(() => {
+    setImageError(false)
+  }, [user?.photo_url])
 
   // Initialize Fuse
   const fuse = useMemo(() => {
@@ -243,25 +249,23 @@ export default function MobileBottomNav({
           onClick={handleProfileClick}
           className={`flex flex-col items-center justify-center w-full h-full transition-colors relative ${
             activeTab === 'profile'
-              ? (activeMode === 'food' ? 'text-orange-500' : 'text-green-500')
-              : 'text-gray-500'
           }`}
         >
           {!loading && user ? (
-            user.photo_url ? (
+            user.photo_url && !imageError ? (
               <img 
                 src={user.photo_url} 
                 alt={user.name || 'Profile'} 
                 className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-200"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                onError={() => setImageError(true)}
+                onLoad={() => setImageError(false)}
               />
             ) : (
-              <div className={`w-6 h-6 ${activeMode === 'food' ? 'bg-orange-500' : 'bg-green-600'} text-white rounded-full flex items-center justify-center ring-1 ring-gray-200`}>
-                <User size={14} strokeWidth={2} />
-              </div>
+              <User size={24} strokeWidth={2} />
             )
-          ) : (
-            <User size={24} strokeWidth={2} />
-          )}
+          ) : null}
           {activeTab === 'profile' && <div className={`w-1 h-1 rounded-full mt-1 absolute bottom-2 ${
             activeMode === 'food' ? 'bg-orange-500' : 'bg-green-500'
           }`} />}
@@ -275,14 +279,18 @@ export default function MobileBottomNav({
               <div className="flex items-center gap-3">
                 {/* Avatar */}
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center overflow-hidden ring-2 ring-white/30">
-                  {user.photo_url ? (
+                  {user.photo_url && !imageError ? (
                     <img 
                       src={user.photo_url} 
                       alt={user.name || 'Profile'} 
                       className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
+                      onError={() => setImageError(true)}
+                      onLoad={() => setImageError(false)}
                     />
                   ) : (
-                    <User size={20} className="text-white" />
+                    <User size={24} strokeWidth={2} className="text-white" />
                   )}
                 </div>
                 

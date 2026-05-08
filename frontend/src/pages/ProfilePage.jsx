@@ -8,6 +8,12 @@ const ProfilePage = ({ activeMode }) => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  // Reset image error when user changes
+  React.useEffect(() => {
+    setImageError(false)
+  }, [user?.photo_url])
 
   const accent = activeMode === 'food'
     ? { 
@@ -76,12 +82,19 @@ const ProfilePage = ({ activeMode }) => {
               {/* Avatar */}
               <div className="relative flex-shrink-0">
                 <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center overflow-hidden ring-4 ring-white/30">
-                  {user.photo_url ? (
+                  {user.photo_url && !imageError ? (
                     <img 
                       src={user.photo_url} 
                       alt={user.name || 'Profile'} 
                       className="w-full h-full object-cover"
-                    />
+                      referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
+                      onError={() => {
+                        setImageError(true)
+                      }}
+                      onLoad={() => {
+                        setImageError(false);
+                    }}/>
                   ) : (
                     <UserIcon size={48} className="text-white" />
                   )}

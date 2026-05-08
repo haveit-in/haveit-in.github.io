@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-
+import { useAuth } from '../context/AuthContext.jsx'
+import ApprovedRestaurants from './ApprovedRestaurants.jsx'
 // ChevronLeft Icon component
 const ChevronLeftIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,15 +24,15 @@ const foodCategories = [
   { id: 4, name: 'Desserts', image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=300&h=300&fit=crop' },
   { id: 5, name: 'Chinese', image: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=300&h=300&fit=crop' },
   { id: 6, name: 'Cake', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop' },
-  // { id: 7, name: 'Idly', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=300&h=300&fit=crop' },
   // Row 2
-  { id: 8, name: 'Burger', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=300&fit=crop' },
-  // { id: 9, name: 'Shawarma', image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=300&h=300&fit=crop' },
-  { id: 10, name: 'Salad', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=300&fit=crop' },
-  { id: 11, name: 'Noodles', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&h=300&fit=crop' },
-  { id: 12, name: 'Rolls', image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=300&h=300&fit=crop' },
-  { id: 13, name: 'Shake', image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&h=300&fit=crop' },
-  { id: 14, name: 'Vada', image: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=300&h=300&fit=crop' },
+  { id: 7, name: 'Burger', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=300&fit=crop' },
+  { id: 8, name: 'Shawarma', image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=300&h=300&fit=crop' },
+  { id: 9, name: 'Salad', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=300&fit=crop' },
+  { id: 10, name: 'Noodles', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&h=300&fit=crop' },
+  { id: 11, name: 'Rolls', image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=300&h=300&fit=crop' },
+  { id: 12, name: 'Shake', image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&h=300&fit=crop' },
+  { id: 13, name: 'Vada', image: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=300&h=300&fit=crop' },
+  { id: 14, name: 'Restaurants', image: 'https://images.unsplash.com/photo-15172480680-7bf2f1a6d9c?w=300&h=300&fit=crop' }, // New category for approved restaurants
 ]
 
 // Section Header Component with arrows
@@ -72,7 +73,7 @@ function SectionHeader({ title, onScrollLeft, onScrollRight, hasMoreLeft, hasMor
 }
 
 // Food Category Card Component
-function FoodCategoryCard({ name, image }) {
+function FoodCategoryCard({ name, image, onClick, isSelected }) {
   return (
     <div className="flex flex-col items-center cursor-pointer group relative">
       <div className="w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden mb-2 transition-transform duration-200 group-hover:scale-105">
@@ -83,7 +84,7 @@ function FoodCategoryCard({ name, image }) {
           loading="lazy"
         />
       </div>
-      <span className="text-sm text-[#3d3d3d] text-center font-medium">{name}</span>
+      <span className={`text-sm text-[#3d3d3d] text-center font-medium ${isSelected ? 'text-orange-600 font-semibold' : ''}`}>{name}</span>
     </div>
   )
 }
@@ -93,6 +94,7 @@ export default function FoodCategories() {
   const foodSliderRef = useRef(null)
   const [hasMoreLeft, setHasMoreLeft] = useState(false)
   const [hasMoreRight, setHasMoreRight] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState(null)
 
   const checkScrollBoundaries = useCallback(() => {
     if (foodSliderRef.current) {
@@ -154,6 +156,14 @@ export default function FoodCategories() {
                 key={category.id}
                 name={category.name}
                 image={category.image}
+                onClick={() => {
+                  if (category.name === 'Restaurants') {
+                    setSelectedCategory('restaurants')
+                  } else {
+                    setSelectedCategory(null)
+                  }
+                }}
+                isSelected={selectedCategory === category.name}
               />
             ))}
           </div>
@@ -169,6 +179,9 @@ export default function FoodCategories() {
             />
           ))}
         </div>
+
+        {/* Show Approved Restaurants when Restaurants category is selected */}
+        {selectedCategory === 'restaurants' && <ApprovedRestaurants />}
       </div>
     </div>
   )

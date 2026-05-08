@@ -10,6 +10,19 @@ from app.dependencies import require_admin, get_current_user
 router = APIRouter()
 
 @router.get("/admin/restaurants")
+def get_all_restaurants(
+    status: str = None,
+    db=Depends(get_db),
+    user=Depends(require_admin)
+):
+    query = db.query(RestaurantProfile)
+    
+    if status:
+        query = query.filter(RestaurantProfile.status == status)
+    
+    return query.order_by(RestaurantProfile.created_at.desc()).all()
+
+@router.get("/admin/restaurants")
 def get_pending_restaurants(
     status: str = "pending",
     db=Depends(get_db),
