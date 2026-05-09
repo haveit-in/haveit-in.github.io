@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
-import Razorpay from 'razorpay'
 import LoadingButton from '../components/LoadingButton.jsx'
 import { 
   ArrowLeft, 
@@ -20,14 +19,15 @@ import {
 
 const CheckoutPage = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, getAuthHeaders } = useAuth()
   const { 
     cart, 
     restaurant, 
     getCartTotals, 
     getMinimumOrderInfo,
     clearCart, 
-    replaceCart 
+    replaceCart,
+    isEmpty 
   } = useCart()
   const toast = useToast()
   const [loading, setLoading] = useState(true)
@@ -130,28 +130,65 @@ const CheckoutPage = () => {
 
   // Handle place order
   const handlePlaceOrder = async () => {
+    console.log('=== ORDER PLACEMENT DEBUG ===')
+    console.log('User authenticated:', !!user)
+    
     if (!validateForm()) return
 
     setIsProcessing(true)
     setError('')
 
     try {
+      // IMPORTANT: Read fresh cart data from localStorage to avoid stale state
+      const freshCart = JSON.parse(localStorage.getItem('cart') || '{}')
+      const freshRestaurant = JSON.parse(localStorage.getItem('cartRestaurant') || 'null')
+      
+      console.log('=== FRESH LOCALSTORAGE DATA ===')
+      console.log('Fresh cart:', freshCart)
+      console.log('Fresh restaurant:', freshRestaurant)
+      console.log('Cart items count:', Object.keys(freshCart).length)
+      
       // Get user location (for demo, using default coordinates)
       const customerLat = 17.3850 // Hyderabad coordinates
       const customerLng = 78.4867
 
+      // IMPORTANT: Debug raw cart structure
+      console.log("RAW freshCart:", freshCart)
+      Object.entries(freshCart).forEach(([key, value]) => {
+        console.log("KEY:", key)
+        console.log("VALUE:", value)
+      })
+      
+      // IMPORTANT: UUID is stored as object key, not inside object value
+      const cartItems = Object.entries(freshCart).map(([id, item]) => ({
+        menu_item_id: id,
+        quantity: item.quantity
+      }))
+      
+      console.log('Cart items being sent:', cartItems)
+      console.log('Item IDs:', cartItems.map(item => item.menu_item_id))
+
       const orderPayload = {
-        payment_method: paymentMethod,
+        payment_method: paymentMethod === 'razorpay' ? 'razorpay' : 'cash',
         delivery_address: `${deliveryAddress.addressLine1}, ${deliveryAddress.addressLine2}, ${deliveryAddress.city}, ${deliveryAddress.state} - ${deliveryAddress.pincode}`,
         customer_lat: customerLat,
-        customer_lng: customerLng
+        customer_lng: customerLng,
+        restaurant_id: freshRestaurant?.id,
+        items: cartItems
       }
+
+      console.log('Order payload being sent:', orderPayload)
+
+      // Get token explicitly
+      const token = localStorage.getItem('access_token')
+      console.log('TOKEN FROM LOCALSTORAGE:', token)
+      console.log('TOKEN EXISTS:', !!token)
 
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders()
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(orderPayload)
       })
@@ -213,22 +250,49 @@ const CheckoutPage = () => {
   // Create order
   const createOrder = async () => {
     try {
+      // IMPORTANT: Read fresh cart data from localStorage to avoid stale state
+      const freshCart = JSON.parse(localStorage.getItem('cart') || '{}')
+      const freshRestaurant = JSON.parse(localStorage.getItem('cartRestaurant') || 'null')
+      
+      console.log('=== ONLINE PAYMENT CART DATA ===')
+      console.log('Fresh cart:', freshCart)
+      console.log('Fresh restaurant:', freshRestaurant)
+      
+      if (!freshRestaurant || Object.keys(freshCart).length === 0) {
+        throw new Error('Cart is empty')
+      }
+
       // Get user location (for demo, using default coordinates)
       const customerLat = 17.3850 // Hyderabad coordinates
       const customerLng = 78.4867
+
+      // IMPORTANT: UUID is stored as object key, not inside object value
+      const cartItems = Object.entries(freshCart).map(([id, item]) => ({
+        menu_item_id: id,
+        quantity: item.quantity
+      }))
 
       const orderPayload = {
         payment_method: 'razorpay',
         delivery_address: `${deliveryAddress.addressLine1}, ${deliveryAddress.addressLine2}, ${deliveryAddress.city}, ${deliveryAddress.state} - ${deliveryAddress.pincode}`,
         customer_lat: customerLat,
-        customer_lng: customerLng
+        customer_lng: customerLng,
+        restaurant_id: freshRestaurant?.id,
+        items: cartItems
       }
+
+      console.log('Order payload being sent:', orderPayload)
+
+      // Get token explicitly
+      const token = localStorage.getItem('access_token')
+      console.log('TOKEN FROM LOCALSTORAGE (createOrder):', token)
+      console.log('TOKEN EXISTS (createOrder):', !!token)
 
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders()
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(orderPayload)
       })
@@ -311,7 +375,7 @@ const CheckoutPage = () => {
         }
       }
 
-      const razorpay = new Razorpay(options)
+      const razorpay = new window.Razorpay(options)
       razorpay.open()
     })
   }

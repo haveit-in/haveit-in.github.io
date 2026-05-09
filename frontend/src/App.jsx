@@ -109,8 +109,22 @@ function App() {
               <Route path="/contact" element={<ContactUs />} />
               <Route path="/restaurants" element={<Restaurants />} />
               <Route path="/restaurants/:id" element={<RestaurantDetails />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute requiredRole="user">
+                    <CartPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute requiredRole="user">
+                    <CheckoutPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/orders/success" element={<OrderSuccessPage />} />
               <Route path="/orders/:id/tracking" element={<OrderTrackingPage />} />
               <Route path="/restaurant/orders" element={<RestaurantOrdersPage />} />

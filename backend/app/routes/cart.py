@@ -22,11 +22,18 @@ def get_cart(
 ):
     """Get current user's cart"""
     try:
+        # Convert user_id from string to UUID for database comparison
+        user_id_str = current_user.get("user_id")
+        try:
+            user_uuid = UUID(user_id_str)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        
         # Get user's cart with optimized loading
         cart = db.query(Cart).options(
             joinedload(Cart.cart_items).joinedload(CartItem.menu_item),
             joinedload(Cart.restaurant)
-        ).filter(Cart.user_id == current_user["id"]).first()
+        ).filter(Cart.user_id == user_uuid).first()
         
         if not cart:
             return CartResponse()
@@ -91,13 +98,20 @@ def add_to_cart(
         if not menu_item.is_available:
             raise HTTPException(status_code=400, detail="Menu item is not available")
         
+        # Convert user_id from string to UUID for database comparison
+        user_id_str = current_user.get("user_id")
+        try:
+            user_uuid = UUID(user_id_str)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        
         # Get or create user's cart
-        cart = db.query(Cart).filter(Cart.user_id == current_user["id"]).first()
+        cart = db.query(Cart).filter(Cart.user_id == user_uuid).first()
         
         if not cart:
             # Create new cart
             cart = Cart(
-                user_id=current_user["id"],
+                user_id=user_uuid,
                 restaurant_id=menu_item.restaurant_id
             )
             db.add(cart)
@@ -153,8 +167,15 @@ def update_cart_item(
 ):
     """Update cart item quantity"""
     try:
+        # Convert user_id from string to UUID for database comparison
+        user_id_str = current_user.get("user_id")
+        try:
+            user_uuid = UUID(user_id_str)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        
         # Get user's cart
-        cart = db.query(Cart).filter(Cart.user_id == current_user["id"]).first()
+        cart = db.query(Cart).filter(Cart.user_id == user_uuid).first()
         if not cart:
             raise HTTPException(status_code=404, detail="Cart not found")
         
@@ -194,8 +215,15 @@ def remove_cart_item(
 ):
     """Remove item from cart"""
     try:
+        # Convert user_id from string to UUID for database comparison
+        user_id_str = current_user.get("user_id")
+        try:
+            user_uuid = UUID(user_id_str)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        
         # Get user's cart
-        cart = db.query(Cart).filter(Cart.user_id == current_user["id"]).first()
+        cart = db.query(Cart).filter(Cart.user_id == user_uuid).first()
         if not cart:
             raise HTTPException(status_code=404, detail="Cart not found")
         
@@ -227,10 +255,17 @@ def get_cart_item_count(
 ):
     """Get total number of items in cart for navbar badge"""
     try:
+        # Convert user_id from string to UUID for database comparison
+        user_id_str = current_user.get("user_id")
+        try:
+            user_uuid = UUID(user_id_str)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        
         # Get user's cart with optimized loading
         cart = db.query(Cart).options(
             joinedload(Cart.cart_items)
-        ).filter(Cart.user_id == current_user["id"]).first()
+        ).filter(Cart.user_id == user_uuid).first()
         
         if not cart or not cart.cart_items:
             return {"total_items": 0}
@@ -251,8 +286,15 @@ def clear_cart(
 ):
     """Clear entire cart"""
     try:
+        # Convert user_id from string to UUID for database comparison
+        user_id_str = current_user.get("user_id")
+        try:
+            user_uuid = UUID(user_id_str)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        
         # Get user's cart
-        cart = db.query(Cart).filter(Cart.user_id == current_user["id"]).first()
+        cart = db.query(Cart).filter(Cart.user_id == user_uuid).first()
         if not cart:
             return CartResponse()
         

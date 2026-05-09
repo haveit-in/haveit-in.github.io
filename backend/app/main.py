@@ -25,6 +25,10 @@ from app.middleware.validation import validation_middleware
 
 load_dotenv()
 
+# Debug database connection
+from app.database import engine
+print("DATABASE URL:", engine.url)
+
 app = FastAPI()
 
 # Create database tables
@@ -47,14 +51,14 @@ app.add_middleware(
         "https://haveit-official.vercel.app"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
     max_age=3600,
     expose_headers=["Content-Length", "Content-Type"]
 )
 
 app.middleware("http")(rate_limit_middleware)
-app.middleware("http")(validation_middleware)
+# app.middleware("http")(validation_middleware)  # Temporarily disabled to resolve CORS issue
 
 # Add debugging middleware
 @app.middleware("http")

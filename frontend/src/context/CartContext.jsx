@@ -28,19 +28,52 @@ export const CartProvider = ({ children }) => {
     if (savedCart) {
       try {
         setCart(JSON.parse(savedCart))
-      } catch (e) {
-        console.error('Failed to parse saved cart:', e)
+      } catch (error) {
+        console.error('Error parsing saved cart:', error)
+        // Clear corrupted data
+        localStorage.removeItem('cart')
+        localStorage.removeItem('cartRestaurant')
       }
     }
     
     if (savedRestaurant) {
       try {
         setRestaurant(JSON.parse(savedRestaurant))
-      } catch (e) {
-        console.error('Failed to parse saved restaurant:', e)
+      } catch (error) {
+        console.error('Error parsing saved restaurant:', error)
+        localStorage.removeItem('cartRestaurant')
       }
     }
   }, [])
+
+  // Always fetch fresh cart data from backend (disabled temporarily)
+  const fetchCartFromBackend = useCallback(async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/cart`, {
+        headers: getAuthHeaders()
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch cart')
+      }
+      
+      const cartData = await response.json()
+      setCart(cartData.items || [])
+      if (cartData.restaurant) {
+        setRestaurant(cartData.restaurant)
+      }
+      
+      return cartData
+    } catch (error) {
+      console.error('Error fetching cart:', error)
+      return null
+    }
+  }, [getAuthHeaders])
+
+  // Disabled automatic cart fetching to prevent connection errors
+  // useEffect(() => {
+  //   fetchCartFromBackend()
+  // }, [fetchCartFromBackend])
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -65,55 +98,58 @@ export const CartProvider = ({ children }) => {
     }
 
     setRestaurant(itemRestaurant)
-    setCart(prev => {
-      const existingItem = prev[item.id]
-      if (existingItem) {
-        toast.success(`${item.name} quantity updated`)
-        return {
-          ...prev,
-          [item.id]: {
-            ...existingItem,
-            quantity: existingItem.quantity + 1,
-            addedAt: new Date().toISOString()
-          }
+    
+    const existingItem = cart[item.id]
+    let message
+    
+    if (existingItem) {
+      message = `${item.name} quantity updated`
+      setCart(prev => ({
+        ...prev,
+        [item.id]: {
+          ...existingItem,
+          quantity: existingItem.quantity + 1,
+          addedAt: new Date().toISOString()
         }
-      } else {
-        toast.success(`${item.name} added to cart`)
-        return {
-          ...prev,
-          [item.id]: {
-            ...item,
-            quantity: 1,
-            addedAt: new Date().toISOString()
-          }
+      }))
+    } else {
+      message = `${item.name} added to cart`
+      setCart(prev => ({
+        ...prev,
+        [item.id]: {
+          ...item,
+          quantity: 1,
+          addedAt: new Date().toISOString()
         }
-      }
-    })
+      }))
+    }
+    
+    toast.success(message)
     return true
-  }, [restaurant, toast])
+  }, [restaurant, toast, cart])
 
   // Update item quantity
   const updateQuantity = useCallback((itemId, change) => {
-    setCart(prev => {
-      const item = prev[itemId]
-      if (!item) return prev
+    const item = cart[itemId]
+    if (!item) return
 
-      const newQuantity = item.quantity + change
-      if (newQuantity <= 0) {
-        toast.success(`${item.name} removed from cart`)
+    const newQuantity = item.quantity + change
+    if (newQuantity <= 0) {
+      toast.success(`${item.name} removed from cart`)
+      setCart(prev => {
         const { [itemId]: removed, ...rest } = prev
         return rest
-      }
-
-      return {
+      })
+    } else {
+      setCart(prev => ({
         ...prev,
         [itemId]: {
           ...item,
           quantity: newQuantity
         }
-      }
-    })
-  }, [toast])
+      }))
+    }
+  }, [toast, cart])
 
   // Remove item from cart
   const removeFromCart = useCallback((itemId) => {

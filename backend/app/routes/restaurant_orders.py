@@ -49,7 +49,7 @@ def get_restaurant_orders(
     """
     # STEP 3 — SECURITY: Get restaurant owner's restaurant
     restaurant = db.query(RestaurantProfile).filter(
-        RestaurantProfile.user_id == current_user["uid"]
+        RestaurantProfile.user_id == current_user["user_id"]
     ).first()
     
     if not restaurant:
@@ -142,7 +142,7 @@ def get_restaurant_orders_count(
     """
     # Get restaurant owner's restaurant
     restaurant = db.query(RestaurantProfile).filter(
-        RestaurantProfile.user_id == current_user["uid"]
+        RestaurantProfile.user_id == current_user["user_id"]
     ).first()
     
     if not restaurant:
@@ -185,7 +185,7 @@ async def update_order_status(
     """
     # Get restaurant owner's restaurant
     restaurant = db.query(RestaurantProfile).filter(
-        RestaurantProfile.user_id == current_user["uid"]
+        RestaurantProfile.user_id == current_user["user_id"]
     ).first()
     
     if not restaurant:

@@ -9,6 +9,8 @@ class CreateOrderRequest(BaseModel):
     delivery_address: str
     customer_lat: float
     customer_lng: float
+    restaurant_id: Optional[str] = None
+    items: Optional[List[dict]] = None
 
     class Config:
         from_attributes = True

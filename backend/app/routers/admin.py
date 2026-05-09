@@ -10,27 +10,36 @@ from app.dependencies import require_admin, get_current_user
 router = APIRouter()
 
 @router.get("/admin/restaurants")
-def get_all_restaurants(
+def get_restaurants(
     status: str = None,
     db=Depends(get_db),
     user=Depends(require_admin)
 ):
+    print("=== ADMIN RESTAURANTS REQUEST ===")
+    print(f"Status filter: {status}")
+    print(f"Admin user: {user}")
+    
+    # First, let's see ALL restaurants in the database
+    all_restaurants = db.query(RestaurantProfile).all()
+    print(f"TOTAL RESTAURANTS IN DB: {len(all_restaurants)}")
+    for restaurant in all_restaurants:
+        print(f"  ALL - {restaurant.restaurant_name} (status: {restaurant.status}, user_id: {restaurant.user_id})")
+    
     query = db.query(RestaurantProfile)
     
     if status:
         query = query.filter(RestaurantProfile.status == status)
+        print(f"Filtering by status: {status}")
+    else:
+        # By default, return all restaurants for frontend filtering
+        print("Returning all restaurants for frontend filtering")
     
-    return query.order_by(RestaurantProfile.created_at.desc()).all()
-
-@router.get("/admin/restaurants")
-def get_pending_restaurants(
-    status: str = "pending",
-    db=Depends(get_db),
-    user=Depends(require_admin)
-):
-    return db.query(RestaurantProfile).filter(
-        RestaurantProfile.status == status
-    ).order_by(RestaurantProfile.created_at.desc()).all()
+    restaurants = query.order_by(RestaurantProfile.created_at.desc()).all()
+    print(f"Found {len(restaurants)} restaurants matching filter")
+    for restaurant in restaurants:
+        print(f"  FILTERED - {restaurant.restaurant_name} (status: {restaurant.status}, id: {restaurant.id})")
+    
+    return restaurants
 
 @router.patch("/admin/restaurants/{id}/approve")
 def approve_restaurant(
@@ -58,7 +67,7 @@ def approve_restaurant(
         # Update status and approval fields
         profile.status = "approved"
         profile.is_active = True
-        profile.approved_by = user["user_id"]
+        profile.approved_by = user.get("id")
         profile.approved_at = datetime.utcnow()
 
         # Update user role

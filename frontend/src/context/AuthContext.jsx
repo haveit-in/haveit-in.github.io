@@ -22,19 +22,14 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem('access_token')
     
     if (storedUser && storedToken) {
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser)
-          setUser(parsedUser)
-          setToken(storedToken)
-        } catch (error) {
-          console.error('Error parsing stored user data:', error)
-          // Clear corrupted data
-          localStorage.removeItem('user')
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('role')
-          localStorage.removeItem('name')
-        }
+      try {
+        const parsedUser = JSON.parse(storedUser)
+        setUser(parsedUser)
+        setToken(storedToken)
+      } catch (error) {
+        console.error('Error parsing stored user data:', error)
+        // Clear corrupted data
+        localStorage.removeItem('user')
         localStorage.removeItem('access_token')
         localStorage.removeItem('role')
         localStorage.removeItem('name')
@@ -147,7 +142,11 @@ export const AuthProvider = ({ children }) => {
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('access_token')
-    return token ? { 'Authorization': `Bearer ${token}` } : {}
+    console.log('=== AUTH HEADERS DEBUG ===')
+    console.log('Token from localStorage:', token)
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
+    console.log('Headers being returned:', headers)
+    return headers
   }, [])
 
   const value = {

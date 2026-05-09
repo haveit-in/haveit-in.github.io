@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 # ✅ LOAD ENV HERE (IMPORTANT)
-load_dotenv()
+load_dotenv('.env.local')
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 

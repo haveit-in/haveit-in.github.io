@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router";
 import { Store, Upload, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const sections = [
   { id: "basic", name: "Basic Details" },
@@ -10,6 +11,7 @@ const sections = [
 ];
 
 export function RegistrationPage() {
+  const { token } = useAuth();
   const [formData, setFormData] = useState({
     restaurantName: "",
     ownerName: "",
@@ -50,9 +52,53 @@ export function RegistrationPage() {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/partner/waiting-approval");
+    
+    try {
+      if (!token) {
+        alert('Please login first');
+        navigate('/partner/login');
+        return;
+      }
+
+      console.log('Submitting restaurant application:', formData);
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/restaurant/apply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          restaurant_name: formData.restaurantName,
+          owner_name: formData.ownerName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          cuisine: formData.cuisine,
+          fssai: formData.fssai,
+          account_number: formData.accountNumber,
+          ifsc: formData.ifsc,
+          account_holder: formData.accountHolder,
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        console.log('Application submitted successfully:', result);
+        alert('Application submitted successfully! Please wait for admin approval.');
+        navigate("/partner/waiting-approval");
+      } else {
+        console.error('Application submission failed:', result);
+        alert(result.detail || 'Failed to submit application. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Error submitting application. Please check your connection and try again.');
+    }
   };
 
   return (

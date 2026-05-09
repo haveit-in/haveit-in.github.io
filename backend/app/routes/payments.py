@@ -54,7 +54,7 @@ def create_payment_order(
         raise HTTPException(status_code=404, detail="Order not found")
     
     # 2. Validate User Owns Order (VERY IMPORTANT security check)
-    if order.user_id != current_user["uid"]:
+    if str(order.user_id) != current_user["user_id"]:
         raise HTTPException(status_code=403, detail="Access denied: You don't own this order")
     
     # 3. Validate Order Not Already Paid

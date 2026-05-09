@@ -92,8 +92,8 @@ def calculate_cart_totals(cart_items: List[dict], restaurant_delivery_fee: Optio
     grand_total = calculate_grand_total(subtotal, tax, delivery_fee)
     
     return {
-        'subtotal': float(subtotal),
-        'tax': float(tax),
-        'delivery_fee': float(delivery_fee),
-        'grand_total': float(grand_total)
+        'subtotal': subtotal,
+        'tax': tax,
+        'delivery_fee': delivery_fee,
+        'grand_total': grand_total
     }

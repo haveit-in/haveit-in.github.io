@@ -48,7 +48,11 @@ const RestaurantDetails = () => {
       }
       
       const restaurants = await restaurantResponse.json()
+      console.log('=== RESTAURANT SEARCH DEBUG ===')
+      console.log('Available restaurants:', restaurants)
+      console.log('Looking for restaurant ID:', id)
       const restaurant = restaurants.find(r => r.id === id)
+      console.log('Found restaurant:', restaurant)
       
       if (!restaurant) {
         throw new Error('Restaurant not found')
@@ -58,7 +62,7 @@ const RestaurantDetails = () => {
       
       // Try to get menu data
       try {
-        const menuResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/restaurants/${id}/menu`, {
+        const menuResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/restaurant/restaurants/${id}/menu`, {
           headers: getAuthHeaders()
         })
         

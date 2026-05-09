@@ -1,7 +1,7 @@
 # app/schemas/__init__.py
 
 from .auth import TokenRequest
-from .menu import MenuItemResponse, MenuCategoryResponse, RestaurantMenuResponse
+from .menu import *
 from .cart import AddToCartRequest, UpdateCartItemRequest, CartItemResponse, CartResponse, RestaurantInfo
 from .order import CreateOrderRequest, OrderResponse, OrderListResponse, OrderItemResponse, TrackingLogResponse
 from .payment import CreatePaymentOrderRequest, VerifyPaymentRequest, PaymentResponse
