@@ -1,4 +1,6 @@
 import { Save, Bell, Store, User, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const SettingsSection = ({ icon: Icon, title, iconColor, children }) => (
   <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
@@ -26,6 +28,63 @@ const ToggleSwitch = ({ label, description, defaultChecked = false }) => (
 );
 
 const PartnerSettings = () => {
+  const { token } = useAuth();
+  const [restaurantData, setRestaurantData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchRestaurantProfile = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/restaurant/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch restaurant profile');
+        }
+
+        const data = await response.json();
+        setRestaurantData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchRestaurantProfile();
+    }
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="p-4 lg:p-8">
+        <div className="text-center">Loading restaurant details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 lg:p-8">
+        <div className="text-center text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!restaurantData) {
+    return (
+      <div className="p-4 lg:p-8">
+        <div className="text-center">No restaurant profile found</div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 lg:p-8 space-y-4 lg:space-y-6">
       {/* Desktop: Grid Layout */}
@@ -41,14 +100,14 @@ const PartnerSettings = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
               <input
                 type="text"
-                defaultValue="Spice Garden"
+                defaultValue={restaurantData.restaurant_name || ''}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
               <textarea
-                defaultValue="123 MG Road, Bangalore, Karnataka - 560001"
+                defaultValue={restaurantData.address || ''}
                 rows={3}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
               />
@@ -58,7 +117,7 @@ const PartnerSettings = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                 <input
                   type="tel"
-                  defaultValue="+91 98765 43210"
+                  defaultValue={restaurantData.phone || ''}
                   className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -66,7 +125,7 @@ const PartnerSettings = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <input
                   type="email"
-                  defaultValue="spicegarden@example.com"
+                  defaultValue={restaurantData.email || ''}
                   className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -85,7 +144,7 @@ const PartnerSettings = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Owner Name</label>
               <input
                 type="text"
-                defaultValue="Ramesh Kumar"
+                defaultValue={restaurantData.owner_name || ''}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
             </div>
@@ -93,7 +152,7 @@ const PartnerSettings = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">FSSAI License</label>
               <input
                 type="text"
-                defaultValue="12345678901234"
+                defaultValue={restaurantData.fssai || ''}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
             </div>
@@ -150,14 +209,14 @@ const PartnerSettings = () => {
               <label className="block text-xs font-medium text-gray-700 mb-2">Restaurant Name</label>
               <input
                 type="text"
-                defaultValue="Spice Garden"
+                defaultValue={restaurantData.restaurant_name || ''}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-2">Address</label>
               <textarea
-                defaultValue="123 MG Road, Bangalore, Karnataka - 560001"
+                defaultValue={restaurantData.address || ''}
                 rows={3}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
               />
@@ -167,7 +226,7 @@ const PartnerSettings = () => {
                 <label className="block text-xs font-medium text-gray-700 mb-2">Phone</label>
                 <input
                   type="tel"
-                  defaultValue="+91 98765 43210"
+                  defaultValue={restaurantData.phone || ''}
                   className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -175,7 +234,7 @@ const PartnerSettings = () => {
                 <label className="block text-xs font-medium text-gray-700 mb-2">Email</label>
                 <input
                   type="email"
-                  defaultValue="spicegarden@example.com"
+                  defaultValue={restaurantData.email || ''}
                   className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -194,7 +253,7 @@ const PartnerSettings = () => {
               <label className="block text-xs font-medium text-gray-700 mb-2">Owner Name</label>
               <input
                 type="text"
-                defaultValue="Ramesh Kumar"
+                defaultValue={restaurantData.owner_name || ''}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
             </div>
@@ -202,7 +261,7 @@ const PartnerSettings = () => {
               <label className="block text-xs font-medium text-gray-700 mb-2">FSSAI License</label>
               <input
                 type="text"
-                defaultValue="12345678901234"
+                defaultValue={restaurantData.fssai || ''}
                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
             </div>

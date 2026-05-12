@@ -168,10 +168,38 @@ def admin_orders(
 ):
     from sqlalchemy import text
     rows = db.execute(text("""
-        SELECT o.id, o.total_amount, o.status, o.created_at,
-               u.email as user_email
+        SELECT 
+            -- Order fields
+            o.id, o.order_number, o.user_id, o.restaurant_id,
+            o.subtotal, o.tax_amount, o.delivery_fee, o.total_amount,
+            o.payment_method, o.payment_status, o.order_status,
+            o.delivery_address, o.customer_lat, o.customer_lng,
+            o.estimated_delivery_time, o.created_at, o.updated_at,
+            
+            -- User fields
+            u.email as user_email, u.name as user_name, u.phone as user_phone, 
+            u.photo_url as user_photo, u.role as user_role,
+            
+            -- Restaurant fields  
+            r.restaurant_name, r.owner_name as restaurant_owner, r.phone as restaurant_phone,
+            r.address as restaurant_address, r.city as restaurant_city, r.cuisine,
+            r.logo as restaurant_logo, r.rating as restaurant_rating,
+            r.delivery_fee as restaurant_delivery_fee, r.delivery_time as restaurant_delivery_time,
+            
+            -- Order items count and details
+            (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as items_count,
+            (SELECT JSON_AGG(
+                JSON_BUILD_OBJECT(
+                    'item_name', item_name,
+                    'quantity', quantity,
+                    'price', price,
+                    'total_price', total_price
+                )
+            ) FROM order_items WHERE order_id = o.id) as order_items
+            
         FROM orders o
         LEFT JOIN users u ON u.id = o.user_id
+        LEFT JOIN restaurant_profiles r ON r.id = o.restaurant_id
         ORDER BY o.created_at DESC
         LIMIT 100
     """)).fetchall()
@@ -179,11 +207,65 @@ def admin_orders(
     result = []
     for row in rows:
         result.append({
-            "id": row[0],
-            "total_amount": float(row[1]) if row[1] else 0,
-            "status": row[2],
-            "created_at": row[3],
-            "user_email": row[4]
+            # Core order fields
+            "id": str(row[0]),
+            "order_number": row[1],
+            "user_id": str(row[2]) if row[2] else None,
+            "restaurant_id": str(row[3]) if row[3] else None,
+            
+            # Order financial details
+            "subtotal": float(row[4]) if row[4] else 0,
+            "tax_amount": float(row[5]) if row[5] else 0,
+            "delivery_fee": float(row[6]) if row[6] else 0,
+            "total_amount": float(row[7]) if row[7] else 0,
+            
+            # Order status and payment
+            "payment_method": row[8],
+            "payment_status": row[9],
+            "order_status": row[10],
+            
+            # Delivery information
+            "delivery_address": row[11],
+            "customer_lat": float(row[12]) if row[12] else None,
+            "customer_lng": float(row[13]) if row[13] else None,
+            "estimated_delivery_time": row[14],
+            
+            # Timestamps
+            "created_at": row[15],
+            "updated_at": row[16],
+            
+            # User information
+            "user_email": row[17],
+            "user_name": row[18],
+            "user_phone": row[19],
+            "user_photo": row[20],
+            "user_role": row[21],
+            
+            # Restaurant information
+            "restaurant_name": row[22],
+            "restaurant_owner": row[23],
+            "restaurant_phone": row[24],
+            "restaurant_address": row[25],
+            "restaurant_city": row[26],
+            "restaurant_cuisine": row[27],
+            "restaurant_logo": row[28],
+            "restaurant_rating": float(row[29]) if row[29] else None,
+            "restaurant_delivery_fee": float(row[30]) if row[30] else None,
+            "restaurant_delivery_time": row[31],
+            
+            # Order items
+            "items_count": row[32],
+            "order_items": row[33] if row[33] else [],
+            
+            # For frontend compatibility (mapping to existing field names)
+            "customer": row[18] or row[17] or "Unknown Customer",
+            "restaurant": row[22] or "Unknown Restaurant",
+            "items": row[32] or 0,
+            "amount": f"${float(row[7]) if row[7] else 0:.2f}",
+            "status": row[10],
+            "phone": row[19] or row[24] or "No phone",
+            "address": row[11] or "No address",
+            "time": f"{(datetime.now() - row[15]).total_seconds() / 60:.0f} mins ago" if row[15] else ""
         })
     return result
 

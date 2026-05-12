@@ -42,6 +42,6 @@ def require_admin(user=Depends(get_current_user)):
     return user
 
 def require_restaurant_owner(user=Depends(get_current_user)):
-    if user.get("role") != "restaurant_owner":
+    if "restaurant_owner" not in user.get("roles", []):
         raise HTTPException(status_code=403, detail="Restaurant owner access required")
     return user

@@ -137,19 +137,118 @@ const AdminOrders = () => {
         
         if (response.ok) {
           const data = await response.json();
-          setOrders(data);
+          console.log('API Response with all fields:', data); // Debug log
+          
+          // Map API response to frontend format with ALL database fields
+          const mappedOrders = data.map(order => ({
+            // Core order fields
+            id: order.order_number || `#${order.id?.slice(-6) || 'Unknown'}`,
+            order_id: order.id,
+            user_id: order.user_id,
+            restaurant_id: order.restaurant_id,
+            
+            // Customer information (all available fields)
+            customer: order.user_name || order.user_email || 'Unknown Customer',
+            customerEmail: order.user_email,
+            customerPhone: order.user_phone,
+            customerPhoto: order.user_photo,
+            customerRole: order.user_role,
+            customerImage: order.user_photo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.user_email || 'unknown'}`,
+            
+            // Restaurant information (all available fields)
+            restaurant: order.restaurant_name || 'Unknown Restaurant',
+            restaurantOwner: order.restaurant_owner,
+            restaurantPhone: order.restaurant_phone,
+            restaurantAddress: order.restaurant_address,
+            restaurantCity: order.restaurant_city,
+            restaurantCuisine: order.restaurant_cuisine,
+            restaurantLogo: order.restaurant_logo,
+            restaurantRating: order.restaurant_rating,
+            restaurantDeliveryFee: order.restaurant_delivery_fee,
+            restaurantDeliveryTime: order.restaurant_delivery_time,
+            
+            // Order financial details
+            subtotal: order.subtotal,
+            taxAmount: order.tax_amount,
+            deliveryFee: order.delivery_fee,
+            totalAmount: order.total_amount,
+            amount: order.amount || `$${order.total_amount?.toFixed(2) || '0.00'}`,
+            
+            // Order status and payment
+            status: order.order_status || order.status || 'pending',
+            paymentMethod: order.payment_method,
+            paymentStatus: order.payment_status,
+            
+            // Delivery information
+            address: order.delivery_address || 'No address',
+            customerLat: order.customer_lat,
+            customerLng: order.customer_lng,
+            estimatedDeliveryTime: order.estimated_delivery_time,
+            
+            // Order items
+            items: order.items_count || 0,
+            orderItems: order.order_items || [],
+            
+            // Timestamps
+            createdAt: order.created_at,
+            updatedAt: order.updated_at,
+            time: order.time || formatRelativeTime(order.created_at),
+            
+            // Contact info (prefer user phone, fallback to restaurant)
+            phone: order.user_phone || order.restaurant_phone || 'No phone',
+            
+            // Keep original data for debugging
+            _original: order
+          }));
+          
+          console.log('Mapped Orders with all fields:', mappedOrders); // Debug log
+          setOrders(mappedOrders);
         } else {
-          // Use mock data if API fails
-          setOrders(mockOrders);
+          console.error('API request failed with status:', response.status);
+          // Show error instead of using mock data
+          setError('Failed to load orders from server');
         }
       } catch (err) {
         console.error('Failed to fetch orders:', err);
-        // Use mock data as fallback
-        setOrders(mockOrders);
+        setError('Network error while loading orders');
       } finally {
         setLoading(false);
       }
     }, [getAuthHeaders]);
+
+    // Helper function to format relative time
+    const formatRelativeTime = (dateString) => {
+      if (!dateString) return 'Unknown time';
+      try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        
+        if (diffMins < 60) return `${diffMins} mins ago`;
+        if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hours ago`;
+        return `${Math.floor(diffMins / 1440)} days ago`;
+      } catch (e) {
+        return 'Unknown time';
+      }
+    };
+
+    // Helper function to format date
+    const formatDate = (dateString) => {
+      if (!dateString) return 'N/A';
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return 'Invalid date';
+      }
+    };
 
   useEffect(() => {
     fetchOrders();
@@ -337,52 +436,89 @@ const AdminOrders = () => {
               </div>
             ) : (
               filteredOrders.map((order) => (
-                <div key={order.id} className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+                <div key={order.id} className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
                   {/* Order Header */}
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-slate-900">{order.id}</p>
                       <StatusBadge status={order.status} />
+                      <p className="text-xs text-slate-500">{formatDate(order.createdAt)}</p>
                     </div>
-                    <p className="font-bold text-slate-900 text-lg">{order.amount}</p>
+                    <div className="text-right">
+                      <p className="font-bold text-slate-900 text-lg">{order.amount}</p>
+                      <p className="text-xs text-slate-500">{order.time}</p>
+                    </div>
                   </div>
 
                   {/* Customer Info */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center ring-2 ring-orange-100">
-                      <span className="text-white font-semibold text-sm">
-                        {order.customer?.charAt(0) || 'C'}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-900">{order.customer}</p>
-                      <div className="flex items-center gap-1 text-xs text-slate-500">
-                        <Phone className="w-3 h-3" />
-                        <span>{order.phone}</span>
+                  <div className="bg-slate-50 rounded-lg p-3 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={order.customerImage} 
+                        alt={order.customer}
+                        className="w-10 h-10 rounded-full"
+                        onError={(e) => e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.customerEmail || 'unknown'}`}
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900">{order.customer}</p>
+                        <p className="text-xs text-slate-500">{order.customerEmail}</p>
                       </div>
                     </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>📱 {order.customerPhone || 'No phone'}</div>
+                      <div>👤 {order.customerRole || 'user'}</div>
+                    </div>
+                  </div>
+
+                  {/* Restaurant Info */}
+                  <div className="bg-orange-50 rounded-lg p-3 space-y-2">
+                    <p className="font-medium text-slate-900">{order.restaurant}</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>📞 {order.restaurantPhone || 'No phone'}</div>
+                      <div>📍 {order.restaurantCity || 'N/A'}</div>
+                      <div>🍽️ {order.restaurantCuisine || 'N/A'}</div>
+                      {order.restaurantRating && <div>⭐ {order.restaurantRating}</div>}
+                    </div>
+                    <p className="text-xs text-slate-600">Owner: {order.restaurantOwner || 'N/A'}</p>
                   </div>
 
                   {/* Order Details */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-slate-700">
-                      <Package className="w-4 h-4 text-slate-400" />
-                      <span>{order.restaurant}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <span>{order.items} items</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <MapPin className="w-4 h-4 text-slate-400" />
-                      <span className="truncate">{order.address}</span>
+                    <div className="font-medium text-slate-900">Order Details</div>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Items:</strong> {order.items}</p>
+                      <p><strong>Address:</strong> {order.address}</p>
+                      <p><strong>Est. Delivery:</strong> {order.estimatedDeliveryTime || 'N/A'}</p>
+                      {order.orderItems && order.orderItems.length > 0 && (
+                        <details className="cursor-pointer">
+                          <summary className="text-blue-600 hover:text-blue-800 text-sm">View Items ({order.orderItems.length})</summary>
+                          <div className="mt-1 pl-2 border-l-2 border-gray-200">
+                            {order.orderItems.map((item, idx) => (
+                              <p key={idx} className="text-xs">• {item.item_name} x{item.quantity} (${item.total_price})</p>
+                            ))}
+                          </div>
+                        </details>
+                      )}
                     </div>
                   </div>
 
-                  {/* Time & Action */}
+                  {/* Financial Details */}
+                  <div className="bg-green-50 rounded-lg p-3 space-y-1">
+                    <div className="font-medium text-slate-900">Financial Details</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div><strong>Subtotal:</strong> ${order.subtotal?.toFixed(2) || '0.00'}</div>
+                      <div><strong>Tax:</strong> ${order.taxAmount?.toFixed(2) || '0.00'}</div>
+                      <div><strong>Delivery:</strong> ${order.deliveryFee?.toFixed(2) || '0.00'}</div>
+                      <div><strong>Total:</strong> {order.amount}</div>
+                      <div><strong>Payment:</strong> {order.paymentMethod || 'N/A'}</div>
+                      <div><strong>Status:</strong> {order.paymentStatus || 'N/A'}</div>
+                    </div>
+                  </div>
+
+                  {/* Action */}
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <div className="flex items-center gap-1 text-xs text-slate-500">
-                      <Clock className="w-3 h-3" />
-                      <span>{order.time}</span>
+                    <div className="text-xs text-slate-500">
+                      Updated: {formatDate(order.updatedAt)}
                     </div>
                     <button
                       className="inline-flex items-center px-3 py-1.5 border border-orange-200 text-xs font-medium rounded-lg text-orange-600 bg-white hover:bg-orange-50 transition-colors"
@@ -400,28 +536,28 @@ const AdminOrders = () => {
             <table className="min-w-full">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                     Order ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Customer
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Customer Details
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Restaurant
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Restaurant Info
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Items
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Order Details
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Amount
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Financials
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                     Time
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -436,41 +572,82 @@ const AdminOrders = () => {
                 ) : (
                   filteredOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-900">
-                        {order.id}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div>
+                          <p className="font-semibold text-slate-900 text-sm">{order.id}</p>
+                          <p className="text-xs text-slate-500">Created: {formatDate(order.createdAt)}</p>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center ring-2 ring-orange-100">
-                            <span className="text-white font-semibold text-sm">
-                              {order.customer?.charAt(0) || 'C'}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-slate-900">{order.customer}</p>
-                            <div className="flex items-center gap-1 text-xs text-slate-500">
-                              <Phone className="w-3 h-3" />
-                              {order.phone}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <img 
+                              src={order.customerImage} 
+                              alt={order.customer}
+                              className="w-8 h-8 rounded-full"
+                              onError={(e) => e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.customerEmail || 'unknown'}`}
+                            />
+                            <div>
+                              <p className="font-medium text-slate-900 text-sm">{order.customer}</p>
+                              <p className="text-xs text-slate-500">{order.customerEmail}</p>
                             </div>
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            <p>📱 {order.customerPhone || 'No phone'}</p>
+                            <p>👤 {order.customerRole || 'user'}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-700">
-                        {order.restaurant}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="space-y-1">
+                          <p className="font-medium text-slate-900 text-sm">{order.restaurant}</p>
+                          <p className="text-xs text-slate-500">Owner: {order.restaurantOwner || 'N/A'}</p>
+                          <div className="text-xs text-slate-600">
+                            <p>📞 {order.restaurantPhone || 'No phone'}</p>
+                            <p>📍 {order.restaurantCity || 'N/A'}</p>
+                            <p>🍽️ {order.restaurantCuisine || 'N/A'}</p>
+                            {order.restaurantRating && <p>⭐ {order.restaurantRating}</p>}
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                        {order.items} items
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="space-y-1 text-xs">
+                          <p><strong>Items:</strong> {order.items}</p>
+                          <p><strong>Address:</strong> {order.address?.substring(0, 30)}{order.address?.length > 30 ? '...' : ''}</p>
+                          <p><strong>Est. Delivery:</strong> {order.estimatedDeliveryTime || 'N/A'}</p>
+                          {order.customerLat && order.customerLng && (
+                            <p><strong>Location:</strong> {order.customerLat.toFixed(4)}, {order.customerLng.toFixed(4)}</p>
+                          )}
+                          {order.orderItems && order.orderItems.length > 0 && (
+                            <details className="cursor-pointer">
+                              <summary className="text-blue-600 hover:text-blue-800">View Items ({order.orderItems.length})</summary>
+                              <div className="mt-1 pl-2 border-l-2 border-gray-200">
+                                {order.orderItems.map((item, idx) => (
+                                  <p key={idx} className="text-xs">• {item.item_name} x{item.quantity} (${item.total_price})</p>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-900">
-                        {order.amount}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="space-y-1 text-xs">
+                          <p><strong>Subtotal:</strong> ${order.subtotal?.toFixed(2) || '0.00'}</p>
+                          <p><strong>Tax:</strong> ${order.taxAmount?.toFixed(2) || '0.00'}</p>
+                          <p><strong>Delivery:</strong> ${order.deliveryFee?.toFixed(2) || '0.00'}</p>
+                          <p className="font-semibold text-slate-900"><strong>Total:</strong> {order.amount}</p>
+                          <p><strong>Payment:</strong> {order.paymentMethod || 'N/A'}</p>
+                          <p><strong>Status:</strong> {order.paymentStatus || 'N/A'}</p>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <StatusBadge status={order.status} />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                        {order.time}
+                      <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-600">
+                        <p>{order.time}</p>
+                        <p className="text-slate-400">{formatDate(order.updatedAt)}</p>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-4 py-3 whitespace-nowrap text-right">
                         <button
                           className="inline-flex items-center px-3 py-1.5 border border-orange-200 text-xs font-medium rounded-lg text-orange-600 bg-white hover:bg-orange-50"
                         >

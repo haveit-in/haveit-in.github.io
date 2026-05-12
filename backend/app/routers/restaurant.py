@@ -126,7 +126,32 @@ def get_restaurant_profile(
     return {
         "id": str(profile.id),
         "restaurant_name": profile.restaurant_name,
-        "status": profile.status
+        "owner_name": profile.owner_name,
+        "email": profile.email,
+        "phone": profile.phone,
+        "address": profile.address,
+        "city": profile.city,
+        "cuisine": json.loads(profile.cuisine) if profile.cuisine else [],
+        "fssai": profile.fssai,
+        "account_number": profile.account_number,
+        "ifsc": profile.ifsc,
+        "account_holder": profile.account_holder,
+        "status": profile.status,
+        "created_at": profile.created_at.isoformat() if profile.created_at else None,
+        "approved_at": profile.approved_at.isoformat() if profile.approved_at else None,
+        "rejection_reason": profile.rejection_reason,
+        "is_active": profile.is_active,
+        "banner_image": profile.banner_image,
+        "logo": profile.logo,
+        "latitude": float(profile.latitude) if profile.latitude else None,
+        "longitude": float(profile.longitude) if profile.longitude else None,
+        "minimum_order": float(profile.minimum_order) if profile.minimum_order else 0,
+        "delivery_fee": float(profile.delivery_fee) if profile.delivery_fee else 0,
+        "delivery_radius_km": profile.delivery_radius_km,
+        "is_open": profile.is_open,
+        "rating": float(profile.rating) if profile.rating else 4.0,
+        "delivery_time": profile.delivery_time,
+        "total_reviews": profile.total_reviews
     }
 
 @router.put("/restaurant/profile")
