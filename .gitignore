@@ -11,6 +11,11 @@ venv/
 __pycache__/
 *.pyc
 
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
 # Database files
 *.db
 *.sqlite
@@ -29,6 +34,10 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# IDE-specific configurations
+.windsurf/
+.qodo/
 
 # Build outputs
 dist/
