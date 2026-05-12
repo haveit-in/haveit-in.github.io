@@ -11,6 +11,15 @@ venv/
 __pycache__/
 *.pyc
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Firebase credentials
+firebase_admin.json
+firebase-credentials.json
+
 # OS generated files
 .DS_Store
 Thumbs.db
