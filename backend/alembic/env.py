@@ -2,13 +2,15 @@ import os
 import sys
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 
 # Add the parent directory to the path so we can import app models
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+_BACKEND_DIR = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(_BACKEND_DIR)
 
 from app.database import Base
 from app.models import User, RestaurantProfile, Order
@@ -26,10 +28,14 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+
+def _apply_database_url_from_env() -> None:
+    """Use the same DATABASE_URL as the FastAPI app (.env.local), not only alembic.ini."""
+    load_dotenv(os.path.join(_BACKEND_DIR, ".env.local"))
+    db_url = os.getenv("DATABASE_URL")
+    if db_url:
+        # ConfigParser treats % specially; SQLAlchemy URLs may contain % encoded chars
+        config.set_main_option("sqlalchemy.url", db_url.replace("%", "%%"))
 
 
 def run_migrations_offline() -> None:
@@ -44,6 +50,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
+    _apply_database_url_from_env()
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -63,6 +70,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    _apply_database_url_from_env()
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
