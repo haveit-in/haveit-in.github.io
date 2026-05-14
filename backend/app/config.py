@@ -72,8 +72,8 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("REFRESH_TOKEN_EXPIRE_DAYS"),
     )
 
-    razorpay_key_id: str = Field(default="", validation_alias=AliasChoices("RAZORPAY_KEY_ID"))
-    razorpay_key_secret: str = Field(
+    RAZORPAY_KEY_ID: str = Field(default="", validation_alias=AliasChoices("RAZORPAY_KEY_ID"))
+    RAZORPAY_KEY_SECRET: str = Field(
         default="", validation_alias=AliasChoices("RAZORPAY_KEY_SECRET")
     )
 
