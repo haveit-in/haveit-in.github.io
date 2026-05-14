@@ -1,9 +1,13 @@
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
+import logging
 import os
+from datetime import datetime, timedelta
 
-load_dotenv('.env.local')
+from dotenv import load_dotenv
+from jose import JWTError, jwt
+
+load_dotenv(".env.local")
+
+log = logging.getLogger(__name__)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -17,26 +21,12 @@ def create_access_token(data: dict):
 
 def verify_access_token(token: str):
     try:
-        print(f"=== TOKEN VERIFICATION DEBUG ===")
-        print(f"SECRET_KEY exists: {SECRET_KEY is not None}")
-        print(f"SECRET_KEY length: {len(SECRET_KEY) if SECRET_KEY else 0}")
-        print(f"Algorithm: {ALGORITHM}")
-        
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print(f"Token decoded successfully: {payload}")
-        print("=== TOKEN VERIFICATION SUCCESS ===")
+        log.debug("access_token_verified")
         return payload
     except JWTError as e:
-        print(f"=== TOKEN VERIFICATION ERROR ===")
-        print(f"JWT Error: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
-        print("=== END TOKEN ERROR ===")
+        log.warning("access_token_invalid: %s", type(e).__name__)
         return None
-    except Exception as e:
-        print(f"=== UNEXPECTED TOKEN ERROR ===")
-        print(f"Error: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
-        import traceback
-        print(f"Traceback: {traceback.format_exc()}")
-        print("=== END UNEXPECTED TOKEN ERROR ===")
+    except Exception:
+        log.exception("access_token_verification_failed")
         return None

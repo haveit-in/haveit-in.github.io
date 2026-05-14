@@ -1,9 +1,11 @@
-# app/websocket/manager.py
+import asyncio
+import json
+import logging
+from typing import Dict, List
 
 from fastapi import WebSocket, WebSocketDisconnect
-from typing import Dict, List
-import json
-import asyncio
+
+log = logging.getLogger(__name__)
 
 class ConnectionManager:
     def __init__(self):
@@ -13,18 +15,14 @@ class ConnectionManager:
         self.user_connections: Dict[WebSocket, str] = {}  # websocket -> user_id
 
     async def connect(self, websocket: WebSocket, order_id: str, user_id: str):
-        """Connect a WebSocket to a specific order"""
-        await websocket.accept()
-        
-        # Add to order connections
+        """Register an already-accepted WebSocket for a specific order."""
         if order_id not in self.active_connections:
             self.active_connections[order_id] = []
         self.active_connections[order_id].append(websocket)
-        
-        # Store user mapping
+
         self.user_connections[websocket] = user_id
-        
-        print(f"WebSocket connected for order {order_id} by user {user_id}")
+
+        log.debug("websocket_registered order_id=%s user_id=%s", order_id, user_id)
 
     def disconnect(self, websocket: WebSocket, order_id: str):
         """Disconnect a WebSocket from an order"""
@@ -39,14 +37,14 @@ class ConnectionManager:
         # Remove user mapping
         if websocket in self.user_connections:
             user_id = self.user_connections.pop(websocket)
-            print(f"WebSocket disconnected for order {order_id} by user {user_id}")
+            log.debug("websocket_unregistered order_id=%s user_id=%s", order_id, user_id)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         """Send a message to a specific WebSocket"""
         try:
             await websocket.send_text(message)
-        except Exception as e:
-            print(f"Error sending personal message: {e}")
+        except Exception:
+            log.warning("websocket_send_failed", exc_info=True)
 
     async def broadcast_to_order(self, order_id: str, message: dict):
         """Broadcast a message to all connections for a specific order"""
@@ -56,8 +54,8 @@ class ConnectionManager:
             for connection in self.active_connections[order_id]:
                 try:
                     await connection.send_text(json.dumps(message))
-                except Exception as e:
-                    print(f"Error broadcasting to connection: {e}")
+                except Exception:
+                    log.warning("websocket_broadcast_failed", exc_info=True)
                     disconnected_connections.append(connection)
             
             # Clean up disconnected connections
