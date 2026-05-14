@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { UserIcon, ArrowLeftIcon, EditIcon, PlusIcon, CameraIcon } from '../components/Icons.jsx'
 import UserDetailsModal from '../components/UserDetailsModal.jsx'
+import MyOrders from '../components/MyOrders.jsx'
 
 const ProfilePage = ({ activeMode }) => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [activeTab, setActiveTab] = useState('profile')
 
   // Reset image error when user changes
   React.useEffect(() => {
@@ -154,6 +156,33 @@ const ProfilePage = ({ activeMode }) => {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* Tabs */}
+        <div className="flex gap-0 border-b border-gray-200 mb-8">
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`px-6 py-3 font-medium transition-all border-b-2 ${
+              activeTab === 'profile'
+                ? `${accent.text} border-b-2 ${activeTab === 'profile' ? 'border-' + (activeMode === 'food' ? 'orange-500' : 'green-600') : 'border-transparent'}`
+                : 'text-gray-600 border-transparent hover:text-gray-900'
+            }`}
+          >
+            My Profile
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`px-6 py-3 font-medium transition-all border-b-2 ${
+              activeTab === 'orders'
+                ? `${accent.text} border-b-2 ${activeTab === 'orders' ? 'border-' + (activeMode === 'food' ? 'orange-500' : 'green-600') : 'border-transparent'}`
+                : 'text-gray-600 border-transparent hover:text-gray-900'
+            }`}
+          >
+            My Orders
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'profile' && (
+          <>
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -333,6 +362,13 @@ const ProfilePage = ({ activeMode }) => {
             {user.bio || 'No bio added yet. Click edit to add your bio and tell others about yourself.'}
           </p>
         </div>
+          </>
+        )}
+
+        {/* My Orders Tab */}
+        {activeTab === 'orders' && (
+          <MyOrders activeMode={activeMode} />
+        )}
       </div>
 
       {/* User Details Modal */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Search, ShoppingCart, User, Menu } from 'lucide-react'
+import { Home, Search, ShoppingCart, User, MapPin } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const BottomNavigation = ({ onLoginClick }) => {
@@ -26,7 +26,7 @@ const BottomNavigation = ({ onLoginClick }) => {
     { icon: Home, label: 'Home', path: '/' },
     { icon: Search, label: 'Search', path: '/restaurants' },
     { icon: ShoppingCart, label: 'Cart', path: '/cart' },
-    { icon: Menu, label: 'Orders', path: '/track-order' },
+    { icon: MapPin, label: 'Track', path: '/track-order' },
     { icon: User, label: 'Profile', path: '/profile' }
   ]
 
