@@ -34,6 +34,15 @@ const CheckoutPage = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cod')
+  const [skipEmptyCartRedirect, setSkipEmptyCartRedirect] = useState(false)
+  const inputRefs = useRef({})
+
+  const scrollFieldIntoView = (field) => {
+    const element = inputRefs.current[field]
+    if (element?.scrollIntoView) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
   const [addresses, setAddresses] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [newAddress, setNewAddress] = useState({
@@ -62,10 +71,10 @@ const CheckoutPage = () => {
   
   // Redirect if cart is empty
   useEffect(() => {
-    if (isEmpty()) {
+    if (isEmpty() && !skipEmptyCartRedirect) {
       navigate('/cart')
     }
-  }, [isEmpty, navigate])
+  }, [isEmpty, navigate, skipEmptyCartRedirect])
 
   // Load saved address from localStorage
   useEffect(() => {
@@ -128,6 +137,13 @@ const CheckoutPage = () => {
     return true
   }
 
+  const redirectAfterOrder = (orderResponse) => {
+    const target = orderResponse?.order_id ? `/track-order/${orderResponse.order_id}` : '/restaurants'
+    toast.success('Order placed successfully! Redirecting you now.')
+    clearCart()
+    navigate(target)
+  }
+
   // Handle place order
   const handlePlaceOrder = async () => {
     console.log('=== ORDER PLACEMENT DEBUG ===')
@@ -135,6 +151,7 @@ const CheckoutPage = () => {
     
     if (!validateForm()) return
 
+    setSkipEmptyCartRedirect(true)
     setIsProcessing(true)
     setError('')
 
@@ -200,11 +217,7 @@ const CheckoutPage = () => {
 
       const orderResponse = await response.json()
       
-      // Clear cart after successful order
-      clearCart()
-      
-      // Navigate to success page
-      navigate('/orders/success', { state: { orderData: orderResponse } })
+      redirectAfterOrder(orderResponse)
 
     } catch (err) {
       setError(err.message)
@@ -217,6 +230,7 @@ const CheckoutPage = () => {
   const handleRazorpayPayment = async () => {
     if (!validateForm()) return
 
+    setSkipEmptyCartRedirect(true)
     setIsProcessing(true)
     setError('')
 
@@ -234,10 +248,8 @@ const CheckoutPage = () => {
       const paymentSuccess = await openRazorpayPopup(razorpayOrderResponse)
       
       if (paymentSuccess) {
-        // Step 4: Payment successful - navigate to success page
-        toast.success('Payment successful! Your order has been placed.')
-        clearCart()
-        navigate('/orders/success', { state: { orderData: orderResponse } })
+        // Step 4: Payment successful - navigate to destination page
+        redirectAfterOrder(orderResponse)
       }
     } catch (err) {
       setError(err.message)
@@ -426,7 +438,7 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-6 pb-24 md:pb-0">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -443,10 +455,12 @@ const CheckoutPage = () => {
                     Full Name *
                   </label>
                   <input
+                    ref={(el) => (inputRefs.current.fullName = el)}
                     type="text"
                     value={deliveryAddress.fullName}
+                    onFocus={() => scrollFieldIntoView('fullName')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, fullName: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="John Doe"
                   />
                 </div>
@@ -456,10 +470,12 @@ const CheckoutPage = () => {
                     Phone Number *
                   </label>
                   <input
+                    ref={(el) => (inputRefs.current.phone = el)}
                     type="tel"
                     value={deliveryAddress.phone}
+                    onFocus={() => scrollFieldIntoView('phone')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="9876543210"
                     maxLength={10}
                   />
@@ -470,10 +486,12 @@ const CheckoutPage = () => {
                     Address Line 1 *
                   </label>
                   <input
+                    ref={(el) => (inputRefs.current.addressLine1 = el)}
                     type="text"
                     value={deliveryAddress.addressLine1}
+                    onFocus={() => scrollFieldIntoView('addressLine1')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, addressLine1: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Flat/House No., Building, Street"
                   />
                 </div>
@@ -483,10 +501,12 @@ const CheckoutPage = () => {
                     Address Line 2
                   </label>
                   <input
+                    ref={(el) => (inputRefs.current.addressLine2 = el)}
                     type="text"
                     value={deliveryAddress.addressLine2}
+                    onFocus={() => scrollFieldIntoView('addressLine2')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, addressLine2: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Area, Locality (Optional)"
                   />
                 </div>
@@ -509,10 +529,12 @@ const CheckoutPage = () => {
                     City *
                   </label>
                   <input
+                    ref={(el) => (inputRefs.current.city = el)}
                     type="text"
                     value={deliveryAddress.city}
+                    onFocus={() => scrollFieldIntoView('city')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, city: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Hyderabad"
                   />
                 </div>
@@ -522,10 +544,12 @@ const CheckoutPage = () => {
                     State
                   </label>
                   <input
+                    ref={(el) => (inputRefs.current.state = el)}
                     type="text"
                     value={deliveryAddress.state}
+                    onFocus={() => scrollFieldIntoView('state')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, state: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Telangana"
                   />
                 </div>
@@ -535,10 +559,12 @@ const CheckoutPage = () => {
                     Pincode *
                   </label>
                   <input
+                    ref={(el) => (inputRefs.current.pincode = el)}
                     type="text"
                     value={deliveryAddress.pincode}
+                    onFocus={() => scrollFieldIntoView('pincode')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, pincode: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="500001"
                     maxLength={6}
                   />
@@ -549,9 +575,11 @@ const CheckoutPage = () => {
                     Delivery Instructions
                   </label>
                   <textarea
+                    ref={(el) => (inputRefs.current.instructions = el)}
                     value={deliveryAddress.instructions}
+                    onFocus={() => scrollFieldIntoView('instructions')}
                     onChange={(e) => setDeliveryAddress(prev => ({ ...prev, instructions: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Any specific instructions for delivery..."
                     rows={3}
                   />
@@ -713,7 +741,7 @@ const CheckoutPage = () => {
                 isLoading={isProcessing}
                 disabled={!minOrderMet}
                 loadingText={paymentMethod === 'razorpay' ? 'Opening Payment...' : 'Processing...'}
-                className={`w-full mt-6 py-4 rounded-lg font-bold text-lg transition-colors ${
+                className={`w-full mt-6 py-4 rounded-2xl font-bold text-lg transition-colors ${
                   !minOrderMet
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-orange-500 hover:bg-orange-600 text-white'
@@ -728,6 +756,32 @@ const CheckoutPage = () => {
                 )}
               </LoadingButton>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile Sticky Bottom CTA */}
+        <div className="fixed inset-x-0 bottom-20 md:bottom-0 z-40 bg-white border-t border-gray-200 shadow-lg md:hidden"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <LoadingButton
+              onClick={paymentMethod === 'razorpay' ? handleRazorpayPayment : handlePlaceOrder}
+              isLoading={isProcessing}
+              disabled={!minOrderMet}
+              loadingText={paymentMethod === 'razorpay' ? 'Opening Payment...' : 'Processing...'}
+              className={`w-full py-4 rounded-2xl font-bold text-lg transition-colors ${
+                !minOrderMet
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white'
+              }`}
+            >
+              {!minOrderMet ? (
+                'Add more items to checkout'
+              ) : paymentMethod === 'razorpay' ? (
+                `Pay ₹${total.toFixed(2)}`
+              ) : (
+                `Place Order • ₹${total.toFixed(2)}`
+              )}
+            </LoadingButton>
           </div>
         </div>
       </div>

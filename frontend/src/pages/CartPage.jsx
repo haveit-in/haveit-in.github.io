@@ -92,7 +92,7 @@ const CartPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-40">
       {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -143,12 +143,9 @@ const CartPage = () => {
         )}
 
         {/* Cart Items */}
-        <div className="bg-white rounded-xl shadow-sm mb-6">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="font-bold text-gray-900">Cart Items ({items.length})</h2>
-          </div>
-          
-          <div className="divide-y divide-gray-100">
+        <div className="bg-transparent mb-6">
+          <div className="text-sm font-semibold text-gray-500 mb-3">{items.length} items in your bag</div>
+          <div className="space-y-4">
             {items.map(item => (
               <CartItem
                 key={item.id}
@@ -276,12 +273,13 @@ const CartPage = () => {
       </div>
 
       {/* Checkout Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
+      <div className="fixed left-0 right-0 bottom-20 md:bottom-0 bg-white border-t border-gray-200 shadow-lg z-40"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
         <div className="max-w-4xl mx-auto px-4 py-4">
           <button
             onClick={handleCheckout}
             disabled={!minOrderMet}
-            className={`w-full py-4 rounded-lg font-bold text-lg transition-colors ${
+            className={`w-full py-4 rounded-2xl font-bold text-lg transition-colors ${
               minOrderMet
                 ? 'bg-orange-500 hover:bg-orange-600 text-white'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -334,8 +332,8 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
   const itemTotal = price * item.quantity
 
   return (
-    <div className="p-4">
-      <div className="flex gap-4">
+    <div className="bg-white border border-gray-200 rounded-[28px] shadow-sm p-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
         {/* Item Image */}
         {item.image && (
           <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
@@ -370,37 +368,38 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
           </div>
 
           {/* Price and Quantity Controls */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-gray-900">₹{price.toFixed(2)}</span>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <div className="font-bold text-gray-900">₹{price.toFixed(2)}</div>
               {item.discount_price && (
                 <span className="text-sm text-gray-500 line-through">₹{item.price.toFixed(2)}</span>
               )}
               <span className="text-sm text-gray-500">× {item.quantity}</span>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Quantity Controls */}
-              <div className="flex items-center gap-1 bg-gray-100 rounded-lg">
+            <div className="flex items-center gap-3 justify-between sm:justify-end">
+              <div className="flex items-center gap-2 rounded-2xl bg-gray-100 border border-gray-200 px-1 py-1">
                 <button
                   onClick={() => onUpdateQuantity(-1)}
-                  className="w-7 h-7 rounded-lg bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                  className="w-10 h-10 rounded-2xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                  aria-label="Decrease quantity"
                 >
-                  <Minus className="w-3 h-3" />
+                  <Minus className="w-4 h-4" />
                 </button>
-                <span className="w-8 text-center font-medium text-sm">{item.quantity}</span>
+                <span className="w-10 text-center font-semibold text-gray-900 text-base">{item.quantity}</span>
                 <button
                   onClick={() => onUpdateQuantity(1)}
-                  className="w-7 h-7 rounded-lg bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                  className="w-10 h-10 rounded-2xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                  aria-label="Increase quantity"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Remove Button */}
               <button
                 onClick={onRemove}
-                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center"
+                aria-label="Remove item"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

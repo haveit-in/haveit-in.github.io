@@ -1,12 +1,14 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
 import { ShoppingCart, IndianRupee } from 'lucide-react'
 
 const FloatingCartBar = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { getCartTotals, isEmpty, getMinimumOrderInfo } = useCart()
-  
-  if (isEmpty()) return null
+
+  const isRestaurantRoute = location.pathname === '/restaurants' || location.pathname.startsWith('/restaurants/')
+  if (!isRestaurantRoute || isEmpty()) return null
 
   const { itemCount, total } = getCartTotals()
   const { met: minOrderMet } = getMinimumOrderInfo()
@@ -16,7 +18,8 @@ const FloatingCartBar = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden">
+    <div className="fixed left-0 right-0 bottom-20 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       <div className="px-4 py-3">
         <button
           onClick={handleViewCart}
