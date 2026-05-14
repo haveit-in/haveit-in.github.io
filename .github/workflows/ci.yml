@@ -1,0 +1,85 @@
+# CI for HaveIt.
+#
+# Merge blocking: require the "Backend (ruff + pytest)" and "Frontend (eslint + build)"
+# checks in GitHub → Settings → Branches → Branch protection rules → Require status checks.
+#
+# Advisory: "Backend (mypy, advisory)" uses continue-on-error so it appears on PRs but does
+# not block merges (expand mypy coverage and flip to required when ready).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  backend:
+    name: Backend (ruff + pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SECRET_KEY: ci-test-secret-key-32bytes-minimum!!
+      DATABASE_URL: sqlite:///:memory:
+      CREATE_TABLES_ON_STARTUP: "false"
+      CORS_ORIGINS: http://localhost:5173
+      SKIP_FIREBASE_INIT: "true"
+      ENVIRONMENT: development
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Ruff (scoped; expand paths as legacy code is cleaned up)
+        run: |
+          ruff check tests \
+            app/config.py app/auth.py app/logging_config.py app/main.py app/dependencies.py \
+            app/firebase.py app/websocket/manager.py app/utils/razorpay_client.py
+      - name: Pytest
+        run: pytest -q
+
+  backend-mypy:
+    name: Backend (mypy, advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SECRET_KEY: ci-test-secret-key-32bytes-minimum!!
+      SKIP_FIREBASE_INIT: "true"
+      ENVIRONMENT: development
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: mypy
+
+  frontend:
+    name: Frontend (eslint + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: ESLint (scoped; repo-wide lint is tracked separately)
+        run: npx eslint src/lib/logger.js src/context/AuthContext.jsx src/context/useRoleRedirect.jsx
+      - run: npm run build
+        env:
+          VITE_API_BASE_URL: https://example.com

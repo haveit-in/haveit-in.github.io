@@ -24,7 +24,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise
     except Exception:
         log.exception("authentication_dependency_failed")
-        raise HTTPException(status_code=401, detail="Authentication error")
+        raise HTTPException(status_code=401, detail="Authentication error") from None
 
 def require_admin(user=Depends(get_current_user)):
     if "admin" not in user.get("roles", []):

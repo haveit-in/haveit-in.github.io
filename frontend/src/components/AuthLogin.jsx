@@ -3,7 +3,8 @@ import Brand from './Brand.jsx'
 import TextField from './TextField.jsx'
 import { FacebookIcon, GoogleIcon } from './Icons.jsx'
 import { loginWithGoogle } from '../utils/auth.js'
-import { useAuth, useRoleRedirect } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
+import { useRoleRedirect } from '../context/useRoleRedirect.jsx'
 import SocialAuthButtons from './SocialAuthButtons.jsx'
 
 function isValidPhone(value) {

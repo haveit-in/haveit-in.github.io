@@ -5,7 +5,8 @@ import SocialButton from '../components/SocialButton.jsx'
 import TextField from '../components/TextField.jsx'
 import { FacebookIcon, GoogleIcon } from '../components/Icons.jsx'
 import { loginWithGoogle } from '../utils/auth.js'
-import { useAuth, useRoleRedirect } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
+import { useRoleRedirect } from '../context/useRoleRedirect.jsx'
 
 function isValidPhone(value) {
   const digits = value.replace(/[^\d]/g, '')

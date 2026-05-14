@@ -5,27 +5,21 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from uuid import UUID
 
-from app.auth import create_access_token
+import app.models.restaurant  # noqa: F401 - register SQLAlchemy mappers
+from app.auth import issue_token_pair, verify_refresh_token
 from app.config import settings
-from app.logging_config import configure_logging
-from app.websocket.manager import manager
-
 from app.database import Base, engine, get_db
-from app.firebase import verify_firebase_token
-from app.models import user, restaurant
-from app.models.user import User
-from app.schemas import TokenRequest
 from app.dependencies import get_current_user
-from app.routers import restaurant, admin
-from app.routes import menu
-from app.routes import cart
-from app.routes import orders
-from app.routes import payments
-from app.routes import restaurant_orders
+from app.firebase import verify_firebase_token
+from app.logging_config import configure_logging
 from app.middleware.rate_limit import rate_limit_middleware
-from app.middleware.validation import validation_middleware
+from app.models.user import User
+from app.routers import admin
+from app.routers import restaurant as restaurant_router
+from app.routes import cart, menu, orders, payments, restaurant_orders
+from app.schemas import RefreshTokenRequest, TokenRequest
+from app.websocket.manager import manager
 
 load_dotenv()
 configure_logging(settings)
@@ -39,10 +33,21 @@ log.info(
 
 app = FastAPI()
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
 
-app.include_router(restaurant.router)
+def _login_tokens(db_user: User) -> dict[str, str]:
+    return issue_token_pair(str(db_user.id), [db_user.role])
+
+
+if settings.create_tables_on_startup:
+    Base.metadata.create_all(bind=engine)
+    log.warning(
+        "sqlalchemy_create_all ran (CREATE_TABLES_ON_STARTUP=true); "
+        "disable in production and use Alembic only"
+    )
+else:
+    log.info("skipping_sqlalchemy_create_all (deployed environments should use Alembic)")
+
+app.include_router(restaurant_router.router)
 app.include_router(admin.router)
 app.include_router(menu.router)
 app.include_router(cart.router)
@@ -52,12 +57,7 @@ app.include_router(restaurant_orders.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174", 
-        "http://localhost:3000",
-        "https://haveit-official.vercel.app"
-    ],
+    allow_origins=settings.cors_origin_list(),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -137,18 +137,12 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(user)
 
-            # Generate access token
-            token = create_access_token({
-                "user_id": str(user.id),
-                "roles": [user.role]
-            })
-
             # If partner and new user, require onboarding
             if data.role == "partner":
                 log.info("partner_onboarding_required")
                 return {
                     "requiresOnboarding": True,
-                    "access_token": token
+                    **_login_tokens(user),
                 }
         else:
             # UPDATE EXISTING USER WITH CURRENT INFO
@@ -167,13 +161,19 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
                     user.role = "admin"
                 elif user.role == "user" and data.role == "partner":
                     raise HTTPException(
-                        status_code=403, 
-                        detail="This account is registered as a user. Please use the user login page."
+                        status_code=403,
+                        detail=(
+                            "This account is registered as a user. "
+                            "Please use the user login page."
+                        ),
                     )
                 elif user.role == "restaurant_owner" and data.role == "user":
                     raise HTTPException(
-                        status_code=403, 
-                        detail="This account is registered as a restaurant owner. Please use the partner login page."
+                        status_code=403,
+                        detail=(
+                            "This account is registered as a restaurant owner. "
+                            "Please use the partner login page."
+                        ),
                     )
                 elif user.role == "admin" and data.role != "admin":
                     raise HTTPException(
@@ -186,12 +186,6 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(user)
 
-            # Generate access token
-            token = create_access_token({
-                "user_id": str(user.id),
-                "roles": [user.role]
-            })
-
             # If partner, check if restaurant profile exists
             if data.role == "partner":
                 from app.models.restaurant import RestaurantProfile
@@ -203,7 +197,7 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
                     log.info("partner_onboarding_required_existing")
                     return {
                         "requiresOnboarding": True,
-                        "access_token": token
+                        **_login_tokens(user),
                     }
 
             # If partner, check restaurant status
@@ -218,31 +212,26 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
                         log.info("partner_restaurant_pending")
                         return {
                             "requiresApproval": True,
-                            "access_token": token
+                            **_login_tokens(user),
                         }
                     elif restaurant.status == "rejected":
                         log.info("partner_restaurant_rejected")
                         return {
                             "rejected": True,
                             "rejection_reason": restaurant.rejection_reason,
-                            "access_token": token
+                            **_login_tokens(user),
                         }
                     elif restaurant.status == "approved" and not restaurant.is_active:
                         log.info("partner_restaurant_inactive")
                         return {
                             "requiresApproval": True,
-                            "access_token": token
+                            **_login_tokens(user),
                         }
-
-        token = create_access_token({
-            "user_id": str(user.id),
-            "roles": [user.role]
-        })
 
         log.info("google_login_success email=%s role=%s", email, user.role)
         return {
             "message": "Login successful",
-            "access_token": token,
+            **_login_tokens(user),
             "user": {
                 "id": str(user.id),
                 "role": user.role,
@@ -256,7 +245,7 @@ def google_login(data: TokenRequest, db: Session = Depends(get_db)):
         raise
     except Exception:
         log.exception("google_login_failed")
-        raise HTTPException(status_code=401, detail="Invalid Google token")
+        raise HTTPException(status_code=401, detail="Invalid Google token") from None
 
 @app.post("/auth/login")
 def login(data: TokenRequest, db: Session = Depends(get_db)):
@@ -300,18 +289,12 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(user)
 
-            # Generate access token
-            token = create_access_token({
-                "user_id": str(user.id),
-                "roles": [user.role]
-            })
-
             # If partner and new user, require onboarding
             if data.role == "partner":
                 log.info("partner_onboarding_required")
                 return {
                     "requiresOnboarding": True,
-                    "access_token": token
+                    **_login_tokens(user),
                 }
         else:
             # 🔥 UPDATE EXISTING USER WITH CURRENT INFO
@@ -330,13 +313,19 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
                     user.role = "admin"
                 elif user.role == "user" and data.role == "partner":
                     raise HTTPException(
-                        status_code=403, 
-                        detail="This account is registered as a user. Please use the user login page."
+                        status_code=403,
+                        detail=(
+                            "This account is registered as a user. "
+                            "Please use the user login page."
+                        ),
                     )
                 elif user.role == "restaurant_owner" and data.role == "user":
                     raise HTTPException(
-                        status_code=403, 
-                        detail="This account is registered as a restaurant owner. Please use the partner login page."
+                        status_code=403,
+                        detail=(
+                            "This account is registered as a restaurant owner. "
+                            "Please use the partner login page."
+                        ),
                     )
                 elif user.role == "admin" and data.role != "admin":
                     raise HTTPException(
@@ -349,12 +338,6 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(user)
 
-            # Generate access token
-            token = create_access_token({
-                "user_id": str(user.id),
-                "roles": [user.role]
-            })
-
             # If partner, check if restaurant profile exists
             if data.role == "partner":
                 from app.models.restaurant import RestaurantProfile
@@ -366,7 +349,7 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
                     log.info("partner_onboarding_required_existing")
                     return {
                         "requiresOnboarding": True,
-                        "access_token": token
+                        **_login_tokens(user),
                     }
 
             # If partner, check restaurant status
@@ -381,31 +364,26 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
                         log.info("partner_restaurant_pending")
                         return {
                             "requiresApproval": True,
-                            "access_token": token
+                            **_login_tokens(user),
                         }
                     elif restaurant.status == "rejected":
                         log.info("partner_restaurant_rejected")
                         return {
                             "rejected": True,
                             "rejection_reason": restaurant.rejection_reason,
-                            "access_token": token
+                            **_login_tokens(user),
                         }
                     elif restaurant.status == "approved" and not restaurant.is_active:
                         log.info("partner_restaurant_inactive")
                         return {
                             "requiresApproval": True,
-                            "access_token": token
+                            **_login_tokens(user),
                         }
-
-        token = create_access_token({
-            "user_id": str(user.id),
-            "roles": [user.role]
-        })
 
         log.info("login_success email=%s role=%s", email, user.role)
         return {
             "message": "Login successful",
-            "access_token": token,
+            **_login_tokens(user),
             "user": {
                 "id": str(user.id),
                 "role": user.role,
@@ -419,7 +397,21 @@ def login(data: TokenRequest, db: Session = Depends(get_db)):
         raise
     except Exception:
         log.exception("login_failed")
-        raise HTTPException(status_code=401, detail="Invalid Firebase token")
+        raise HTTPException(status_code=401, detail="Invalid Firebase token") from None
+
+
+@app.post("/auth/refresh")
+def refresh_tokens(data: RefreshTokenRequest):
+    """Exchange a valid refresh JWT for a new access + refresh pair (refresh rotation)."""
+    payload = verify_refresh_token(data.refresh_token)
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+    user_id = payload.get("user_id")
+    roles = payload.get("roles")
+    if not user_id or not isinstance(roles, list) or not roles:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    return issue_token_pair(str(user_id), [str(r) for r in roles])
+
 
 @app.get("/restaurants")
 def get_approved_restaurants(db: Session = Depends(get_db)):
@@ -429,7 +421,7 @@ def get_approved_restaurants(db: Session = Depends(get_db)):
         
         restaurants = db.query(RestaurantProfile).filter(
             RestaurantProfile.status == "approved",
-            RestaurantProfile.is_active == True
+            RestaurantProfile.is_active
         ).order_by(RestaurantProfile.created_at.desc()).all()
         
         result = []
@@ -461,9 +453,9 @@ def get_approved_restaurants(db: Session = Depends(get_db)):
             })
         
         return result
-    except Exception as e:
+    except Exception:
         log.exception("approved_restaurants_failed")
-        raise HTTPException(status_code=500, detail="Failed to fetch restaurants")
+        raise HTTPException(status_code=500, detail="Failed to fetch restaurants") from None
 
 @app.get("/protected")
 def protected(user=Depends(get_current_user)):

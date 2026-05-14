@@ -93,7 +93,7 @@ def create_payment_order(
     
     # 6. Return Frontend Payload
     return {
-        "key": settings.RAZORPAY_KEY_ID,
+        "key": settings.razorpay_key_id,
         "razorpay_order_id": razorpay_order_id,
         "amount": amount_in_paise,
         "currency": "INR"

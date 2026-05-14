@@ -4,7 +4,9 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import Lock from "lucide-react/dist/esm/icons/lock";
 import { useState } from "react";
 import { loginWithGooglePartner } from "../utils/auth.js";
-import { useAuth, useRoleRedirect } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useRoleRedirect } from "../context/useRoleRedirect.jsx";
+import { logger } from "../lib/logger.js";
 
 export default function PartnerLogin() {
   const navigate = useNavigate();
@@ -17,7 +19,7 @@ export default function PartnerLogin() {
       setLoading(true);
       const response = await loginWithGooglePartner(login);
       
-      console.log("RESPONSE:", response);
+      logger.debug("partner login response", { requiresOnboarding: response.requiresOnboarding });
       
       if (response.requiresOnboarding) {
         navigate("/partner/register");
@@ -30,7 +32,7 @@ export default function PartnerLogin() {
         handleLoginRedirect(response);
       }
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error("Login error:", error);
     } finally {
       setLoading(false);
     }

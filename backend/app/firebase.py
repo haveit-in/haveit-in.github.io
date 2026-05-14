@@ -1,24 +1,22 @@
-import os
 import json
-from dotenv import load_dotenv
+import logging
+import os
+
 import firebase_admin
-from firebase_admin import credentials, auth
+from dotenv import load_dotenv
+from firebase_admin import auth, credentials
 
-# Load environment variables from .env.local for local development
-load_dotenv('.env.local')
+load_dotenv(".env.local")
 
-if not firebase_admin._apps:
+log = logging.getLogger(__name__)
+
+if os.getenv("SKIP_FIREBASE_INIT", "").lower() in ("1", "true", "yes"):
+    log.warning("firebase_admin_skipped (SKIP_FIREBASE_INIT is set)")
+elif not firebase_admin._apps:
     try:
-        # For production: Use environment variables
         if os.getenv("FIREBASE_PROJECT_ID"):
             private_key = os.getenv("FIREBASE_PRIVATE_KEY", "")
-            print(f"Private key length: {len(private_key)}")
-            print(f"Private key starts with: {private_key[:50]}...")
-            
-            # Fix the private key by replacing literal \n with actual newlines
             private_key = private_key.replace("\\n", "\n")
-            print(f"Fixed private key starts with: {private_key[:50]}...")
-            
             cred_data = {
                 "type": "service_account",
                 "project_id": os.getenv("FIREBASE_PROJECT_ID"),
@@ -30,36 +28,25 @@ if not firebase_admin._apps:
                 "token_uri": "https://oauth2.googleapis.com/token",
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
                 "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL"),
-                "universe_domain": "googleapis.com"
+                "universe_domain": "googleapis.com",
             }
             cred = credentials.Certificate(cred_data)
-        # For local development: Use JSON file
         else:
-            cred_path = os.path.join(os.path.dirname(__file__), '..', 'firebase_admin.json')
-            with open(cred_path, 'r') as f:
+            cred_path = os.path.join(os.path.dirname(__file__), "..", "firebase_admin.json")
+            with open(cred_path) as f:
                 cred_data = json.load(f)
-            
-            # Fix the private key by replacing literal \n with actual newlines
-            if 'private_key' in cred_data:
-                cred_data['private_key'] = cred_data['private_key'].replace('\\n', '\n')
-            
+            if "private_key" in cred_data:
+                cred_data["private_key"] = cred_data["private_key"].replace("\\n", "\n")
             cred = credentials.Certificate(cred_data)
-        
+
         firebase_admin.initialize_app(cred)
-        print("Firebase Admin SDK initialized successfully")
-    except Exception as e:
-        print(f"Firebase initialization error: {str(e)}")
+        log.info("firebase_admin_initialized")
+    except Exception:
+        log.exception("firebase_initialization_failed")
         raise
 
+
 def verify_firebase_token(id_token: str):
-    try:
-        # Check if Firebase Admin SDK is initialized
-        if not firebase_admin._apps:
-            raise Exception("Firebase Admin SDK not initialized")
-        
-        decoded_token = auth.verify_id_token(id_token)
-        return decoded_token
-    except Exception as e:
-        print(f"Token verification error: {str(e)}")
-        print(f"Token preview: {id_token[:50]}..." if len(id_token) > 50 else f"Token: {id_token}")
-        raise
+    if not firebase_admin._apps:
+        raise RuntimeError("Firebase Admin SDK is not initialized")
+    return auth.verify_id_token(id_token)
