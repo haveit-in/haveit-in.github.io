@@ -99,7 +99,7 @@ const MyOrders = ({ activeMode }) => {
   }
 
   const handleViewDetails = (orderId) => {
-    navigate(`/order-tracking/${orderId}`)
+    navigate(`/track-order?orderId=${orderId}`)
   }
 
   const formatDate = (dateString) => {
@@ -254,13 +254,7 @@ const MyOrders = ({ activeMode }) => {
           </div>
 
           {/* Pagination Controls */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-white rounded-xl border border-gray-200">
-            {/* Page Info */}
-            <div className="text-sm text-gray-600 font-medium">
-              <span>Page <span className={`${accent.text} font-bold`}>{page}</span></span>
-              <span> • Showing <span className={`${accent.text} font-bold`}>{orders.length}</span> orders per page</span>
-            </div>
-
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-4 p-6 bg-white rounded-xl border border-gray-200">
             {/* Pagination Buttons */}
             <div className="flex gap-3">
               <button

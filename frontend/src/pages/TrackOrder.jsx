@@ -1,18 +1,29 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Search, MapPin, Clock, CheckCircle, XCircle, Truck, Package, ArrowRight, Phone } from 'lucide-react'
 
 export default function TrackOrder() {
+  const [searchParams] = useSearchParams()
   const [orderId, setOrderId] = useState('')
   const [searched, setSearched] = useState(false)
   const [orderStatus, setOrderStatus] = useState(null)
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (orderId.trim()) {
+  // Auto-fill and trigger search if orderId is provided in URL
+  useEffect(() => {
+    const idFromUrl = searchParams.get('orderId')
+    if (idFromUrl) {
+      setOrderId(idFromUrl)
+      // Auto-trigger search with the order ID
+      handleSearchWithId(idFromUrl)
+    }
+  }, [searchParams])
+
+  const handleSearchWithId = (id) => {
+    if (id.trim()) {
       setSearched(true)
       // Simulate order lookup - in real app, this would be an API call
       setOrderStatus({
-        id: orderId,
+        id: id,
         status: 'in_transit',
         estimatedDelivery: '25 mins',
         currentStep: 3,
@@ -67,7 +78,7 @@ export default function TrackOrder() {
       {/* Search Section */}
       <div className="max-w-6xl mx-auto px-4 md:px-6 -mt-6">
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <form onSubmit={handleSearch} className="flex gap-3">
+          <form onSubmit={(e) => { e.preventDefault(); handleSearchWithId(orderId); }} className="flex gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
