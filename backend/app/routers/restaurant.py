@@ -168,7 +168,19 @@ def update_restaurant_profile(
     if not profile:
         raise HTTPException(404, "Restaurant profile not found")
 
+    # Update all fields from the request
     profile.restaurant_name = data.restaurant_name
+    profile.owner_name = data.owner_name
+    profile.email = data.email
+    profile.phone = data.phone
+    profile.address = data.address
+    profile.city = data.city
+    profile.cuisine = json.dumps(data.cuisine)
+    profile.fssai = data.fssai
+    profile.account_number = data.account_number
+    profile.ifsc = data.ifsc
+    profile.account_holder = data.account_holder
+    
     db.commit()
 
-    return {"message": "Profile updated"}
+    return {"message": "Profile updated successfully"}

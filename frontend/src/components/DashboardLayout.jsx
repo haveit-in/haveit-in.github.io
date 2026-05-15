@@ -6,7 +6,7 @@ const mainNavigation = [
   { name: "Orders", path: "/partner/dashboard/orders", icon: ShoppingBag },
   { name: "Menu", path: "/partner/dashboard/menu", icon: MenuIcon },
   { name: "Earnings", path: "/partner/dashboard/earnings", icon: DollarSign },
-  { name: "Profile", path: "/partner/dashboard/settings", icon: User },
+  { name: "Settings", path: "/partner/dashboard/settings", icon: Settings },
 ];
 
 const accountNavigation = [
