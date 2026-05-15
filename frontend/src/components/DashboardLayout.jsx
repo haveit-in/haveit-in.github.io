@@ -42,7 +42,7 @@ export function DashboardLayout() {
               className="h-6 w-auto"
             />
             <span className="text-sm font-semibold">
-              <span className="text-orange-500">HaveIt</span>
+              <span className="text-orange-500">Haveit </span>
               <span className="text-gray-900">Partner</span>
             </span>
           </div>
