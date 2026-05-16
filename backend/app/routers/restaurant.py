@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from pydantic import BaseModel
 import uuid
 import json
+import os
 from datetime import datetime, timedelta
 from app.database import get_db
 from app.models.restaurant import RestaurantProfile
@@ -23,6 +24,15 @@ class ApplyRequest(BaseModel):
     account_number: str
     ifsc: str
     account_holder: str
+    food_type: str = None  # 'veg', 'non-veg', 'both'
+    cost_for_two: float = None
+    opening_time: str = None  # HH:MM format
+    closing_time: str = None  # HH:MM format
+    fssai_certificate_url: str = None
+    pan_card_url: str = None
+    bank_proof_url: str = None
+    restaurant_images_urls: list[str] = None
+    menu_url: str = None
 
 @router.post("/restaurant/apply")
 def apply_restaurant(
@@ -64,6 +74,15 @@ def apply_restaurant(
             account_number=data.account_number,
             ifsc=data.ifsc,
             account_holder=data.account_holder,
+            food_type=data.food_type,
+            cost_for_two=data.cost_for_two,
+            opening_time=data.opening_time,
+            closing_time=data.closing_time,
+            fssai_certificate_url=data.fssai_certificate_url,
+            pan_card_url=data.pan_card_url,
+            bank_proof_url=data.bank_proof_url,
+            restaurant_images_urls=json.dumps(data.restaurant_images_urls) if data.restaurant_images_urls else None,
+            menu_url=data.menu_url,
             status="pending"
         )
 
@@ -154,7 +173,11 @@ def get_restaurant_profile(
         "is_open": profile.is_open,
         "rating": float(profile.rating) if profile.rating else 4.0,
         "delivery_time": profile.delivery_time,
-        "total_reviews": profile.total_reviews
+        "total_reviews": profile.total_reviews,
+        "food_type": profile.food_type,
+        "cost_for_two": float(profile.cost_for_two) if profile.cost_for_two else None,
+        "opening_time": profile.opening_time,
+        "closing_time": profile.closing_time
     }
 
 @router.put("/restaurant/profile")
@@ -183,6 +206,20 @@ def update_restaurant_profile(
     profile.account_number = data.account_number
     profile.ifsc = data.ifsc
     profile.account_holder = data.account_holder
+    profile.food_type = data.food_type
+    profile.cost_for_two = data.cost_for_two
+    profile.opening_time = data.opening_time
+    profile.closing_time = data.closing_time
+    if data.fssai_certificate_url:
+        profile.fssai_certificate_url = data.fssai_certificate_url
+    if data.pan_card_url:
+        profile.pan_card_url = data.pan_card_url
+    if data.bank_proof_url:
+        profile.bank_proof_url = data.bank_proof_url
+    if data.restaurant_images_urls:
+        profile.restaurant_images_urls = json.dumps(data.restaurant_images_urls)
+    if data.menu_url:
+        profile.menu_url = data.menu_url
 
     db.commit()
 
@@ -379,3 +416,55 @@ def get_partner_dashboard_earnings(
         "weekly_chart": weekly_chart,
         "transactions": transactions
     }
+
+@router.post("/restaurant/upload-document")
+async def upload_document(
+    file: UploadFile = File(...),
+    doc_type: str = None,
+    user=Depends(get_current_user)
+):
+    """
+    Upload a document for restaurant onboarding.
+    Supported doc_types: fssai_certificate, pan_card, bank_proof, restaurant_image, menu
+    """
+    try:
+        # Validate file type
+        allowed_extensions = {'.pdf', '.jpg', '.jpeg', '.png'}
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        
+        if file_ext not in allowed_extensions:
+            raise HTTPException(400, f"File type {file_ext} not allowed. Allowed types: {', '.join(allowed_extensions)}")
+        
+        # Validate file size (max 5MB)
+        MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+        file_content = await file.read()
+        if len(file_content) > MAX_FILE_SIZE:
+            raise HTTPException(400, "File size exceeds 5MB limit")
+        
+        # Create upload directory if it doesn't exist
+        upload_dir = "uploads/documents"
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Generate unique filename
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = os.path.join(upload_dir, unique_filename)
+        
+        # Save file
+        with open(file_path, "wb") as f:
+            f.write(file_content)
+        
+        # Return file URL (in production, this would be a cloud storage URL)
+        file_url = f"/uploads/documents/{unique_filename}"
+        
+        return {
+            "success": True,
+            "file_url": file_url,
+            "filename": file.filename,
+            "doc_type": doc_type
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error uploading document: {str(e)}")
+        raise HTTPException(500, f"Error uploading document: {str(e)}")

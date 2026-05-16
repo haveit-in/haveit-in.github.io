@@ -40,6 +40,19 @@ class RestaurantProfile(Base):
     rating = Column(Numeric(2, 1), default=4.0)
     delivery_time = Column(String(50), nullable=True)
     total_reviews = Column(Integer, default=0)
+    
+    # Additional fields from onboarding form
+    food_type = Column(String(20), nullable=True)  # 'veg', 'non-veg', 'both'
+    cost_for_two = Column(Numeric(10, 2), nullable=True)
+    opening_time = Column(String(10), nullable=True)  # HH:MM format
+    closing_time = Column(String(10), nullable=True)  # HH:MM format
+    
+    # Document URLs
+    fssai_certificate_url = Column(Text, nullable=True)
+    pan_card_url = Column(Text, nullable=True)
+    bank_proof_url = Column(Text, nullable=True)
+    restaurant_images_urls = Column(Text, nullable=True)  # JSON array
+    menu_url = Column(Text, nullable=True)
 
     user = relationship("User", foreign_keys=[user_id])
     approver = relationship("User", foreign_keys=[approved_by])
