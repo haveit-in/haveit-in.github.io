@@ -140,8 +140,7 @@ def admin_dashboard(
         "totalUsers": users,
         "totalRestaurants": restaurants,
         "pendingRestaurants": pending,
-        "totalOrders": orders,
-        "revenue": 0  # wire later
+        "totalOrders": orders
     }
 
 @router.get("/admin/users")
@@ -275,17 +274,19 @@ def admin_analytics(
     user=Depends(require_admin)
 ):
     from sqlalchemy import text
-    
+
     data = db.execute(text("""
-        SELECT DATE(created_at) as date,
-               COUNT(*) as orders
-        FROM orders
-        GROUP BY DATE(created_at)
+        SELECT DATE(o.created_at) as date,
+               COUNT(*) as orders,
+               SUM(CAST(o.total_amount AS NUMERIC)) as revenue
+        FROM orders o
+        WHERE o.payment_status = 'PAID'
+        GROUP BY DATE(o.created_at)
         ORDER BY date ASC
     """)).fetchall()
 
     return {
-        "ordersTrend": [dict(row) for row in data]
+        "ordersTrend": [{"date": row[0], "orders": row[1], "revenue": float(row[2]) if row[2] else 0} for row in data]
     }
 
 @router.post("/admin/setup")

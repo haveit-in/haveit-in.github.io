@@ -62,6 +62,7 @@ def verify_access_token(token: str) -> dict[str, Any] | None:
         log.warning("access_verifier_unknown_typ: %s", typ)
         return None
     log.debug("access_token_verified")
+    log.info("JWT_PAYLOAD_DEBUG: %s", payload)
     return payload
 
 

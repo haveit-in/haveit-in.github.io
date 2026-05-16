@@ -1,21 +1,6 @@
-import { DollarSign, TrendingUp, Calendar } from "lucide-react";
-
-const data = [
-  { name: "Mon", earnings: 4000 },
-  { name: "Tue", earnings: 3000 },
-  { name: "Wed", earnings: 5000 },
-  { name: "Thu", earnings: 4500 },
-  { name: "Fri", earnings: 6000 },
-  { name: "Sat", earnings: 7500 },
-  { name: "Sun", earnings: 7000 },
-];
-
-const transactions = [
-  { id: "TXN001", date: "Apr 27, 2026", amount: "₹12,450", status: "Completed", type: "Daily Settlement" },
-  { id: "TXN002", date: "Apr 26, 2026", amount: "₹10,200", status: "Completed", type: "Daily Settlement" },
-  { id: "TXN003", date: "Apr 25, 2026", amount: "₹15,800", status: "Completed", type: "Daily Settlement" },
-  { id: "TXN004", date: "Apr 24, 2026", amount: "₹11,500", status: "Pending", type: "Daily Settlement" },
-];
+import { useState, useEffect } from "react";
+import { DollarSign, TrendingUp, Calendar, Loader2, AlertCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const EarningsCard = ({ icon: Icon, title, value, trend, trendValue, color }) => (
   <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 min-w-[160px] flex-shrink-0">
@@ -37,44 +22,59 @@ const EarningsCard = ({ icon: Icon, title, value, trend, trendValue, color }) =>
   </div>
 );
 
-const TransactionCard = ({ txn }) => (
-  <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-    <div className="flex items-start justify-between mb-2">
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <p className="font-semibold text-gray-900 text-sm">{txn.id}</p>
-          <span
-            className={`px-2 py-1 text-xs rounded-full font-medium ${
-              txn.status === "Completed"
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}
-          >
-            {txn.status}
-          </span>
+const TransactionCard = ({ txn }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="font-semibold text-gray-900 text-sm">{txn.order_number || txn.payment_id}</p>
+            <span
+              className={`px-2 py-1 text-xs rounded-full font-medium ${
+                txn.payment_status === "PAID" || txn.payment_status === "Completed"
+                  ? "bg-green-100 text-green-700"
+                  : txn.payment_status === "PENDING"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {txn.payment_status || txn.status}
+            </span>
+          </div>
+          <p className="text-xs text-gray-600 mb-1">Payment ID: {txn.payment_id || 'N/A'}</p>
+          <p className="text-xs text-gray-500">{formatDate(txn.created_at || txn.date)}</p>
         </div>
-        <p className="text-xs text-gray-600 mb-1">{txn.type}</p>
-        <p className="text-xs text-gray-500">{txn.date}</p>
-      </div>
-      <div className="text-right">
-        <p className="text-lg font-bold text-green-600">{txn.amount}</p>
+        <div className="text-right">
+          <p className="text-lg font-bold text-green-600">₹{txn.amount?.toFixed(2) || '0.00'}</p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-const WeeklyChart = () => {
-  const chartData = [
-    { day: 'Mon', value: 4000 },
-    { day: 'Tue', value: 3000 },
-    { day: 'Wed', value: 5000 },
-    { day: 'Thu', value: 4500 },
-    { day: 'Fri', value: 6000 },
-    { day: 'Sat', value: 7500 },
-    { day: 'Sun', value: 7000 },
-  ];
+const WeeklyChart = ({ chartData }) => {
+  if (!chartData || chartData.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <h3 className="font-semibold text-gray-900 mb-4">Weekly Earnings</h3>
+        <div className="h-32 flex items-center justify-center text-gray-500 text-sm">
+          No earnings data available
+        </div>
+      </div>
+    );
+  }
 
-  const maxValue = Math.max(...chartData.map(d => d.value));
+  const maxValue = Math.max(...chartData.map(d => d.amount || 0));
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
@@ -83,10 +83,10 @@ const WeeklyChart = () => {
         {chartData.map((item, index) => (
           <div key={index} className="flex-1 flex flex-col items-center gap-2">
             <div className="w-full flex flex-col items-center">
-              <span className="text-xs text-gray-600 mb-1">₹{(item.value/1000).toFixed(1)}k</span>
+              <span className="text-xs text-gray-600 mb-1">₹{((item.amount || 0)/1000).toFixed(1)}k</span>
               <div 
                 className="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg transition-all duration-300 hover:opacity-80"
-                style={{ height: `${(item.value / maxValue) * 100}px` }}
+                style={{ height: `${maxValue > 0 ? ((item.amount || 0) / maxValue) * 100 : 0}px` }}
               />
             </div>
             <span className="text-xs text-gray-500">{item.day}</span>
@@ -97,18 +97,73 @@ const WeeklyChart = () => {
   );
 };
 
-const chartData = [
-  { day: 'Mon', value: 4000 },
-  { day: 'Tue', value: 3000 },
-  { day: 'Wed', value: 5000 },
-  { day: 'Thu', value: 4500 },
-  { day: 'Fri', value: 6000 },
-  { day: 'Sat', value: 7500 },
-  { day: 'Sun', value: 7000 },
-];
-
 const PartnerEarnings = () => {
-  const maxValue = Math.max(...chartData.map(d => d.value));
+  const { fetchWithAuth } = useAuth();
+  const [earnings, setEarnings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEarnings = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/partner/dashboard/earnings`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch earnings data');
+        }
+        
+        const data = await response.json();
+        setEarnings(data);
+      } catch (err) {
+        console.error('Error fetching earnings:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEarnings();
+  }, [fetchWithAuth]);
+
+  const formatCurrency = (amount) => {
+    if (!amount || amount === 0) return '₹0';
+    if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)}L`;
+    if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}k`;
+    return `₹${amount.toFixed(0)}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="p-4 lg:p-8 space-y-6 lg:space-y-8 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-600 mx-auto mb-2" />
+          <p className="text-gray-600">Loading earnings data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+          <div>
+            <p className="text-red-800 font-medium">Error loading earnings</p>
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const weeklyEarnings = earnings?.weekly_earnings || 0;
+  const monthlyEarnings = earnings?.monthly_earnings || 0;
+  const pendingAmount = earnings?.pending_amount || 0;
+  const weeklyChart = earnings?.weekly_chart || [];
+  const transactions = earnings?.transactions || [];
 
   return (
     <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
@@ -120,7 +175,7 @@ const PartnerEarnings = () => {
           <EarningsCard
             icon={DollarSign}
             title="This Week"
-            value="₹42,450"
+            value={formatCurrency(weeklyEarnings)}
             trend="up"
             trendValue="15%"
             color={{ bg: 'bg-green-100', icon: 'text-green-600' }}
@@ -128,13 +183,13 @@ const PartnerEarnings = () => {
           <EarningsCard
             icon={Calendar}
             title="This Month"
-            value="₹1.85L"
+            value={formatCurrency(monthlyEarnings)}
             color={{ bg: 'bg-orange-100', icon: 'text-orange-600' }}
           />
           <EarningsCard
             icon={DollarSign}
             title="Pending"
-            value="₹11,500"
+            value={formatCurrency(pendingAmount)}
             color={{ bg: 'bg-blue-100', icon: 'text-blue-600' }}
           />
         </div>
@@ -143,7 +198,7 @@ const PartnerEarnings = () => {
           <EarningsCard
             icon={DollarSign}
             title="This Week"
-            value="₹42,450"
+            value={formatCurrency(weeklyEarnings)}
             trend="up"
             trendValue="15%"
             color={{ bg: 'bg-green-100', icon: 'text-green-600' }}
@@ -151,13 +206,13 @@ const PartnerEarnings = () => {
           <EarningsCard
             icon={Calendar}
             title="This Month"
-            value="₹1.85L"
+            value={formatCurrency(monthlyEarnings)}
             color={{ bg: 'bg-orange-100', icon: 'text-orange-600' }}
           />
           <EarningsCard
             icon={DollarSign}
             title="Pending"
-            value="₹11,500"
+            value={formatCurrency(pendingAmount)}
             color={{ bg: 'bg-blue-100', icon: 'text-blue-600' }}
           />
         </div>
@@ -166,22 +221,7 @@ const PartnerEarnings = () => {
       {/* Weekly Chart - Responsive */}
       <div>
         <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-4 lg:mb-6">Weekly Earnings</h3>
-        <div className="bg-white rounded-2xl p-4 lg:p-6 shadow-sm border border-gray-100">
-          <div className="h-32 lg:h-64 flex items-end justify-between gap-2 lg:gap-4">
-            {chartData.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full flex flex-col items-center">
-                  <span className="text-xs lg:text-sm text-gray-600 mb-1 lg:mb-2">₹{(item.value/1000).toFixed(1)}k</span>
-                  <div 
-                    className="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg transition-all duration-300 hover:opacity-80"
-                    style={{ height: `${(item.value / maxValue) * 100}px` }}
-                  />
-                </div>
-                <span className="text-xs text-gray-500">{item.day}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <WeeklyChart chartData={weeklyChart} />
       </div>
 
       {/* Transaction History - Responsive */}
@@ -191,9 +231,15 @@ const PartnerEarnings = () => {
           <button className="text-orange-600 text-sm lg:text-base font-medium">View All</button>
         </div>
         <div className="space-y-3 lg:space-y-4">
-          {transactions.map((txn) => (
-            <TransactionCard key={txn.id} txn={txn} />
-          ))}
+          {transactions.length > 0 ? (
+            transactions.map((txn, index) => (
+              <TransactionCard key={txn.payment_id || txn.id || index} txn={txn} />
+            ))
+          ) : (
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+              <p className="text-gray-500">No transactions found</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
